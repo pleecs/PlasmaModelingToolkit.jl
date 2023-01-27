@@ -1,0 +1,4 @@
+name = "PlasmaModelingToolkit"
+uuid = "b6ea2aa5-e686-4c2b-83aa-04f448536243"
+authors = ["Bartosz Chaber <bartosz.chaber@ee.pw.edu.pl>"]
+version = "0.1.0"
