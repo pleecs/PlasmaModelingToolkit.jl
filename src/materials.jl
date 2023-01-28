@@ -17,5 +17,9 @@ Vacuum = Dielectric{ε_0, μ_0, 0.0}(0xff)
 PTFE   = Dielectric{2.04ε_0, μ_0, 0.0}(0xfe)
 Air    = Dielectric{1.0006ε_0, μ_0, 0.0}(0xae)
 
-# TODO: add PML
+struct PerfectlyMatchedLayer{EPSILON, MU} <: Medium{EPSILON, MU, 0.0} 
+  id :: UInt8
+   σ :: Float64
+   m :: Int64
+end
 end
