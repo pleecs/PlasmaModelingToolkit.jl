@@ -14,6 +14,7 @@ struct PerfectlyMatchedLayer{EPSILON, MU} <: Medium{EPSILON, MU, 0.0}
 end
 
 import Base: convert
+convert(::Type{UInt8}, m::PerfectlyMatchedLayer) = m.id
 convert(::Type{UInt8}, d::Dielectric) = d.id
 convert(::Type{UInt8}, c::Conductor)  = 0x00
 
