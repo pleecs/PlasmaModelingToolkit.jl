@@ -1,28 +1,29 @@
 module Domains
-export Patch, Segment
-export AxisymmetricGrid
+	import ..Geometry: Shape, Rectangle
+	import ..Materials: Material
+	export AxisymmetricDomain
 
-struct Patch{Z1, Z2, R1, R2} end
-struct Segment{A, B, C, U, V} end
+	struct AxisymmetricDomain
+		zmin :: Float64
+		zmax :: Float64
+		rmin :: Float64
+		rmax :: Float64
+		materials :: Dict{Shape, Material}
+	end
 
-struct AxisymmetricGrid{ZN, RN}
-    z  :: Matrix{Float64}
-    r  :: Matrix{Float64}
-    dz :: Float64
-    dr :: Float64
-    id :: Matrix{UInt8}
-end
+	function AxisymmetricDomain(zmax::Float64, rmax::Float64, material::Material; rmin=0.0, zmin=0.0)
+		AxisymmetricDomain((zmin, zmax), (rmin, rmax), material)
+	end
 
-function AxisymmetricGrid(zs, rs)
-    dr = step(rs)
-    dz = step(zs)
-    nz = length(zs)
-    nr = length(rs)
-    z  = repeat(zs,  1, nr)
-    r  = repeat(rs', nz, 1)
-    id = zeros(UInt8, nz, nr)
-    AxisymmetricGrid{nz, nr}(z, r, dz, dr, id)
-end
+	function AxisymmetricDomain((zmin, zmax), (rmin, rmax), material::Material)
+		height = rmax - rmin
+		width  = zmax - zmin
+		region = Rectangle{zmin, rmin, width, height}()
+		AxisymmetricDomain(zmin, zmax, rmin, rmax, Dict{Shape, Material}(region => material))
+	end
 
-# TODO: add CartesianGrid
+	import Base: setindex!
+	function setindex!(domain::AxisymmetricDomain, material::Material, shape::Shape)
+		domain.materials[shape] = material
+	end
 end

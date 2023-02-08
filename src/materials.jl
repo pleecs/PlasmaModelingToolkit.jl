@@ -1,9 +1,10 @@
 module Materials
 import ..Constants: ε_0, μ_0
 
-abstract type Medium{EPSILON, MU, SIGMA} end
+abstract type Material end
+abstract type Medium{EPSILON, MU, SIGMA} <: Material end
 
-struct Conductor end
+struct Conductor <: Material end
 struct Dielectric{EPSILON, MU, SIGMA} <: Medium{EPSILON, MU, SIGMA} 
   id :: UInt8
 end

@@ -1,12 +1,15 @@
 module Geometry
 export isinside, +, -
-export Rectangle, Circle
+export Rectangle, Circle, Segment
 
 const mm = 1e-3 # unit conversion ratio [mm/m]
 const cm = 1e-2 # unit conversion ratio [cm/m]
 
-struct Rectangle{X, Y, W, H} end
-struct Circle{X, Y, R} end
+abstract type Shape end
+
+struct Rectangle{X, Y, W, H} <: Shape end
+struct Circle{X, Y, R} <: Shape end
+struct Segment{X1, Y1, X2, Y2} <: Shape end 
 
 function isinside(x, y, ::Rectangle{X, Y, W, H}) where {X, Y, W, H}
   if X <= x <= X + W
@@ -27,14 +30,14 @@ function isinside(x, y, ::Circle{X, Y, R}) where {X, Y, R}
   return false
 end
 
-struct CompositeShape{OPERATOR, A, B} end
+struct CompositeShape{OPERATOR, A, B}  <: Shape end
 import Base: +, -
 
-function +(A::Union{Rectangle, Circle, CompositeShape}, B)
+function +(A::Shape, B::Shape)
   return CompositeShape{+, A, B}()
 end
  
-function -(A::Union{Rectangle, Circle, CompositeShape}, B)
+function -(A::Shape, B::Shape)
   return CompositeShape{-, A, B}()
 end
  
