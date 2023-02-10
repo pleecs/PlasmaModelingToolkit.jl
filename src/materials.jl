@@ -19,8 +19,8 @@ convert(::Type{UInt8}, m::PerfectlyMatchedLayer) = m.id
 convert(::Type{UInt8}, d::Dielectric) = d.id
 convert(::Type{UInt8}, c::Conductor)  = 0x00
 
-Metal  = Conductor()
-Vacuum = Dielectric{ε_0, μ_0, 0.0}(0xff)
-PTFE   = Dielectric{2.04ε_0, μ_0, 0.0}(0xfe)
-Air    = Dielectric{1.0006ε_0, μ_0, 0.0}(0xae)
+Metal()  = Conductor()
+Vacuum() = Dielectric{ε_0, μ_0, 0.0}(0xff)
+PTFE()   = Dielectric{2.04ε_0, μ_0, 0.0}(0xfe)
+Air()    = Dielectric{1.0006ε_0, μ_0, 0.0}(0xae)
 end
