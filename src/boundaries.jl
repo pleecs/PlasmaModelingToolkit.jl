@@ -11,5 +11,6 @@ end
 end
 
 module ParticleBoundaryConditions
-
+export ParticleBoundaryCondition
+abstract type ParticleBoundaryCondition end
 end

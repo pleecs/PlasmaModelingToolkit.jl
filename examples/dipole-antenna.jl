@@ -12,21 +12,20 @@ import PlasmaModelingToolkit.Geometry: mm
 import PlasmaModelingToolkit.Geometry: Rectangle, Circle
 import PlasmaModelingToolkit.Constants: ε_0, μ_0
 import PlasmaModelingToolkit.Materials: Air, Metal, PerfectlyMatchedLayer
-# define materials...
-domain = AxisymmetricDomain(LENGTH, RADIUS, Air)
+
+domain = AxisymmetricDomain(LENGTH, RADIUS, Air())
+
 ground = Rectangle{0, 0, 15mm, RADIUS}()
 dielec = Rectangle{0, 0, 15mm, R_coax}()
 inner  = Rectangle{0, 0, 22mm, r_coax}()
-tip    = Circle{22mm, 0, r_coax}()
-# ... with perfectly matched layers
-PML    = PerfectlyMatchedLayer{ε_0, μ_0}(0x01, 0.7(0.02/π), 2)
+inner += Circle{22mm, 0, r_coax}() 
 top    = Rectangle{LENGTH - 1mm, 0mm, 1mm, RADIUS}()
 wall   = Rectangle{0mm, RADIUS - 1mm, LENGTH, 1mm}()
-# ... and assign them to the geometry
-domain[top] =  PML
-domain[wall] =  PML
-domain[ground] =  Metal
-domain[dielec] =  Air
-domain[inner + tip] =  Metal
+
+domain[top]    =  PerfectlyMatchedLayer{ε_0, μ_0}(0x01, 0.7(0.02/π), 2)
+domain[wall]   =  PerfectlyMatchedLayer{ε_0, μ_0}(0x01, 0.7(0.02/π), 2)
+domain[ground] =  Metal()
+domain[dielec] =  Air()
+domain[inner]  =  Metal()
 
 display(domain)

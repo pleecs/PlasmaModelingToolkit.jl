@@ -1,14 +1,25 @@
 # simulation parameters
 RADIUS  = 0.10            # radius along r-axis [m]
 LENGTH  = 0.60            # lenght along z-axis [m]
-NR      = 101             # number of grid points along radial direction [1]
-NZ      = 601             # number of grid points along axial direction [1]
 
 import PlasmaModelingToolkit.Materials: Air, Metal
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain
-import PlasmaModelingToolkit.Geometry: Circle
-domain = AxisymmetricDomain(LENGTH, RADIUS, Air, rmin=0.4)
+import PlasmaModelingToolkit.Geometry: Circle, Segment
+import PlasmaModelingToolkit.Constants: η_0
+import PlasmaModelingToolkit.BoundaryConditions: PerfectMagneticConductor, PerfectElectricConductor, SurfaceImpedance
+
+domain = AxisymmetricDomain(LENGTH, RADIUS, Air())
+
 circle = Circle{LENGTH/2, 0.0, RADIUS/3}()
-domain[circle] = Metal
+axis   = Segment{0, 0, LENGTH, 0}()
+side   = Segment{0, RADIUS, LENGTH, RADIUS}()
+input  = Segment{0, 0, 0, RADIUS}()
+output = Segment{LENGTH, RADIUS, LENGTH, 0}()
+
+domain[circle] = Metal()
+domain[axis] = PerfectMagneticConductor()
+domain[side] = PerfectElectricConductor()
+domain[input] = SurfaceImpedance(η_0)
+domain[output] = SurfaceImpedance(η_0)
 
 display(domain)
