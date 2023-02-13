@@ -11,7 +11,7 @@ import PlasmaModelingToolkit.BoundaryConditions: PerfectMagneticConductor, Perfe
 domain = AxisymmetricDomain(LENGTH, RADIUS, Air())
 
 circle = Circle{LENGTH/2, 0.0, RADIUS/3}()
-axis   = Segment{0, 0, LENGTH, 0}()
+axis   = Segment{LENGTH, 0, 0, 0}()
 side   = Segment{0, RADIUS, LENGTH, RADIUS}()
 input  = Segment{0, 0, 0, RADIUS}()
 output = Segment{LENGTH, RADIUS, LENGTH, 0}()

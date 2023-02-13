@@ -9,7 +9,10 @@ abstract type Shape end
 
 struct Rectangle{X, Y, W, H} <: Shape end
 struct Circle{X, Y, R} <: Shape end
+
+# by default Segment has its normal vector oriented to the left 
 struct Segment{X1, Y1, X2, Y2} <: Shape end
+
 struct CompositeShape{OPERATOR, A, B}  <: Shape end
 
 function ∈((x, y), ::Rectangle{X, Y, W, H}) where {X, Y, W, H}
