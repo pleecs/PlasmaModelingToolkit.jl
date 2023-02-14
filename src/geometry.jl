@@ -39,7 +39,4 @@ end
 
 ∈(p, ::CompositeShape{+, A, B}) where {A, B} = ∈(p, A) ||  ∈(p, B)
 ∈(p, ::CompositeShape{-, A, B}) where {A, B} = ∈(p, A) && !∈(p, B)
-
-
 end
-

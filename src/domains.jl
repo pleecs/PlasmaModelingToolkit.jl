@@ -30,7 +30,13 @@ module Domains
 		domain.materials[shape] = material
 	end
 
-	function setindex!(domain::AxisymmetricDomain, bc::Union{ParticleBoundaryCondition, BoundaryCondition}, shape::Shape) 
-		domain.bcs[shape] = bc
+	function setindex!(domain::AxisymmetricDomain, bc::Union{ParticleBoundaryCondition, BoundaryCondition}, segment::Segment) 
+		domain.bcs[segment] = bc
 	end
+
+	function ∈(segment::Segment{Z1, R1, Z2, R2}, domain::AxisymmetricDomain) where {Z1, R1, Z2, R2}
+		rect = Rectangle{domain.zmin, domain.rmin, (domain.rmax - domain.rmin), (domain.zmax - domain.zmin)}()
+		return ((Z1,R1) ∈ rect) && ((Z2,R2) ∈ rect)
+	end
+
 end
