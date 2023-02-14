@@ -1,5 +1,5 @@
 module Domains
-	import ..Geometry: Shape, Rectangle
+	import ..Geometry: Shape, Rectangle, Segment
 	import ..Materials: Material
 	import ..BoundaryConditions: BoundaryCondition
 	import ..ParticleBoundaryConditions: ParticleBoundaryCondition
