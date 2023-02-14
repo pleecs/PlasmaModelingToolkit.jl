@@ -1,5 +1,5 @@
 module Domains
-	import ..Geometry: Shape, Rectangle
+	import ..Geometry: Shape, Rectangle, Segment
 	import ..Materials: Material
 	import ..BoundaryConditions: BoundaryCondition
 	import ..ParticleBoundaryConditions: ParticleBoundaryCondition
@@ -11,7 +11,7 @@ module Domains
 		zmax :: Float64
 		rmin :: Float64
 		rmax :: Float64
-		materials :: Dict{Shape, Material}
+		materials :: Vector{Pair{Shape, Material}}
 		bcs :: Dict{Shape, Union{BoundaryCondition, ParticleBoundaryCondition}} 
 	end
 
@@ -23,12 +23,12 @@ module Domains
 		height = rmax - rmin
 		width  = zmax - zmin
 		region = Rectangle{zmin, rmin, width, height}()
-		AxisymmetricDomain(zmin, zmax, rmin, rmax, Dict{Shape, Material}(region => material), Dict())
+		AxisymmetricDomain(zmin, zmax, rmin, rmax, [region => material], Dict())
 	end
 
 	import Base: setindex!
 	function setindex!(domain::AxisymmetricDomain, material::Material, shape::Shape)
-		domain.materials[shape] = material
+        push!(domain.materials, shape => material)
 	end
 
 	function setindex!(domain::AxisymmetricDomain, bc::Union{ParticleBoundaryCondition, BoundaryCondition}, segment::Segment)
