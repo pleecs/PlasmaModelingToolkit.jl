@@ -4,6 +4,7 @@ module Domains
 	import ..BoundaryConditions: BoundaryCondition
 	import ..ParticleBoundaryConditions: ParticleBoundaryCondition
 	export AxisymmetricDomain
+	import Base: ∈
 
 	struct AxisymmetricDomain
 		zmin :: Float64
@@ -30,7 +31,7 @@ module Domains
 		domain.materials[shape] = material
 	end
 
-	function setindex!(domain::AxisymmetricDomain, bc::Union{ParticleBoundaryCondition, BoundaryCondition}, segment::Segment) 
+	function setindex!(domain::AxisymmetricDomain, bc::Union{ParticleBoundaryCondition, BoundaryCondition}, segment::Segment)
 		domain.bcs[segment] = bc
 	end
 
