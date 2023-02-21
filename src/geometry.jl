@@ -84,7 +84,7 @@ function ∩(ray::Ray, segment::Segment{X1, Y1, X2, Y2}) where {X1, Y1, X2, Y2}
 
 	v₁ = ray.origin .- a
 	v₂ = b .- a
-	v₃ = ray.direction .* (-1, 1)
+	v₃ = reverse(ray.direction) .* (-1, 1)
 
 	v₂v₃ = v₂ ⋅ v₃
 	
