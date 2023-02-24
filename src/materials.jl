@@ -8,8 +8,8 @@ struct Conductor <: Material end
 struct Dielectric{EPSILON, MU, SIGMA} <: Medium{EPSILON, MU, SIGMA} 
   id :: UInt8
 end
-struct PerfectlyMatchedLayer{EPSILON, MU, 0.0} <: Medium{EPSILON, MU}
-  dielectric :: Dielectric{EPSILON, MU, 0.0}
+struct PerfectlyMatchedLayer{EPSILON, MU, SIGMA} <: Medium{EPSILON, MU, SIGMA}
+  dielectric :: Dielectric{EPSILON, MU, SIGMA}
   σ :: Float64
   m :: Int64
 end
