@@ -36,5 +36,4 @@ domain[dielec] = PTFE()
 domain[outer] = Metal()
 domain[inner] = Metal()
 
-
 draw!(domain)
