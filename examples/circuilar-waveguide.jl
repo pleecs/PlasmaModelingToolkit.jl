@@ -23,6 +23,4 @@ domain[side] = PerfectElectricConductor()
 domain[input] = SurfaceImpedance(η_0)
 domain[output] = SurfaceImpedance(η_0)
 
-# display(domain)
-
 draw!(domain)

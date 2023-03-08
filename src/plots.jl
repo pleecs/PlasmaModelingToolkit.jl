@@ -1,16 +1,12 @@
 module SVG
-export NativeSVG
+import NativeSVG
 
 import ..Domains: AxisymmetricDomain
 import ..Geometry: Rectangle, Circle, Polygon, Segment, CompositeShape, Shape
 import ..Materials: Material, Medium, Conductor, Dielectric, PerfectlyMatchedLayer, Metal, Vacuum, PTFE, Air
 import ..BoundaryConditions: PerfectMagneticConductor, PerfectElectricConductor, SurfaceImpedance, BoundaryCondition
 import ..ParticleBoundaryConditions: ParticleBoundaryCondition
-
-import NativeSVG
-import Base: display
-
-color(::Medium) = "blue"
+import PlasmaModelingToolkit.Sources: CoaxialPort
 
 function color(m::Dielectric) 
 	if m.id ==  0xff #Vacuum
@@ -22,12 +18,13 @@ function color(m::Dielectric)
 	end
 end
 
+color(::Medium) = "blue"
 color(::PerfectlyMatchedLayer) = "green"
 color(::Conductor) = "goldenrod"
 color(::PerfectMagneticConductor) = "blue"
 color(::PerfectElectricConductor) = "green"
 color(::SurfaceImpedance) = "orange"
-
+color(::CoaxialPort) = "orange"
 
 function draw(color::String, shape::Union{Rectangle, Circle, Polygon, CompositeShape})
 	return NativeSVG.use(href="#$(objectid(shape))", fill=color)
@@ -114,5 +111,4 @@ function draw!(domain::AxisymmetricDomain; filename="domain.svg")
 
 	write(filename, domain)
 end
-
 end
