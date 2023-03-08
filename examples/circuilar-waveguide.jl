@@ -7,6 +7,7 @@ import PlasmaModelingToolkit.Domains: AxisymmetricDomain
 import PlasmaModelingToolkit.Geometry: Circle, Segment
 import PlasmaModelingToolkit.Constants: η_0
 import PlasmaModelingToolkit.BoundaryConditions: PerfectMagneticConductor, PerfectElectricConductor, SurfaceImpedance
+import PlasmaModelingToolkit.SVG: draw!
 
 domain = AxisymmetricDomain(LENGTH, RADIUS, Air())
 
@@ -22,4 +23,6 @@ domain[side] = PerfectElectricConductor()
 domain[input] = SurfaceImpedance(η_0)
 domain[output] = SurfaceImpedance(η_0)
 
-display(domain)
+# display(domain)
+
+draw!(domain)
