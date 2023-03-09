@@ -18,16 +18,16 @@ import PlasmaModelingToolkit.SVG: figure, save
 
 domain = AxisymmetricDomain((0, L_coax), (r_coax, R_coax), Air())
 
-inner  = Segment{0.0, 0.0, L_coax, 0.0}()
+inner  = Segment{0.0, r_coax, L_coax, r_coax}()
 outer  = Segment{0.0, R_coax, L_coax, R_coax}()
 input  = Segment{0.0, r_coax, 0.0, R_coax}()
-output = Segment{L_coax, R_coax, L_coax, 0.0}()
+output = Segment{L_coax, R_coax, L_coax, r_coax}()
 
 domain[inner]  = PerfectElectricConductor()
 domain[outer]  = PerfectElectricConductor()
 domain[output] = SurfaceImpedance(η_0)
 domain[input]  = CoaxialPort{HarmonicSignal{1.0, 20e6}}(Air())
 
-f = figure(domain, 30)
+f = figure(domain; width=30, margin_top=2, margin_bottom=2, margin_right=22, margin_left=2, offset=2)
 
-save(f, "domain.svg")
+save(f, "coaxial-cable.svg")

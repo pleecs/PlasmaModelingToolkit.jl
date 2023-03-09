@@ -118,15 +118,14 @@ function get_domain_size(domain::AxisymmetricDomain, desired_width)
 end
 
 function save(fig::NativeSVG.SVG, filename="domain.svg")
-	write(filename, fig )
+	write("plots/$filename", fig )
 end
 
-function figure(domain, width=5)
-	margin_top, margin_bottom, margin_right, margin_left = 2,2,8,2
-	offset = 2
+function figure(domain; width=5, margin_top=2, margin_bottom=2, margin_right=2, margin_left=2, offset=2)
 
-	# FIXME: swapped gH gW 
-	gH, gW, dW, dH = get_domain_size(domain, width-2*offset-margin_left-margin_right)
+	@assert width-2*offset-margin_left-margin_right > 0 "Margins and offsets are too large!"
+
+	gW, gH, dW, dH = get_domain_size(domain, width-2*offset-margin_left-margin_right)
 
 	height = gH + 2*offset + margin_top + margin_bottom 
 
@@ -135,6 +134,7 @@ function figure(domain, width=5)
 		# background
 		NativeSVG.rect(width="$(width)cm", height="$(height)cm", fill="#f5f5f5")
 
+		# arrowheads
 		NativeSVG.defs() do
 			NativeSVG.polygon(id="arrowhead_top", points="-5,0 5,0 0,-8.7", fill="black")
 			NativeSVG.polygon(id="arrowhead_right", points="0,-5 8.7,0 0,5", fill="black")
