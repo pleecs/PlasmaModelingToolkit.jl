@@ -6,7 +6,7 @@ import PlasmaModelingToolkit.Geometry: Rectangle, Circle, Segment, mm, Polygon
 import PlasmaModelingToolkit.Constants: ε_0, μ_0, η_0
 import PlasmaModelingToolkit.Materials: Air, Metal, PerfectlyMatchedLayer, PTFE, Vacuum
 import PlasmaModelingToolkit.BoundaryConditions: SurfaceImpedance, PerfectElectricConductor, PerfectMagneticConductor
-import PlasmaModelingToolkit.SVG: draw!
+import PlasmaModelingToolkit.SVG: figure, save
 
 domain = AxisymmetricDomain(0.5, 0.5, Air())
 
@@ -36,4 +36,6 @@ domain[dielec] = PTFE()
 domain[outer] = Metal()
 domain[inner] = Metal()
 
-draw!(domain)
+f = figure(domain, 30)
+
+save(f, "domain.svg")

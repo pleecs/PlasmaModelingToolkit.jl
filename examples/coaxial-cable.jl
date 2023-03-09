@@ -9,7 +9,7 @@ import PlasmaModelingToolkit.Geometry: Segment
 import PlasmaModelingToolkit.Constants: η_0
 import PlasmaModelingToolkit.BoundaryConditions: SurfaceImpedance, PerfectElectricConductor, PerfectMagneticConductor
 import PlasmaModelingToolkit.Sources: CoaxialPort
-import PlasmaModelingToolkit.SVG: draw!
+import PlasmaModelingToolkit.SVG: figure, save
 
 domain = AxisymmetricDomain((0, L_coax), (r_coax, R_coax), Air())
 
@@ -23,4 +23,6 @@ domain[outer]  = PerfectElectricConductor()
 domain[output] = SurfaceImpedance(η_0)
 domain[input]  = CoaxialPort(1.0, 20e9)
 
-draw!(domain)
+f = figure(domain, 30)
+
+save(f, "domain.svg")
