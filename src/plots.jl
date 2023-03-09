@@ -36,24 +36,28 @@ function draw(color::String, shape::Segment)
 end
 
 function define(shape::Rectangle{X, Y, W, H}) where {X, Y, W, H}
-	return NativeSVG.rect(id="$(objectid(shape))", x="$X", y="$Y", width="$W", height="$H")
+	x, y, w, h = 1000 .* (X, Y, W, H)
+	return NativeSVG.rect(id="$(objectid(shape))", x="$x", y="$y", width="$w", height="$h")
 end
 
 function define(shape::Circle{X, Y, R}) where {X, Y, R}
-	return NativeSVG.circle(id="$(objectid(shape))", cx="$X", cy="$Y", r="$R")
+	x, y, r = 1000 .* (X, Y, R)
+	return NativeSVG.circle(id="$(objectid(shape))", cx="$x", cy="$y", r="$r")
 end
 
 function define(polygon::Polygon)
 	points = ""
 	for segment in polygon.segments
 		x,y,_,_ = typeof(segment).parameters
+		x,y = 1000 .* (x,y)
 		points *= "$x,$y " 
 	end
 	return NativeSVG.polygon(id="$(objectid(polygon))", points=points)
 end
 
 function define(shape::Segment{X1,Y1,X2,Y2}) where {X1,Y1,X2,Y2}
-	return NativeSVG.line(id="$(objectid(shape))", x1="$X1", y1="$Y1", x2="$X2", y2="$Y2")
+	x1,y1,x2,y2 = 1000 .* (X1,Y1,X2,Y2)
+	return NativeSVG.line(id="$(objectid(shape))", x1="$x1", y1="$y1", x2="$x2", y2="$y2")
 end
 
 function define(shape::CompositeShape{+})
@@ -80,7 +84,8 @@ function define(shape::CompositeShape{-})
 end
 
 function generate_svg(domain::AxisymmetricDomain)
-	Z = (domain.zmax - domain.zmin)
+	Z = (domain.zmax - domain.zmin) * 1000
+
 
 	NativeSVG.defs() do
 		for (shape, _) in domain.materials
@@ -104,11 +109,10 @@ function generate_svg(domain::AxisymmetricDomain)
 end
 
 function get_domain_size(domain::AxisymmetricDomain, desired_width)
-	dW = (domain.rmax - domain.rmin)
-	dH = (domain.zmax - domain.zmin)
-
+	dW = domain.rmax * 1000
+	dH = domain.zmax * 1000
 	gW = float(desired_width)
-	gH = desired_width * (dW / dH)
+	gH = desired_width * (dH / dW)
 
 	return gW, gH, dW, dH
 end
