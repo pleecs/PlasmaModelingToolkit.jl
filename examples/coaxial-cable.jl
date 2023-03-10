@@ -28,6 +28,12 @@ domain[outer]  = PerfectElectricConductor()
 domain[output] = SurfaceImpedance(η_0)
 domain[input]  = CoaxialPort{HarmonicSignal{1.0, 20e6}}(Air())
 
-f = figure(domain; width=30, margin_top=2, margin_bottom=2, margin_right=22, margin_left=2, offset=2)
+f = figure(domain; 
+	width=30, 
+	margin_top=2, 
+	margin_bottom=2, 
+	margin_right=22, 
+	margin_left=2, 
+	offset=2)
 
 save(f, "coaxial-cable.svg")

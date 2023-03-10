@@ -36,6 +36,15 @@ domain[dielec] = PTFE()
 domain[outer] = Metal()
 domain[inner] = Metal()
 
-f = figure(domain; width=30, margin_top=2, margin_bottom=2, margin_right=2, margin_left=2, offset=2)
+f = figure(domain; 
+	width=12, 
+	margin_top=1, 
+	margin_bottom=1, 
+	margin_right=1, 
+	margin_left=2, 
+	offset=0.5,
+	hticks=[0.0 RADIUS 0.5],
+	vticks=[0.0 LENGTH 0.5],
+	font_size=12)
 
 save(f, "swo.svg")
