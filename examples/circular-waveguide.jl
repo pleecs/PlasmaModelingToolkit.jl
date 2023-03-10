@@ -25,4 +25,4 @@ domain[output] = SurfaceImpedance(η_0)
 
 f = figure(domain; width=30, margin_top=2, margin_bottom=2, margin_right=22, margin_left=2, offset=2)
 
-save(f, "circuilar-waveguide.svg")
+save(f, "circular-waveguide.svg")
