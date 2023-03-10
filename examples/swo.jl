@@ -37,11 +37,11 @@ domain[outer] = Metal()
 domain[inner] = Metal()
 
 f = figure(domain; 
-	width=12, 
+	width=20, 
 	margin_top=1, 
-	margin_bottom=1, 
+	margin_bottom=2, 
 	margin_right=1, 
-	margin_left=2, 
+	margin_left=3, 
 	offset=0.5,
 	hticks=[0.0 RADIUS 0.5],
 	vticks=[0.0 LENGTH 0.5],

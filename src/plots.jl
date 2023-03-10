@@ -138,42 +138,51 @@ function figure(domain; width=5, margin_top=2, margin_bottom=2, margin_right=2, 
 		# background
 		NativeSVG.rect(width="$(width)cm", height="$(height)cm", fill="#f5f5f5")
 
-		
 		NativeSVG.defs() do
 			# arrowheads
 			NativeSVG.polygon(id="arrowhead_top", points="-5,0 5,0 0,-8.7", fill="black")
 			NativeSVG.polygon(id="arrowhead_right", points="0,-5 8.7,0 0,5", fill="black")
 
 			# tick mark
-			NativeSVG.line(id="tick_vertical", x1="0", y1="5", x2="0", y2="-5", stroke="black", stroke_width="2px")
-			NativeSVG.line(id="tick_horizontal", x1="5", y1="0", x2="-5", y2="0", stroke="black", stroke_width="2px")
+			NativeSVG.line(id="tick_vertical", x1="0", y1="5", x2="0", y2="-5", stroke="black", stroke_width="1px")
+			NativeSVG.line(id="tick_horizontal", x1="5", y1="0", x2="-5", y2="0", stroke="black", stroke_width="1px")
+
+			# rotated text test
+			NativeSVG.text(id="test", text_anchor="middle", font_size="$(font_size)pt", font_family="serif", transform="rotate(-90)") do
+				NativeSVG.str("Z-coordinate [m]")
+			end
+
 		end
 
 		# vertical axis
 		NativeSVG.g() do
 			NativeSVG.use(href="#arrowhead_top", x="$(margin_left)cm", y="$(margin_top)cm")
-			NativeSVG.line(x1="$(margin_left)cm", x2="$(margin_left)cm", y1="$(margin_top)cm", y2="$(gH+2*offset+margin_top)cm", stroke="black", stroke_width="2px")
+			NativeSVG.line(x1="$(margin_left)cm", x2="$(margin_left)cm", y1="$(margin_top)cm", y2="$(gH+2*offset+margin_top)cm", stroke="black", stroke_width="1px")
 			for i in 1:length(vticks)
 				tick = gvticks[i]
 				val = vticks[i]
 				NativeSVG.use(href="#tick_horizontal", x="$(margin_left)cm", y="$(gH+offset+margin_top-tick)cm")
-				NativeSVG.text(x="$(margin_left - 0.3)cm", y="$(gH+offset+margin_top-tick + (font_size/2 * 0.02))cm", text_anchor="end", font_size="$(font_size)pt", font_family="Gill Sans") do
+				NativeSVG.text(x="$(margin_left - 0.3)cm", y="$(gH+offset+margin_top-tick + (font_size/2 * 0.02))cm", text_anchor="end", font_size="$(font_size)pt", font_family="serif") do
 					NativeSVG.str("$val")
 				end
 			end
+			NativeSVG.use(href="#test", x="$(margin_left- 2)cm", y="$(gH/2+offset+margin_top)cm")
 		end
 
 		# horizontal axis
 		NativeSVG.g() do
 			NativeSVG.use(href="#arrowhead_right", x="$(gW+2*offset+margin_left)cm", y="$(gH+2*offset+margin_top)cm")
-			NativeSVG.line(x1="$(margin_left)cm", x2="$(gW+2*offset+margin_left)cm", y1="$(gH+2*offset+margin_top)cm", y2="$(gH+2*offset+margin_top)cm", stroke="black", stroke_width="2px")
+			NativeSVG.line(x1="$(margin_left)cm", x2="$(gW+2*offset+margin_left)cm", y1="$(gH+2*offset+margin_top)cm", y2="$(gH+2*offset+margin_top)cm", stroke="black", stroke_width="1px")
 			for i in 1:length(hticks)
 				tick = ghticks[i]
 				val = hticks[i]
 				NativeSVG.use(href="#tick_vertical", x="$(offset+margin_left+tick)cm", y="$(gH+2*offset+margin_top)cm")
-				NativeSVG.text(x="$(offset+margin_left+tick)cm", y="$(gH+2*offset+margin_top+(font_size * 0.02 + 0.3))cm", text_anchor="middle", font_size="$(font_size)pt", font_family="Gill Sans") do
+				NativeSVG.text(x="$(offset+margin_left+tick)cm", y="$(gH+2*offset+margin_top+(font_size * 0.02 + 0.3))cm", text_anchor="middle", font_size="$(font_size)pt", font_family="serif") do
 					NativeSVG.str("$val")
 				end
+			end
+			NativeSVG.text(x="$(gW/2 + offset + margin_left)cm", y="$(gH+2*offset+margin_top+(font_size * 0.02 + 1))cm", text_anchor="middle", font_size="$(font_size)pt", font_family="serif") do
+				NativeSVG.str("R-coordinate [m]")
 			end
 		end
 
