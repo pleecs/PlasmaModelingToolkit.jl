@@ -13,8 +13,12 @@ import PlasmaModelingToolkit.Sources: CoaxialPort, HarmonicSignal
 import PlasmaModelingToolkit.SVG: draw!
 =======
 import PlasmaModelingToolkit.Sources: CoaxialPort
+<<<<<<< HEAD
 import PlasmaModelingToolkit.SVG: figure, save
 >>>>>>> b54e5fa (Added universal axis plotting, changed plotting API)
+=======
+import PlasmaModelingToolkit.SVG: Figure, save, svg
+>>>>>>> de79815 (Add pattern for PerfectlyMatchedLayer material)
 
 domain = AxisymmetricDomain((0, L_coax), (r_coax, R_coax), Air())
 

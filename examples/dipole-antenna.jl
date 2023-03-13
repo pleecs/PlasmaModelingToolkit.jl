@@ -12,7 +12,7 @@ import PlasmaModelingToolkit.Geometry: Rectangle, Circle, Segment, mm
 import PlasmaModelingToolkit.Constants: ε_0, μ_0, η_0
 import PlasmaModelingToolkit.Materials: Air, Metal, PerfectlyMatchedLayer
 import PlasmaModelingToolkit.BoundaryConditions: SurfaceImpedance, PerfectElectricConductor, PerfectMagneticConductor
-import PlasmaModelingToolkit.SVG: figure, save
+import PlasmaModelingToolkit.SVG: Figure, save, svg
 
 
 domain = AxisymmetricDomain(LENGTH, RADIUS, Air())
@@ -38,6 +38,18 @@ domain[side]   = PerfectElectricConductor()
 domain[input]  = SurfaceImpedance(η_0)
 domain[output] = PerfectElectricConductor()
 
-f = figure(domain; width=30, margin_top=2, margin_bottom=2, margin_right=2, margin_left=2, offset=2)
+f = Figure(domain; width=30)
+f.margin			= 1
+f.margin["bottom"]	= 2 
+f.margin["left"]	= 3
+f.offset			= 0.5
+f.offset["right"]	= 2
+f.x_axis["ticks"]	= [0.0 R_coax RADIUS]
+f.x_axis["label"]	= "r-coordinate [m]"
+f.x_axis["start_from_zero"] = true
+f.y_axis["ticks"]	= [0.0 0.023 LENGTH]
+f.y_axis["label"]	= "z-coordinate [m]"
+f.y_axis["start_from_zero"] = true
+f.font["size"] = 12
 
-save(f, "dipole-antenna.svg")
+save(svg(f), "dipole-antenna.svg")

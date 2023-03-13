@@ -11,17 +11,17 @@ import PlasmaModelingToolkit.Sources: CoaxialPort
 
 default_colormap = Dict(
 	"Medium" => "blue",
-	"PerfectlyMatchedLayer" => "green",
-	"Conductor" => "goldenrod",
-	"PerfectMagneticConductor" => "blue",
-	"PerfectElectricConductor" => "#ff00ff",
-	"SurfaceImpedance" => "orange",
-	"CoaxialPort" => "orange",
-	"Vacuum" => "green",
-	"PTFE" => "beige",
-	"Air" => "skyblue",
-	"axis" => "black",
-	"font" => "black"
+	"PerfectlyMatchedLayer" => "#9D9D9D",
+	"Conductor" => "#50514F",
+	"PerfectMagneticConductor" => "#247BA0",
+	"PerfectElectricConductor" => "#F25F5C",
+	"SurfaceImpedance" => "#FFE066",
+	"CoaxialPort" => "#70C1B3",
+	"Vacuum" => "#FFFFFF",
+	"PTFE" => "#B1B1B1",
+	"Air" => "#8EB1C7",
+	"axis" => "#2D3142",
+	"font" => "#2D3142"
 	)
 
 mutable struct Figure
@@ -44,7 +44,7 @@ function Figure(domain;
 	x_axis = Dict("ticks" => [], "stroke_width" => "1px", "label" => nothing, "label_offset" => 2, "start_from_zero" => false),
 	y_axis = Dict("ticks" => [], "stroke_width" => "1px", "label" => nothing, "label_offset" => 2, "start_from_zero" => false),
 	colormap = default_colormap,
-	background = Dict("color" => "#f5f5f5")
+	background = Dict("color" => "white")
 	)
 
 	return Figure(
@@ -154,6 +154,16 @@ function generate_svg(domain::AxisymmetricDomain, colormap)
 		for (segment, _) in domain.bcs
 			define(segment)
 		end
+
+		if any(x-> x[2] isa PerfectlyMatchedLayer, values(domain.materials))
+			NativeSVG.pattern(id="PML", width="0.5", height="0.5", patternTransform="rotate(-45 0 0)", patternUnits="userSpaceOnUse") do
+				NativeSVG.rect(width="0.25", height="0.5", fill=colormap["PerfectlyMatchedLayer"])
+				NativeSVG.rect(x="0.25", width="0.25", height="0.5", fill="transparent")
+			end
+
+			# hack
+			colormap["PerfectlyMatchedLayer"] = "url(#PML)"
+		end
 	end
 
 	NativeSVG.g(transform="rotate(-90 0 0) translate(-$Z)") do
@@ -207,13 +217,13 @@ function svg(f::Figure)
 
 			# labels
 			if !isnothing(f.y_axis["label"])
-				NativeSVG.text(id="y_axis_label", text_anchor="middle", font_size="$(f.font["size"])pt", font_family="$(f.font["family"])", transform="rotate(-90)") do
+				NativeSVG.text(id="y_axis_label", text_anchor="middle", font_size="$(f.font["size"])pt", font_family="$(f.font["family"])", transform="rotate(-90)", style="fill: $(f.colormap["font"]);") do
 					NativeSVG.str(f.y_axis["label"])
 				end
 			end
 
 			if !isnothing(f.x_axis["label"])
-				NativeSVG.text(id="x_axis_label", text_anchor="middle", font_size="$(f.font["size"])pt", font_family="$(f.font["family"])") do
+				NativeSVG.text(id="x_axis_label", text_anchor="middle", font_size="$(f.font["size"])pt", font_family="$(f.font["family"])", style="fill: $(f.colormap["font"]);") do
 					NativeSVG.str(f.x_axis["label"])
 				end
 			end
@@ -245,7 +255,7 @@ function svg(f::Figure)
 
 					x = f.margin["left"] - 0.3
 					y = f.margin["top"] + f.offset["top"] + gdH - gticks[i] + (f.font["size"]/2 * 0.02) # FIXME: eye-ball
-					NativeSVG.text(x="$(x)cm", y="$(y)cm", text_anchor="end", font_size="$(f.font["size"])pt", font_family="$(f.font["family"])") do
+					NativeSVG.text(x="$(x)cm", y="$(y)cm", text_anchor="end", font_size="$(f.font["size"])pt", font_family="$(f.font["family"])", style="fill: $(f.colormap["font"]);") do
 						NativeSVG.str("$(ticks[i])")
 					end
 				end
@@ -279,7 +289,7 @@ function svg(f::Figure)
 					NativeSVG.use(href="#x_tick", x="$(x)cm", y="$(y)cm")
 
 					y += f.font["size"] * 0.02 + 0.3 # FIXME: eye-ball
-					NativeSVG.text(x="$(x)cm", y="$(y)cm", text_anchor="middle", font_size="$(f.font["size"])pt", font_family=f.font["family"]) do
+					NativeSVG.text(x="$(x)cm", y="$(y)cm", text_anchor="middle", font_size="$(f.font["size"])pt", font_family=f.font["family"], style="fill: $(f.colormap["font"]);") do
 						NativeSVG.str("$(ticks[i])")
 					end
 				end
