@@ -7,6 +7,7 @@ import PlasmaModelingToolkit.Domains: AxisymmetricDomain
 import PlasmaModelingToolkit.Geometry: Circle, Segment
 import PlasmaModelingToolkit.Constants: η_0
 import PlasmaModelingToolkit.BoundaryConditions: PerfectMagneticConductor, PerfectElectricConductor, SurfaceImpedance
+import PlasmaModelingToolkit.SVG: Figure, save, svg
 
 domain = AxisymmetricDomain(LENGTH, RADIUS, Air())
 
@@ -22,4 +23,19 @@ domain[side] = PerfectElectricConductor()
 domain[input] = SurfaceImpedance(η_0)
 domain[output] = SurfaceImpedance(η_0)
 
-display(domain)
+f = Figure(domain; width=25)
+f.margin["right"]  = 15.5
+f.margin["left"]   = 3.5
+f.margin["bottom"] = 3
+
+f.x_axis["ticks"] = [0.0 RADIUS]
+
+f.x_axis["label"] = "r-coordinate [m]"
+
+f.y_axis["ticks"] = [0.0 LENGTH/2-RADIUS/3 LENGTH/2 LENGTH/2+RADIUS/3 LENGTH]
+f.y_axis["tick_labels_max_digits"] = 4
+
+f.y_axis["label"] = "z-coordinate [m]"
+f.y_axis["label_offset"] = 2
+
+save(svg(f), "circular-waveguide.svg")
