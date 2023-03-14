@@ -24,8 +24,8 @@ domain[input] = SurfaceImpedance(η_0)
 domain[output] = SurfaceImpedance(η_0)
 
 f = Figure(domain; width=25)
-f.margin["right"]  = 16
-f.margin["left"]   = 3
+f.margin["right"]  = 15.5
+f.margin["left"]   = 3.5
 f.margin["bottom"] = 3
 
 f.x_axis["ticks"] = [0.0 RADIUS]
