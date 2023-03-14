@@ -38,11 +38,11 @@ end
 
 function Figure(domain;
 	width = 20,
-	margin = Dict("top" => 2,"bottom" => 2, "left" => 2, "right" => 2),
+	margin = Dict("top" => 2.,"bottom" => 2., "left" => 2., "right" => 2.),
 	offset = Dict("top" => 0.5,"bottom" => 0.5, "left" => 0.5, "right" => 0.5),
 	font = Dict("family" => "serif", "size" => 12),
-	x_axis = Dict("ticks" => [], "stroke_width" => "1px", "label" => nothing, "label_offset" => 2, "start_from_zero" => false),
-	y_axis = Dict("ticks" => [], "stroke_width" => "1px", "label" => nothing, "label_offset" => 2, "start_from_zero" => false),
+	x_axis = Dict("ticks" => [], "stroke_width" => 1, "label" => nothing, "label_offset" => 2, "start_from_zero" => false, "ticks_angle" => 0),
+	y_axis = Dict("ticks" => [], "stroke_width" => 1, "label" => nothing, "label_offset" => 2, "start_from_zero" => false, "ticks_angle" => 0),
 	colormap = default_colormap,
 	background = Dict("color" => "white")
 	)
@@ -211,13 +211,39 @@ function svg(f::Figure)
 			NativeSVG.polygon(id="y_arrowhead", points="-5,0 5,0 0,-8.7", fill=f.colormap["axis"])
 
 			# tick mark
-			NativeSVG.line(id="x_tick", x1="0", y1="5", x2="0", y2="-5", stroke=f.colormap["axis"], stroke_width=f.y_axis["stroke_width"])
-			NativeSVG.line(id="y_tick", x1="5", y1="0", x2="-5", y2="0", stroke=f.colormap["axis"], stroke_width=f.x_axis["stroke_width"])
+			NativeSVG.line(id="x_tick", x1="0", y1="5", x2="0", y2="-5", stroke=f.colormap["axis"], stroke_width="$(f.y_axis["stroke_width"])px")
+			NativeSVG.line(id="y_tick", x1="5", y1="0", x2="-5", y2="0", stroke=f.colormap["axis"], stroke_width="$(f.x_axis["stroke_width"])px")
+
+			# tick labels
+			if !isempty(f.x_axis["ticks"])
+				if f.x_axis["ticks_angle"] > 0
+					text_anchor = "start"
+				elseif f.x_axis["ticks_angle"] < 0
+					text_anchor = "end"
+				else
+					text_anchor = "middle"
+				end
+
+				for (i,label) in enumerate(f.x_axis["ticks"])
+					NativeSVG.text(id="x_tick_label_$i", text_anchor=text_anchor, font_size="$(f.font["size"])pt", font_family=f.font["family"], style="fill: $(f.colormap["font"]);", transform="rotate($(f.x_axis["ticks_angle"]))") do
+						NativeSVG.str("$label")
+					end
+				end
+			end
+
+			if !isempty(f.y_axis["ticks"])
+				text_anchor = "end"
+				for (i,label) in enumerate(f.y_axis["ticks"])
+					NativeSVG.text(id="y_tick_label_$i", text_anchor=text_anchor, font_size="$(f.font["size"])pt", font_family=f.font["family"], style="fill: $(f.colormap["font"]);", transform="rotate($(f.y_axis["ticks_angle"]))") do
+						NativeSVG.str("$label")
+					end
+				end
+			end
 
 
 			# labels
 			if !isnothing(f.y_axis["label"])
-				NativeSVG.text(id="y_axis_label", text_anchor="middle", font_size="$(f.font["size"])pt", font_family="$(f.font["family"])", transform="rotate(-90)", style="fill: $(f.colormap["font"]);") do
+				NativeSVG.text(id="y_axis_label", text_anchor="middle", font_size="$(f.font["size"])pt", font_family="$(f.font["family"])", style="fill: $(f.colormap["font"]);", transform="rotate(-90)") do
 					NativeSVG.str(f.y_axis["label"])
 				end
 			end
@@ -255,9 +281,7 @@ function svg(f::Figure)
 
 					x = f.margin["left"] - 0.3
 					y = f.margin["top"] + f.offset["top"] + gdH - gticks[i] + (f.font["size"]/2 * 0.02) # FIXME: eye-ball
-					NativeSVG.text(x="$(x)cm", y="$(y)cm", text_anchor="end", font_size="$(f.font["size"])pt", font_family="$(f.font["family"])", style="fill: $(f.colormap["font"]);") do
-						NativeSVG.str("$(ticks[i])")
-					end
+					NativeSVG.use(href="#y_tick_label_$i", x="$(x)cm", y="$(y)cm")
 				end
 			end
 
@@ -289,9 +313,7 @@ function svg(f::Figure)
 					NativeSVG.use(href="#x_tick", x="$(x)cm", y="$(y)cm")
 
 					y += f.font["size"] * 0.02 + 0.3 # FIXME: eye-ball
-					NativeSVG.text(x="$(x)cm", y="$(y)cm", text_anchor="middle", font_size="$(f.font["size"])pt", font_family=f.font["family"], style="fill: $(f.colormap["font"]);") do
-						NativeSVG.str("$(ticks[i])")
-					end
+					NativeSVG.use(href="#x_tick_label_$i", x="$(x)cm", y="$(y)cm")
 				end
 			end
 
