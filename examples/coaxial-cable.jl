@@ -24,6 +24,20 @@ domain[output] = SurfaceImpedance(η_0)
 domain[input]  = CoaxialPort(1.0, 20e9)
 
 f = Figure(domain; 
-	width=30)
+	width=25)
+f.margin["right"]  = 20.5
+f.margin["left"]   = 2
+f.margin["bottom"] = 3
 
-save(f, "coaxial-cable.svg")
+f.x_axis["ticks"] = [0.0 0.001 0.002]
+f.x_axis["tick_labels_angle"] = -45
+
+f.x_axis["label"] = "r-coordinate [m]"
+f.x_axis["label_offset"] = 2.5
+
+f.y_axis["ticks"] = [0.0 0.040]
+
+f.y_axis["label"] = "z-coordinate [m]"
+f.y_axis["label_offset"] = 1.2
+
+save(svg(f), "coaxial-cable.svg")

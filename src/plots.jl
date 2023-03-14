@@ -41,8 +41,8 @@ function Figure(domain;
 	margin = Dict("top" => 2.,"bottom" => 2., "left" => 2., "right" => 2.),
 	offset = Dict("top" => 0.5,"bottom" => 0.5, "left" => 0.5, "right" => 0.5),
 	font = Dict("family" => "serif", "size" => 12),
-	x_axis = Dict("ticks" => [], "stroke_width" => 1, "label" => nothing, "label_offset" => 2, "start_from_zero" => false, "ticks_angle" => 0),
-	y_axis = Dict("ticks" => [], "stroke_width" => 1, "label" => nothing, "label_offset" => 2, "start_from_zero" => false, "ticks_angle" => 0),
+	x_axis = Dict("ticks" => [], "stroke_width" => 1, "label" => nothing, "label_offset" => 2, "start_from_zero" => false, "tick_labels_angle" => 0, "tick_labels_max_digits" => 3),
+	y_axis = Dict("ticks" => [], "stroke_width" => 1, "label" => nothing, "label_offset" => 2, "start_from_zero" => false, "tick_labels_angle" => 0, "tick_labels_max_digits" => 3), 
 	colormap = default_colormap,
 	background = Dict("color" => "white")
 	)
@@ -216,17 +216,18 @@ function svg(f::Figure)
 
 			# tick labels
 			if !isempty(f.x_axis["ticks"])
-				if f.x_axis["ticks_angle"] > 0
+				if f.x_axis["tick_labels_angle"] > 0
 					text_anchor = "start"
-				elseif f.x_axis["ticks_angle"] < 0
+				elseif f.x_axis["tick_labels_angle"] < 0
 					text_anchor = "end"
 				else
 					text_anchor = "middle"
 				end
 
 				for (i,label) in enumerate(f.x_axis["ticks"])
-					NativeSVG.text(id="x_tick_label_$i", text_anchor=text_anchor, font_size="$(f.font["size"])pt", font_family=f.font["family"], style="fill: $(f.colormap["font"]);", transform="rotate($(f.x_axis["ticks_angle"]))") do
-						NativeSVG.str("$label")
+					NativeSVG.text(id="x_tick_label_$i", text_anchor=text_anchor, font_size="$(f.font["size"])pt", font_family=f.font["family"], style="fill: $(f.colormap["font"]);", transform="rotate($(f.x_axis["tick_labels_angle"]))") do
+						label = round(label, digits=f.x_axis["tick_labels_max_digits"])
+						NativeSVG.str("$(label)")
 					end
 				end
 			end
@@ -234,7 +235,8 @@ function svg(f::Figure)
 			if !isempty(f.y_axis["ticks"])
 				text_anchor = "end"
 				for (i,label) in enumerate(f.y_axis["ticks"])
-					NativeSVG.text(id="y_tick_label_$i", text_anchor=text_anchor, font_size="$(f.font["size"])pt", font_family=f.font["family"], style="fill: $(f.colormap["font"]);", transform="rotate($(f.y_axis["ticks_angle"]))") do
+					NativeSVG.text(id="y_tick_label_$i", text_anchor=text_anchor, font_size="$(f.font["size"])pt", font_family=f.font["family"], style="fill: $(f.colormap["font"]);", transform="rotate($(f.y_axis["tick_labels_angle"]))") do
+						label = round(label, digits=f.y_axis["tick_labels_max_digits"])
 						NativeSVG.str("$label")
 					end
 				end
