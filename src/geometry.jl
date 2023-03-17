@@ -11,7 +11,10 @@ abstract type Shape end
 struct Segment{X1, Y1, X2, Y2} <: Shape end 				
 struct Rectangle{X, Y, W, H} <: Shape end
 struct Circle{X, Y, R} <: Shape end
-struct CompositeShape{OPERATOR, A, B}  <: Shape end
+struct CompositeShape{OPERATOR}  <: Shape
+	A :: Shape
+	B :: Shape 
+end
 struct Polygon{N} <: Shape
 	segments :: NTuple{N, Segment}
 end
@@ -96,9 +99,9 @@ function ∩(ray::Ray, segment::Segment{X1, Y1, X2, Y2}) where {X1, Y1, X2, Y2}
 	return (t₁ >= 0) && (0 <= t₂ <= 1)
 end
 
-+(A::Shape, B::Shape) = CompositeShape{+, A, B}()
--(A::Shape, B::Shape) = CompositeShape{-, A, B}()
++(A::Shape, B::Shape) = CompositeShape{+}(A, B)
+-(A::Shape, B::Shape) = CompositeShape{-}(A, B)
 
-∈(p, ::CompositeShape{+, A, B}) where {A, B} = ∈(p, A) ||  ∈(p, B)
-∈(p, ::CompositeShape{-, A, B}) where {A, B} = ∈(p, A) && !∈(p, B)
+∈(p, shape::CompositeShape{+}) = ∈(p, shape.A) ||  ∈(p, shape.B)
+∈(p, shape::CompositeShape{-}) = ∈(p, shape.A) && !∈(p, shape.B)
 end

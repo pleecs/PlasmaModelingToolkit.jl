@@ -1,0 +1,12 @@
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.8.5"
+manifest_format = "2.0"
+project_hash = "80947de82c91293887085a9acadce789e33ab957"
+
+[[deps.NativeSVG]]
+git-tree-sha1 = "5cea6e934c0f53f3f92e294f32070088d77e2190"
+repo-rev = "master"
+repo-url = "https://github.com/pleecs/NativeSVG.jl"
+uuid = "e0ae6c8d-2d3a-402f-a45e-2aac098fa7eb"
+version = "0.1.1"

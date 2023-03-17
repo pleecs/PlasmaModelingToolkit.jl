@@ -12,6 +12,8 @@ import PlasmaModelingToolkit.Geometry: Rectangle, Circle, Segment, mm
 import PlasmaModelingToolkit.Constants: ε_0, μ_0, η_0
 import PlasmaModelingToolkit.Materials: Air, Metal, PerfectlyMatchedLayer
 import PlasmaModelingToolkit.BoundaryConditions: SurfaceImpedance, PerfectElectricConductor, PerfectMagneticConductor
+import PlasmaModelingToolkit.SVG: Figure, save, svg
+
 
 domain = AxisymmetricDomain(LENGTH, RADIUS, Air())
 
@@ -26,8 +28,8 @@ side   = Segment{0, RADIUS, LENGTH, RADIUS}()
 input  = Segment{0, 0, 0, RADIUS}()
 output = Segment{LENGTH, RADIUS, LENGTH, 0}()
 
-domain[top]    = PerfectlyMatchedLayer{ε_0, μ_0}(0x01, 0.7(0.02/π), 2)
-domain[wall]   = PerfectlyMatchedLayer{ε_0, μ_0}(0x01, 0.7(0.02/π), 2)
+domain[top]    = PerfectlyMatchedLayer(Air(), 0.7(0.02/π), 2)
+domain[wall]   = PerfectlyMatchedLayer(Air(), 0.7(0.02/π), 2)
 domain[ground] = Metal()
 domain[dielec] = Air()
 domain[inner]  = Metal()
@@ -36,4 +38,23 @@ domain[side]   = PerfectElectricConductor()
 domain[input]  = SurfaceImpedance(η_0)
 domain[output] = PerfectElectricConductor()
 
-display(domain)
+f = Figure(domain; width=25)
+f.margin            = 1
+f.margin["bottom"]  = 2 
+f.margin["left"]    = 3.5
+
+f.offset            = 0.5
+f.offset["right"]   = 2
+
+f.x_axis["ticks"]   = [0.0 r_coax R_coax RADIUS]
+f.x_axis["tick_labels_angle"] = -90
+f.x_axis["label"]   = "r-coordinate [m]"
+f.x_axis["start_from_zero"] = true
+
+f.y_axis["ticks"]   = [0.0 0.015 0.023 LENGTH]
+f.y_axis["label"]   = "z-coordinate [m]"
+f.y_axis["start_from_zero"] = true
+
+f.font["size"] = 12
+
+save(svg(f), "dipole-antenna.svg")
