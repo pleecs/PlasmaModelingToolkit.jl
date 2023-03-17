@@ -12,15 +12,14 @@ struct TM01 <: WaveguideMode end
 struct TEM <: WaveguideMode end
 
 struct CoaxialPort{S<:Signal} <: BoundaryCondition
-	m :: Medium			 				# FIXME: remove when we will be able to calculate impedance in Hennel.jl
+	η :: Float64
 end
 
 struct WaveguidePort{S<:Signal, M<:WaveguideMode} <: BoundaryCondition
-	m :: Medium			 				# FIXME: remove when we will be able to calculate impedance in Hennel.jl
+	η :: Float64
 end
 
 struct UniformPort{S<:Signal} <: BoundaryCondition
-  m :: Medium			 				# FIXME: remove when we will be able to calculate impedance in Hennel.jl
+  η :: Float64
 end
-
 end

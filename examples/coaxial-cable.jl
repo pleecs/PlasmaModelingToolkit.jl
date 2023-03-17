@@ -11,6 +11,7 @@ import PlasmaModelingToolkit.BoundaryConditions: SurfaceImpedance, PerfectElectr
 import PlasmaModelingToolkit.Sources: CoaxialPort, HarmonicSignal
 import PlasmaModelingToolkit.SVG: Figure, save, svg
 import PlasmaModelingToolkit.Units: MHz
+import PlasmaModelingToolkit.Constants: η_0
 
 domain = AxisymmetricDomain((0, L_coax), (r_coax, R_coax), Air())
 
@@ -21,7 +22,7 @@ output = Segment{L_coax, R_coax, L_coax, r_coax}()
 
 domain[inner]  = PerfectElectricConductor()
 domain[outer]  = PerfectElectricConductor()
-domain[input]  = CoaxialPort{HarmonicSignal{1.0, 20MHz}}(Air())
+domain[input]  = CoaxialPort{HarmonicSignal{1.0, 20MHz}}(η_0)
 domain[output] = SurfaceImpedance(η_0)
 
 f = Figure(domain; 
