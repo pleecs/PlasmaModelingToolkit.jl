@@ -52,7 +52,7 @@ function Figure(domain;
 
 	return Figure(
 		domain,
-		width,
+		float(width),
 		margin,
 		offset,
 		font,
@@ -64,7 +64,7 @@ function Figure(domain;
 end
 
 import Base: setproperty!
-function setproperty!(f::Figure, s::Symbol, val::T) where{T<:Number}
+function setproperty!(f::Figure, s::Symbol, val::T) where {T<:Number}
     if (s == :offset) || (s == :margin)
     	val = float(val)
         return setfield!(f, s, Dict("top" => val, "bottom" => val, "left" => val, "right" => val))
@@ -93,11 +93,11 @@ color(::SurfaceImpedance, colormap) = colormap["SurfaceImpedance"]
 color(::CoaxialPort, colormap) = colormap["CoaxialPort"]
 
 function draw(color::String, shape::Union{Rectangle, Circle, Polygon, CompositeShape})
-	return NativeSVG.use(href="#$(objectid(shape))", fill=color)
+	return NativeSVG.use(href="#$(objectid(shape))", xlink!href="#$(objectid(shape))", fill=color)
 end
 
 function draw(color::String, shape::Segment)
-	return NativeSVG.use(href="#$(objectid(shape))", stroke=color, stroke_width="1%")
+	return NativeSVG.use(href="#$(objectid(shape))", xlink!href="#$(objectid(shape))", stroke=color, stroke_width="1%")
 end
 
 function define(shape::Rectangle{X, Y, W, H}) where {X, Y, W, H}
@@ -127,8 +127,8 @@ end
 
 function define(shape::CompositeShape{+})
 	NativeSVG.g(id="$(objectid(shape))") do
-		NativeSVG.use(href="#$(objectid(shape.A))")
-		NativeSVG.use(href="#$(objectid(shape.B))")
+		NativeSVG.use(href="#$(objectid(shape.A))", xlink!href="#$(objectid(shape.A))")
+		NativeSVG.use(href="#$(objectid(shape.B))", xlink!href="#$(objectid(shape.B))")
 	end
 
 	define(shape.A)
@@ -138,10 +138,10 @@ end
 function define(shape::CompositeShape{-})
 	NativeSVG.g(id="$(objectid(shape))") do
 		NativeSVG.mask(id="$(objectid(shape))-mask") do
-			NativeSVG.use(href="#$(objectid(shape.A))", fill="white")
-			NativeSVG.use(href="#$(objectid(shape.B))", fill="black")
+			NativeSVG.use(href="#$(objectid(shape.A))", xlink!href="#$(objectid(shape.A))", fill="white")
+			NativeSVG.use(href="#$(objectid(shape.B))", xlink!href="#$(objectid(shape.B))", fill="black")
 		end
-		NativeSVG.use(href="#$(objectid(shape.A))", mask="url(#$(objectid(shape))-mask)")
+		NativeSVG.use(href="#$(objectid(shape.A))", xlink!href="#$(objectid(shape.A))", mask="url(#$(objectid(shape))-mask)")
 	end
 
 	define(shape.A)
@@ -244,7 +244,7 @@ function svg(f::Figure)
 	W = f.width
 	H = gdH + f.offset["top"] + f.offset["bottom"] + f.margin["top"] + f.margin["bottom"] 
  
-	NativeSVG.SVG(width="$(W)cm", height="$(H)cm") do
+	NativeSVG.SVG(xmlns!xlink="http://www.w3.org/1999/xlink", width="$(W)cm", height="$(H)cm") do
 		NativeSVG.defs() do
 			# background
 			NativeSVG.rect(id="background", width="$(W)cm", height="$(H)cm", fill=f.background["color"])
@@ -302,7 +302,7 @@ function svg(f::Figure)
 		end
 
 		# background
-		NativeSVG.use(href="#background")
+		NativeSVG.use(href="#background", xlink!href="#background")
 
 		# y-axis
 		NativeSVG.g(id="y-axis") do
@@ -317,7 +317,7 @@ function svg(f::Figure)
 			if !isnothing(f.y_axis["label"])
 				x = f.margin["left"] - f.y_axis["label_offset"]
 				y = (y1 + y2) / 2
-				NativeSVG.use(href="#y_axis_label", x="$(x)cm", y="$(y)cm")
+				NativeSVG.use(href="#y_axis_label", xlink!href="#y_axis_label", x="$(x)cm", y="$(y)cm")
 			end
 			
 			# ticks & tick labels
@@ -327,11 +327,11 @@ function svg(f::Figure)
 				for i in 1:length(ticks)
 					x = f.margin["left"]
 					y = f.margin["top"] + f.offset["top"] + gdH - gticks[i] - gdH_offset
-					NativeSVG.use(href="#y_tick", x="$(x)cm", y="$(y)cm")
+					NativeSVG.use(href="#y_tick", xlink!href="#y_tick", x="$(x)cm", y="$(y)cm")
 
 					x = f.margin["left"] - 0.3
 					y = f.margin["top"] + f.offset["top"] + gdH - gticks[i] - gdH_offset + (f.font["size"]/2 * 0.02) # FIXME: eye-ball
-					NativeSVG.use(href="#y_tick_label_$i", x="$(x)cm", y="$(y)cm")
+					NativeSVG.use(href="#y_tick_label_$i", xlink!href="#y_tick_label_$i", x="$(x)cm", y="$(y)cm")
 				end
 			end
 		end
@@ -349,7 +349,7 @@ function svg(f::Figure)
 			if !isnothing(f.x_axis["label"])
 				x = (x1 + x2) / 2
 				y = f.margin["top"] + f.offset["top"] + gdH + f.x_axis["label_offset"]
-				NativeSVG.use(href="#x_axis_label", x="$(x)cm", y="$(y)cm")
+				NativeSVG.use(href="#x_axis_label", xlink!href="#x_axis_label", x="$(x)cm", y="$(y)cm")
 			end
 
 			# ticks & tick labels
@@ -359,10 +359,10 @@ function svg(f::Figure)
 				for i in 1:length(ticks)
 					x = f.margin["left"] + f.offset["left"] + gticks[i] - gdW_offset
 					y = f.margin["top"] + f.offset["top"] + gdH + f.offset["bottom"] 
-					NativeSVG.use(href="#x_tick", x="$(x)cm", y="$(y)cm")
+					NativeSVG.use(href="#x_tick", xlink!href="#x_tick", x="$(x)cm", y="$(y)cm")
 
 					y += f.font["size"] * 0.02 + 0.3 # FIXME: eye-ball
-					NativeSVG.use(href="#x_tick_label_$i", x="$(x)cm", y="$(y)cm")
+					NativeSVG.use(href="#x_tick_label_$i", xlink!href="#x_tick_label_$i", x="$(x)cm", y="$(y)cm")
 				end
 			end
 		end
