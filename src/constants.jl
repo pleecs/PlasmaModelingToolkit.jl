@@ -7,6 +7,7 @@ const ε_0 = 8.85418781e-12 # vacuum permittivity [F/m]
 const μ_0 = 1.256637062e-6 # vacuum permeability [H/m]
 const kB  = 1.38064852e-23 # Boltzmann's constant [J/K]
 const c   = 299_792_458.   # speed of light [m/s]
+const χ_01 = 2.4048        # zero of a Bessel's function [-]
 # derived constants
 const η_0 = sqrt(μ_0/ε_0)  # intristic impedance of free space [Ω]
 const c²  = c^2            # speed of light squared [m^2/s^2]
