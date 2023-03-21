@@ -11,15 +11,19 @@ abstract type WaveguideMode end
 struct TM01 <: WaveguideMode end
 struct TEM <: WaveguideMode end
 
-struct CoaxialPort{S<:Signal} <: BoundaryCondition
+struct CoaxialPort <: BoundaryCondition
+	signal :: Signal
 	η :: Float64
 end
 
-struct WaveguidePort{S<:Signal, M<:WaveguideMode} <: BoundaryCondition
+struct WaveguidePort <: BoundaryCondition
+	signal :: Signal
+	mode :: WaveguideMode
 	η :: Float64
 end
 
-struct UniformPort{S<:Signal} <: BoundaryCondition
+struct UniformPort <: BoundaryCondition
+	signal :: Signal
   η :: Float64
 end
 end
