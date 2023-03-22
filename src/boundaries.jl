@@ -6,6 +6,7 @@ struct PerfectElectricConductor  <: BoundaryCondition end
 struct PerfectMagneticConductor  <: BoundaryCondition end
 mutable struct SurfaceImpedance  <: BoundaryCondition
     η :: Float64
+    ε :: Float64
 end
 
 end

@@ -9,7 +9,7 @@ LENGTH = 0.05            # lenght along z-axis [m]
 
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain
 import PlasmaModelingToolkit.Geometry: Rectangle, Circle, Segment, mm
-import PlasmaModelingToolkit.Constants: ε_0, μ_0, η_0
+import PlasmaModelingToolkit.Constants: ε_0, η_0
 import PlasmaModelingToolkit.Materials: Air, Metal, PerfectlyMatchedLayer
 import PlasmaModelingToolkit.BoundaryConditions: SurfaceImpedance, PerfectElectricConductor, PerfectMagneticConductor
 import PlasmaModelingToolkit.SVG: Figure, save, svg
@@ -35,7 +35,7 @@ domain[dielec] = Air()
 domain[inner]  = Metal()
 domain[axis]   = PerfectMagneticConductor()
 domain[side]   = PerfectElectricConductor()
-domain[input]  = SurfaceImpedance(η_0)
+domain[input]  = SurfaceImpedance(η_0, ε_0)
 domain[output] = PerfectElectricConductor()
 
 f = Figure(domain; width=25)

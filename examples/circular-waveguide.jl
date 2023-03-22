@@ -5,9 +5,11 @@ LENGTH  = 0.60            # lenght along z-axis [m]
 import PlasmaModelingToolkit.Materials: Air, Metal
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain
 import PlasmaModelingToolkit.Geometry: Circle, Segment
-import PlasmaModelingToolkit.Constants: η_0
+import PlasmaModelingToolkit.Constants: η_0, ε_0
 import PlasmaModelingToolkit.BoundaryConditions: PerfectMagneticConductor, PerfectElectricConductor, SurfaceImpedance
 import PlasmaModelingToolkit.SVG: Figure, save, svg
+import PlasmaModelingToolkit.Units: MHz
+import PlasmaModelingToolkit.Sources: WaveguidePort, HarmonicSignal, TM01
 
 domain = AxisymmetricDomain(LENGTH, RADIUS, Air())
 
@@ -20,8 +22,9 @@ output = Segment{LENGTH, RADIUS, LENGTH, 0}()
 domain[circle] = Metal()
 domain[axis] = PerfectMagneticConductor()
 domain[side] = PerfectElectricConductor()
-domain[input] = SurfaceImpedance(η_0)
-domain[output] = SurfaceImpedance(η_0)
+domain[input] = WaveguidePort(HarmonicSignal{1.0, 20MHz}(), TM01())
+domain[input] = SurfaceImpedance(η_0, ε_0)
+domain[output] = SurfaceImpedance(η_0, ε_0)
 
 f = Figure(domain; width=25)
 f.margin["right"]  = 15.5

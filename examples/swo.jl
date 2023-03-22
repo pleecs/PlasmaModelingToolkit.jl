@@ -26,7 +26,7 @@ dielec -= Circle{30mm, 23mm, 21mm}()
 dielec -= Rectangle{5mm, RADIUS, 166mm, 13.5mm}()
 dielec -= outer
 
-inner = Circle{30mm, 23mm, 21mm}()
+inner  = Circle{30mm, 23mm, 21mm}()
 inner += Rectangle{9mm, 0mm, 21mm, 23mm}()
 inner += Rectangle{30mm, 0mm, 150.5mm, 44mm}()
 inner += Circle{180.5mm, 39.5mm, 4.5mm}()

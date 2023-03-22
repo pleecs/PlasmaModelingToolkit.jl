@@ -7,7 +7,7 @@ import ..Geometry: Rectangle, Circle, Polygon, Segment, CompositeShape, Shape
 import ..Materials: Material, Medium, Conductor, Dielectric, PerfectlyMatchedLayer, Metal, Vacuum, PTFE, Air
 import ..BoundaryConditions: PerfectMagneticConductor, PerfectElectricConductor, SurfaceImpedance, BoundaryCondition
 import ..ParticleBoundaryConditions: ParticleBoundaryCondition
-import PlasmaModelingToolkit.Sources: CoaxialPort
+import PlasmaModelingToolkit.Sources: CoaxialPort, WaveguidePort, UniformPort
 
 default_colormap = Dict(
 	"Medium" => "blue",
@@ -17,6 +17,8 @@ default_colormap = Dict(
 	"PerfectElectricConductor" => "#F25F5C",
 	"SurfaceImpedance" => "#FFE066",
 	"CoaxialPort" => "#70C1B3",
+	"WaveguidePort" => "#70C1B3",
+	"UniformPort" => "#70C1B3",
 	"Vacuum" => "#FFFFFF",
 	"PTFE" => "#B1B1B1",
 	"Air" => "#8EB1C7",
@@ -91,6 +93,8 @@ color(::PerfectMagneticConductor, colormap) = colormap["PerfectMagneticConductor
 color(::PerfectElectricConductor, colormap) = colormap["PerfectElectricConductor"]
 color(::SurfaceImpedance, colormap) = colormap["SurfaceImpedance"]
 color(::CoaxialPort, colormap) = colormap["CoaxialPort"]
+color(::WaveguidePort, colormap) = colormap["WaveguidePort"]
+color(::UniformPort, colormap) = colormap["UniformPort"]
 
 function draw(color::String, shape::Union{Rectangle, Circle, Polygon, CompositeShape})
 	return NativeSVG.use(href="#$(objectid(shape))", xlink!href="#$(objectid(shape))", fill=color)
