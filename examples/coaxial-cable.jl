@@ -21,7 +21,7 @@ output = Segment{L_coax, R_coax, L_coax, r_coax}()
 
 domain[inner]  = PerfectElectricConductor()
 domain[outer]  = PerfectElectricConductor()
-domain[input]  = CoaxialPort(HarmonicSignal{1.0, 20MHz}())
+domain[input]  = CoaxialPort(HarmonicSignal{1.0, 20MHz}(), ε_0)
 domain[input]  = SurfaceImpedance(η_0, ε_0)
 domain[output] = SurfaceImpedance(η_0, ε_0)
 

@@ -23,7 +23,7 @@ obstacle = Circle{LENGTH/2, 0.0, RADIUS/3}()
 domain[obstacle] = Metal()
 domain[axis] = PerfectMagneticConductor()
 domain[side] = PerfectElectricConductor()
-domain[input] = WaveguidePort(HarmonicSignal{1.0, 20MHz}(), TM01())
+domain[input] = WaveguidePort(HarmonicSignal{1.0, 20MHz}(), TM01(), ε_0)
 domain[input] = SurfaceImpedance(η_0, ε_0)
 domain[output] = SurfaceImpedance(η_0, ε_0)
 

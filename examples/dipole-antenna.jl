@@ -38,7 +38,7 @@ domain[inner]  = Metal()
 domain[axis]   = PerfectMagneticConductor()
 domain[side]   = PerfectElectricConductor()
 domain[input]  = SurfaceImpedance(η_0, ε_0)
-domain[input]  = CoaxialPort(HarmonicSignal{1.0, FREQ}())
+domain[input]  = CoaxialPort(HarmonicSignal{1.0, FREQ}(), ε_0)
 domain[output] = PerfectElectricConductor()
 
 domain[obstacle] = PTFE()
