@@ -2,18 +2,17 @@
 r_coax = 0.001
 R_coax = 0.002
 # simulation parameters
-NR     = 401             # number of grid points along radial direction [1]
-NZ     = 401             # number of grid points along axial direction [1]
 RADIUS = 0.05            # radius along r-axis [m]
 LENGTH = 0.05            # lenght along z-axis [m]
+FREQ   = 50e9            # Excitation frequency [Hz]
 
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain
 import PlasmaModelingToolkit.Geometry: Rectangle, Circle, Segment, mm
 import PlasmaModelingToolkit.Constants: ε_0, η_0
-import PlasmaModelingToolkit.Materials: Air, Metal, PerfectlyMatchedLayer
+import PlasmaModelingToolkit.Materials: Air, Metal, PerfectlyMatchedLayer, PTFE
 import PlasmaModelingToolkit.BoundaryConditions: SurfaceImpedance, PerfectElectricConductor, PerfectMagneticConductor
+import PlasmaModelingToolkit.Sources: CoaxialPort, HarmonicSignal
 import PlasmaModelingToolkit.SVG: Figure, save, svg
-
 
 domain = AxisymmetricDomain(LENGTH, RADIUS, Air())
 
@@ -25,18 +24,24 @@ top    = Rectangle{LENGTH - 1mm, 0mm, 1mm, RADIUS}()
 wall   = Rectangle{0mm, RADIUS - 1mm, LENGTH, 1mm}()
 axis   = Segment{LENGTH, 0, 0, 0}()
 side   = Segment{0, RADIUS, LENGTH, RADIUS}()
-input  = Segment{0, 0, 0, RADIUS}()
+input  = Segment{0, r_coax, 0, R_coax}()
 output = Segment{LENGTH, RADIUS, LENGTH, 0}()
+
+obstacle = Circle{30mm, 14.9mm, 9mm}()
+obstacle-= Circle{30mm, 14.9mm, 5mm}()
 
 domain[top]    = PerfectlyMatchedLayer(Air(), 0.7(0.02/π), 2)
 domain[wall]   = PerfectlyMatchedLayer(Air(), 0.7(0.02/π), 2)
 domain[ground] = Metal()
-domain[dielec] = Air()
+domain[dielec] = PTFE()
 domain[inner]  = Metal()
 domain[axis]   = PerfectMagneticConductor()
 domain[side]   = PerfectElectricConductor()
 domain[input]  = SurfaceImpedance(η_0, ε_0)
+domain[input]  = CoaxialPort(HarmonicSignal{1.0, FREQ}())
 domain[output] = PerfectElectricConductor()
+
+domain[obstacle] = PTFE()
 
 f = Figure(domain; width=25)
 f.margin            = 1

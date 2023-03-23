@@ -13,13 +13,14 @@ import PlasmaModelingToolkit.Sources: WaveguidePort, HarmonicSignal, TM01
 
 domain = AxisymmetricDomain(LENGTH, RADIUS, Air())
 
-circle = Circle{LENGTH/2, 0.0, RADIUS/3}()
 axis   = Segment{LENGTH, 0, 0, 0}()
 side   = Segment{0, RADIUS, LENGTH, RADIUS}()
 input  = Segment{0, 0, 0, RADIUS}()
 output = Segment{LENGTH, RADIUS, LENGTH, 0}()
 
-domain[circle] = Metal()
+obstacle = Circle{LENGTH/2, 0.0, RADIUS/3}()
+
+domain[obstacle] = Metal()
 domain[axis] = PerfectMagneticConductor()
 domain[side] = PerfectElectricConductor()
 domain[input] = WaveguidePort(HarmonicSignal{1.0, 20MHz}(), TM01())
