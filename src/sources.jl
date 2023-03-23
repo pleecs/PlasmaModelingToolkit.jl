@@ -13,14 +13,17 @@ struct TEM <: WaveguideMode end
 
 struct CoaxialPort <: BoundaryCondition
 	signal :: Signal
+	ε :: Float64
 end
 
 struct WaveguidePort <: BoundaryCondition
 	signal :: Signal
 	mode :: WaveguideMode
+	ε :: Float64
 end
 
 struct UniformPort <: BoundaryCondition
 	signal :: Signal
+	ε :: Float64
 end
 end
