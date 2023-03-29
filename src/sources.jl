@@ -1,11 +1,13 @@
 module Sources
 import ..BoundaryConditions: BoundaryCondition
 import ..Materials: Medium
+import ..TemporalFunctions: TemporalFunction
 
 abstract type Signal end
 struct HarmonicSignal{A, FREQ} <: Signal end                # A * sin(2pi * FREQ * t)
 struct GaussianPulse{A, SIGMA} <: Signal end                # A * gaussian_pulse(SIGMA, t)
 struct GaussianWavePacket{A, SIGMA, FREQ} <: Signal end     # HarmonicSignal * GaussianPulse
+struct AperiodicSignal{F} <: Signal where {F<:TemporalFunction} end
 
 abstract type WaveguideMode end
 struct TM01 <: WaveguideMode end
