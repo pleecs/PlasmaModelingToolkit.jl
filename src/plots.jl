@@ -165,9 +165,10 @@ function domain_svg(f::Figure{AxisymmetricDomain})
 		end
 
 		if any(x-> x[2] isa PerfectlyMatchedLayer, values(f.domain.materials))
-			NativeSVG.pattern(id="PML", width="0.5", height="0.5", patternTransform="rotate(-45 0 0)", patternUnits="userSpaceOnUse") do
-				NativeSVG.rect(width="0.25", height="0.5", fill=f.colormap["PerfectlyMatchedLayer"])
-				NativeSVG.rect(x="0.25", width="0.25", height="0.5", fill="transparent")
+			thickness = Z / 200
+			NativeSVG.pattern(id="PML", width="$(2*thickness)", height="$(2*thickness)", patternTransform="rotate(-45 0 0)", patternUnits="userSpaceOnUse") do
+				NativeSVG.rect(width="$thickness", height="$(2*thickness)", fill=f.colormap["PerfectlyMatchedLayer"])
+				NativeSVG.rect(x="$thickness", width="$thickness", height="$(2*thickness)", fill="transparent")
 			end
 
 			# hack
