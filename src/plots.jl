@@ -19,9 +19,7 @@ default_colormap = Dict(
 	"CoaxialPort" => "#70C1B3",
 	"WaveguidePort" => "#70C1B3",
 	"UniformPort" => "#70C1B3",
-	"Vacuum" => "#FFFFFF",
-	"PTFE" => "#B1B1B1",
-	"Air" => "#8EB1C7",
+	"Dielectric" => "#B1B1B1",
 	"axis" => "#2D3142",
 	"font" => "#2D3142",
 	"normals" => "#2D3142"
@@ -75,19 +73,10 @@ function setproperty!(f::Figure, s::Symbol, val::T) where {T<:Number}
     end
 end
 
-
-function color(m::Dielectric, colormap) 
-	if m.id ==  0xff 
-		return colormap["Vacuum"]
-	elseif m.id == 0xfe
-		return colormap["PTFE"]
-	elseif m.id == 0xae
-		return colormap["Air"]
-	end
-end
+color(p::PerfectlyMatchedLayer, colormap) = "#" * string(convert(UInt8, p), base=16) ^ 3
+color(d::Dielectric, colormap) = "#" * string(convert(UInt8, d), base=16) ^ 3
 
 color(::Medium, colormap) = colormap["Medium"]
-color(::PerfectlyMatchedLayer, colormap) = colormap["PerfectlyMatchedLayer"]
 color(::Conductor, colormap) = colormap["Conductor"]
 color(::PerfectMagneticConductor, colormap) = colormap["PerfectMagneticConductor"]
 color(::PerfectElectricConductor, colormap) = colormap["PerfectElectricConductor"]

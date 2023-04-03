@@ -17,14 +17,10 @@ end
 import Base: convert
 convert(::Type{UInt8}, d::Dielectric) = d.id
 convert(::Type{UInt8}, c::Conductor)  = 0x00
-convert(::Type{UInt8}, p::PerfectlyMatchedLayer) = convert(UInt8, p.dielectric)
-
-import Base: ==
-==(p::PerfectlyMatchedLayer, d::Dielectric) = (p.dielectric == d)
-==(d::Dielectric, p::PerfectlyMatchedLayer) = (p.dielectric == d)
+convert(::Type{UInt8}, p::PerfectlyMatchedLayer) = 0x80 + (p.dielectric.id)
 
 Metal()  = Conductor()
-Vacuum() = Dielectric{ε_0, μ_0, 0.0}(0xff)
-PTFE()   = Dielectric{2.04ε_0, μ_0, 0.0}(0xfe)
-Air()    = Dielectric{1.0006ε_0, μ_0, 0.0}(0xae)
+Vacuum() = Dielectric{ε_0, μ_0, 0.0}(0x01)
+PTFE()   = Dielectric{2.04ε_0, μ_0, 0.0}(0x02)
+Air()    = Dielectric{1.0006ε_0, μ_0, 0.0}(0x03)
 end

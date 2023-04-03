@@ -1,7 +1,7 @@
 name = "PlasmaModelingToolkit"
 uuid = "b6ea2aa5-e686-4c2b-83aa-04f448536243"
 authors = ["Bartosz Chaber <bartosz.chaber@ee.pw.edu.pl>", "Wiktor Łodyga <wiktor.lodyga.dokt@pw.edu.pl"]
-version = "0.1.17"
+version = "0.1.18"
 
 [deps]
 NativeSVG = "e0ae6c8d-2d3a-402f-a45e-2aac098fa7eb"
