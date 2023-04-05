@@ -9,4 +9,5 @@ include("species.jl")
 include("sources.jl")
 include("units.jl")
 include("plots.jl")
+include("grid.jl")
 end
