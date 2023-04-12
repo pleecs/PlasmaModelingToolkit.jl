@@ -14,8 +14,6 @@ mutable struct SurfaceImpedance  <: BoundaryCondition
     η :: Union{Float64, TemporalFunction}
     ε :: Float64
 end
-end
 
-module ParticleBoundaryConditions
-abstract type ParticleBoundaryCondition end
+abstract type ParticleBoundaryCondition <: BoundaryCondition end
 end

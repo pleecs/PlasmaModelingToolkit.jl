@@ -11,23 +11,24 @@ import PlasmaModelingToolkit.SVG: Figure, save, svg
 import PlasmaModelingToolkit.Units: MHz
 import PlasmaModelingToolkit.Sources: WaveguidePort, HarmonicSignal, TM01
 
-domain = AxisymmetricDomain(LENGTH, RADIUS, Air())
+domain   = AxisymmetricDomain(LENGTH, RADIUS, Air())
+obstacle = Circle{LENGTH/2, 0.0, RADIUS/3}()
 
+domain[obstacle] = Metal()
+
+model  = FDTDModel(domain)
 axis   = Segment{LENGTH, 0, 0, 0}()
 side   = Segment{0, RADIUS, LENGTH, RADIUS}()
 input  = Segment{0, 0, 0, RADIUS}()
 output = Segment{LENGTH, RADIUS, LENGTH, 0}()
 
-obstacle = Circle{LENGTH/2, 0.0, RADIUS/3}()
+model[axis]   = PerfectMagneticConductor()
+model[side]   = PerfectElectricConductor()
+model[input]  = WaveguidePort(SineFunction{1.0, 20MHz}(), TM01(), ε_0)
+model[input]  = SurfaceImpedance(η_0, ε_0)
+model[output] = SurfaceImpedance(η_0, ε_0)
 
-domain[obstacle] = Metal()
-domain[axis] = PerfectMagneticConductor()
-domain[side] = PerfectElectricConductor()
-domain[input] = WaveguidePort(HarmonicSignal{1.0, 20MHz}(), TM01(), ε_0)
-domain[input] = SurfaceImpedance(η_0, ε_0)
-domain[output] = SurfaceImpedance(η_0, ε_0)
-
-f = Figure(domain; width=25)
+f = Figure(model; width=25)
 f.margin["right"]  = 15.5
 f.margin["left"]   = 3.5
 f.margin["bottom"] = 3
