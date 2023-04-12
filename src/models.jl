@@ -30,7 +30,10 @@ function FDTDModel(domain::AxisymmetricDomain, NZ, NR)
 end
 
 function setindex!(model::FDTDModel, bc::BoundaryCondition, segment::Segment)
-	push!(domain.bcs, segment => bc)
+	grid = model.grid
+	bcs = model.boundaries
+	id = convert(UInt8, length(bcs))
+	discretize!(model.node_boundary, grid, segment, id)
 end
 
 struct FDMModel{G <: AbstractGrid} <: AbstractModel
