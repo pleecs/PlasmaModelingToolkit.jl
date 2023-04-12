@@ -32,6 +32,4 @@ r: A:B => 1:7
 normal vector is oriented towards falling direction of the coordinate z
 """
 struct Edges{A, B, C, U, V} end
-
-
 end

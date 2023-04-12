@@ -27,6 +27,7 @@ default_colormap = Dict(
 
 mutable struct Figure{D}
 	domain :: D
+	bcs :: Vector{Pair{Shape, BoundaryCondition}} 
 	width :: Float64
 	margin :: Dict
 	offset :: Dict
@@ -38,7 +39,7 @@ mutable struct Figure{D}
 	normals :: Dict
 end
 
-function Figure(domain;
+function Figure(domain::AbstractDomain;
 	width = 20,
 	margin = Dict("top" => 2.,"bottom" => 2., "left" => 2., "right" => 2.),
 	offset = Dict("top" => 0.5,"bottom" => 0.5, "left" => 0.5, "right" => 0.5),
@@ -52,6 +53,33 @@ function Figure(domain;
 
 	return Figure(
 		domain,
+		[],
+		float(width),
+		margin,
+		offset,
+		font,
+		x_axis,
+		y_axis,
+		colormap,
+		background,
+		normals)
+end
+
+function Figure(model::AbstractModel;
+	width = 20,
+	margin = Dict("top" => 2.,"bottom" => 2., "left" => 2., "right" => 2.),
+	offset = Dict("top" => 0.5,"bottom" => 0.5, "left" => 0.5, "right" => 0.5),
+	font = Dict("family" => "serif", "size" => 12),
+	x_axis = Dict("ticks" => [], "stroke_width" => 1, "label" => nothing, "label_offset" => 2, "start_from_zero" => false, "tick_labels_angle" => 0, "tick_labels_max_digits" => 3),
+	y_axis = Dict("ticks" => [], "stroke_width" => 1, "label" => nothing, "label_offset" => 2, "start_from_zero" => false, "tick_labels_angle" => 0, "tick_labels_max_digits" => 3), 
+	colormap = default_colormap,
+	background = Dict("color" => "white"),
+	normals = Dict("show" => true, "length" => 6, "thickness" => 1, "color" => default_colormap["normals"])
+	)
+
+	return Figure(
+		domain,
+		[],
 		float(width),
 		margin,
 		offset,
@@ -141,6 +169,7 @@ function define(shape::CompositeShape{-})
 	define(shape.B)
 end
 
+
 function domain_svg(f::Figure{AxisymmetricDomain})
 	Z = (f.domain.zmax - f.domain.zmin) * 1000
 
@@ -149,7 +178,7 @@ function domain_svg(f::Figure{AxisymmetricDomain})
 			define(shape)
 		end
 
-		for (segment, _) in f.domain.bcs
+		for (segment, _) in f.bcs
 			define(segment)
 		end
 
@@ -170,7 +199,7 @@ function domain_svg(f::Figure{AxisymmetricDomain})
 			draw(color(material, f.colormap), shape)
 		end
 
-		for (segment, bc) in f.domain.bcs
+		for (segment, bc) in f.bcs
 			draw(color(bc, f.colormap), segment)
 		end
 	end
@@ -194,7 +223,7 @@ function draw_normals(f::Figure{AxisymmetricDomain})
 	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f.domain, domain_width)
 
 	NativeSVG.g(id="normals") do
-		for (segment, bc) in f.domain.bcs
+		for (segment, bc) in f.bcs
 	
 			lX1, lY1, lX2, lY2 = 1000 .* typeof(segment).parameters
 
@@ -211,7 +240,7 @@ function draw_normals(f::Figure{AxisymmetricDomain})
 			dx = (X2 - X1) / √((X2 - X1)^2 + (Y2 - Y1)^2)
 			dy = (Y2 - Y1) / √((X2 - X1)^2 + (Y2 - Y1)^2)
 
-			# length scaled 10× down for more convenient usage (avoid floats)
+			# length scaled down 10× for more convenient usage (avoid floats)
 			x2 = x1 + (f.normals["length"] / 10) * dy
 			y2 = y1 + (f.normals["length"] / 10) * -dx
 
