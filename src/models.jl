@@ -19,7 +19,14 @@ end
 
 
 function FDTDModel(domain::AxisymmetricDomain, NZ, NR)
-	
+	grid = discretize(domain, NZ, NR)
+	materials = Material[]
+	boundaries = BoundaryCondition[]
+	z_edge_boundary = zeros(UInt8, NZ-1, NR)
+	r_edge_boundary = zeros(UInt8, NZ, NR-1)
+	node_material = zeros(UInt8, NZ, NR)
+	edge_boundary = (z_edge_boundary, r_edge_boundary)
+	return FDTDModel(grid, materials, boundaries, edge_boundary, node_material)
 end
 
 function setindex!(model::FDTDModel, bc::BoundaryCondition, segment::Segment)
@@ -47,10 +54,7 @@ function setindex!(model::FDMModel, bc::BoundaryCondition, segment::Segment)
 	grid = model.grid
 	bcs = model.boundaries
 	id = convert(UInt8, length(bcs))
-	nz, nr = size(node_boundary)
-	for j=1:nr, i=1:nz
-		# ...
-	end
+	discretize!(model.node_boundary, grid, segment, id)
 	return nothing
 end
 
@@ -58,12 +62,7 @@ function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, shape::Shap
 	grid = model.grid
 	bcs = model.boundaries
 	id = convert(UInt8, length(bcs))
-	nz, nr = size(node_boundary)
-	for j=1:nr, i=1:nz
-		if (grid.z[i,j], grid.r[i,j]) ∈ shape
-            node_boundary[i,j] = id
-        end
-	end
+	discretize!(model.node_boundary, grid, shape, id)
 	return nothing
 end
 
