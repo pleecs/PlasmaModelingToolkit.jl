@@ -2,12 +2,13 @@ module SVG
 export Figure, save, svg
 import NativeSVG
 
-import ..Domains: AxisymmetricDomain
+import ..Models: AbstractModel
+import ..Domains: AbstractDomain, AxisymmetricDomain
 import ..Geometry: Rectangle, Circle, Polygon, Segment, CompositeShape, Shape
 import ..Materials: Material, Medium, Conductor, Dielectric, PerfectlyMatchedLayer, Metal, Vacuum, PTFE, Air
 import ..BoundaryConditions: PerfectMagneticConductor, PerfectElectricConductor, SurfaceImpedance, BoundaryCondition
-import ..ParticleBoundaryConditions: ParticleBoundaryCondition
-import PlasmaModelingToolkit.Sources: CoaxialPort, WaveguidePort, UniformPort
+import ..BoundaryConditions: ParticleBoundaryCondition
+import ..Sources: CoaxialPort, WaveguidePort, UniformPort
 
 default_colormap = Dict(
 	"Medium" => "blue",
