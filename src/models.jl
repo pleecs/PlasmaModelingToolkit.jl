@@ -42,15 +42,13 @@ function setindex!(model::FDTDModel, bc::BoundaryCondition, segment::Segment)
 	get!(bcs, bc, length(bcs) + 1)
 	z_edges, r_edges = model.edge_boundary
 
-	# segment should be extended if the nearby nodes have lower ids
-	is, js = snap(node, grid, segment)
+	is, js = snap(node, grid, segment; extend=true)
 	if first(is) == last(is) && first(js) < last(js)
 		for j=js, i=is
 			z_edges[i,j] = bcs[bc]
 		end
 	end
 
-	# segment should be extended if the nearby nodes have lower ids
     if first(is) < last(is) && first(js) == last(js)
 		for j=js, i=is
 			r_edges[i,j] = bcs[bc]
