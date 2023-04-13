@@ -30,7 +30,7 @@ function FDTDModel(domain::AxisymmetricDomain, NZ, NR)
 	materials[Conductor()] = 0x00
 	for (shape, material) in domain.materials
 		get!(materials, material, length(materials) + 1)
-		discretize!(model.node_material, grid, shape, materials[material])
+		discretize_nodes!(model.node_material, grid, shape, materials[material])
 	end
 
 	return FDTDModel(grid, materials, boundaries, edge_boundary, node_material)
@@ -40,8 +40,22 @@ function setindex!(model::FDTDModel, bc::BoundaryCondition, segment::Segment)
 	grid = model.grid
 	bcs = model.boundaries
 	get!(bcs, bc, length(bcs) + 1)
-	# segment should be potientially snapped base on model.node_material
-	discretize!(model.edge_boundary, grid, segment, bcs[bc])
+	z_edges, r_edges = model.edge_boundary
+
+	# segment should be extended if the nearby nodes have lower ids
+	is, js = snap(node, grid, segment)
+	if first(is) == last(is) && first(js) < last(js)
+		for j=js, i=is
+			z_edges[i,j] = bcs[bc]
+		end
+	end
+
+	# segment should be extended if the nearby nodes have lower ids
+    if first(is) < last(is) && first(js) == last(js)
+		for j=js, i=is
+			r_edges[i,j] = bcs[bc]
+		end
+	end
 end
 
 struct FDMModel{G <: AbstractGrid} <: AbstractModel
@@ -72,7 +86,13 @@ function setindex!(model::FDMModel, bc::BoundaryCondition, segment::Segment)
 	grid = model.grid
 	bcs = model.boundaries
 	get!(bcs, bc, length(bcs) + 1)
-	discretize!(model.node_boundary, grid, segment, bcs[bc])
+	nodes = model.node_boundary
+
+	is, js = snap(node, grid, segment)
+    for j=js, i=is
+        nodes[i,j] = bcs[bc]
+    end
+	
 	return nothing
 end
 
