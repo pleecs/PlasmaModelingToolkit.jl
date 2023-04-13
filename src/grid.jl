@@ -20,7 +20,8 @@ function discretize(domain::AxisymmetricDomain, nz, nr)
     return AxisymmetricGrid{nz, nr}(z, r, dz, dr)
 end
 
-function discretize!(m::Matrix{UInt8}, grid::AxisymmetricGrid{NZ, NR}, shape::Shape, v::UInt8) where {NZ, NR}
+function discretize!(m::Matrix{UInt8}, grid::AxisymmetricGrid{NZ, NR},
+    shape::Shape, v::UInt8) where {NZ, NR}
     for j=1:NR, i=1:NZ
         if (grid.z[i,j], grid.r[i,j]) ∈ shape
             m[i,j] = v
@@ -28,7 +29,7 @@ function discretize!(m::Matrix{UInt8}, grid::AxisymmetricGrid{NZ, NR}, shape::Sh
     end
 end
 
-function discretize(m::Matrix{UInt8}, grid::AxisymmetricGrid{NZ, NR},
+function discretize!(m::Matrix{UInt8}, grid::AxisymmetricGrid{NZ, NR},
     segment::Segment{Z1, Z2, R1, R2}, v::UInt8) where {NZ, NR, Z1, Z2, R1, R2}
     if Z1 ≈ Z2
         ε, z = modf(Z1 / grid.dz - minimum(grid.z) / grid.dz)
