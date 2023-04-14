@@ -5,12 +5,13 @@ import ..Domains: AxisymmetricDomain
 import ..Geometry: Shape, Segment
 import ..Materials: Material, Conductor
 
+import ..Grid: discretize, discretize!, snap
 import Base: setindex!
 
 abstract type AbstractModel end
 
-struct FDTDModel{G <: AbstractGrid} <: AbstractModel
-	grid :: G
+struct FDTDModel <: AbstractModel
+	grid :: AbstractGrid
 	materials :: Dict{Material, UInt8}
 	boundaries :: Dict{BoundaryCondition, UInt8}
 	edge_boundary :: NTuple{2, Matrix{UInt8}}
@@ -30,7 +31,7 @@ function FDTDModel(domain::AxisymmetricDomain, NZ, NR)
 	materials[Conductor()] = 0x00
 	for (shape, material) in domain.materials
 		get!(materials, material, length(materials) + 1)
-		discretize_nodes!(model.node_material, grid, shape, materials[material])
+		discretize!(node_material, grid, shape, materials[material])
 	end
 
 	return FDTDModel(grid, materials, boundaries, edge_boundary, node_material)
@@ -40,24 +41,32 @@ function setindex!(model::FDTDModel, bc::BoundaryCondition, segment::Segment)
 	grid = model.grid
 	bcs = model.boundaries
 	get!(bcs, bc, length(bcs) + 1)
+	node_material = model.node_material
 	z_edges, r_edges = model.edge_boundary
 
-	is, js = snap(node, grid, segment; extend=true)
+	is, js = snap(node_material, grid, segment; extend=true)
+	
 	if first(is) == last(is) && first(js) < last(js)
-		for j=js, i=is
-			z_edges[i,j] = bcs[bc]
+		Z0 = first(is)
+		R1 = first(js)
+		R2 = last(js)
+		for j=R1:R2-1, i=Z0
+			r_edges[i,j] = bcs[bc]
 		end
 	end
 
     if first(is) < last(is) && first(js) == last(js)
-		for j=js, i=is
-			r_edges[i,j] = bcs[bc]
+		Z1 = first(is)
+		Z2 = last(is)
+		R0 = first(js)
+		for j=R0, i=Z1:Z2-1
+			z_edges[i,j] = bcs[bc]
 		end
 	end
 end
 
-struct FDMModel{G <: AbstractGrid} <: AbstractModel
-	grid :: G
+struct FDMModel <: AbstractModel
+	grid :: AbstractGrid
 	materials :: Dict{Material, UInt8}
 	boundaries :: Dict{BoundaryCondition, UInt8}
 	node_boundary :: Matrix{UInt8}
@@ -81,14 +90,14 @@ function FDMModel(domain::AxisymmetricDomain, NZ, NR; maxiter=1_000)
 end
 
 function setindex!(model::FDMModel, bc::BoundaryCondition, segment::Segment)
+	nodes = model.node_material
 	grid = model.grid
 	bcs = model.boundaries
 	get!(bcs, bc, length(bcs) + 1)
-	nodes = model.node_boundary
 
-	is, js = snap(node, grid, segment)
+	is, js = snap(nodes, grid, segment)
     for j=js, i=is
-        nodes[i,j] = bcs[bc]
+        model.node_boundary[i,j] = bcs[bc]
     end
 	
 	return nothing
