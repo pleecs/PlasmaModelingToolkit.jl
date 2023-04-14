@@ -5,3 +5,4 @@ version = "0.1.20"
 
 [deps]
 NativeSVG = "e0ae6c8d-2d3a-402f-a45e-2aac098fa7eb"
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
