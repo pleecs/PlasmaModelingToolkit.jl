@@ -23,7 +23,7 @@ module Domains
 		height = rmax - rmin
 		width  = zmax - zmin
 		region = Rectangle{zmin, rmin, width, height}()
-		AxisymmetricDomain(zmin, zmax, rmin, rmax, [region => material], [])
+		AxisymmetricDomain(zmin, zmax, rmin, rmax, [region => material])
 	end
 
 	function setindex!(domain::AxisymmetricDomain, material::Material, shape::Shape)
