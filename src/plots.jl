@@ -406,3 +406,36 @@ function svg(f::Figure)
 	end
 end
 end
+
+module Plot
+using PyPlot
+import ..Models: FDTDModel
+
+function plot_nodes(model::FDTDModel; s=10, lw=1)
+	nz, nr = size(model.node_material)
+	z, r = model.grid.z, model.grid.r
+	scatter(z, r, c=model.node_material, s=s, marker="s", linewidths=lw, edgecolors="black", cmap="tab10")
+	axis("equal")
+	xlabel("r (m)")
+	ylabel("z (m)")
+	
+	return nothing
+end
+
+function plot_edges(model::FDTDModel; s=10, lw=1)
+	nz, nr = size(model.node_material)
+	zz, rz = model.grid.z[1:nz-1,1:nr], model.grid.r[1:nz-1,1:nr]
+	zr, rr = model.grid.z[1:nz,1:nr-1], model.grid.r[1:nz,1:nr-1]
+	zz .+= model.grid.dz/2
+	rr .+= model.grid.dr/2
+	
+	scatter(zz, rz, c=first(model.edge_boundary), s=s, marker=">", linewidths=lw, edgecolors="black", cmap="tab10")
+	scatter(zr, rr, c=last(model.edge_boundary),  s=s, marker="^", linewidths=lw, edgecolors="black", cmap="tab10")
+	
+	axis("equal")
+	xlabel("r (m)")
+	ylabel("z (m)")
+	
+	return nothing
+end
+end
