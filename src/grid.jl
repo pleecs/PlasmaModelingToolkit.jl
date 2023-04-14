@@ -30,7 +30,7 @@ function discretize!(node::Matrix{UInt8}, grid::AxisymmetricGrid{NZ, NR},
 end
 
 function snap(node::Matrix{UInt8}, grid::AxisymmetricGrid{NZ, NR},
-    segment::Segment{Z1, Z2, R1, R2}; extend=false) where {NZ, NR, Z1, Z2, R1, R2}
+    segment::Segment{Z1, R1, Z2, R2}; extend=false) where {NZ, NR, Z1, Z2, R1, R2}
     if Z1 ≈ Z2
         ε, z = modf(Z1 / grid.dz - minimum(grid.z) / grid.dz)
         i₁ = i₂ = Int(z) + 1
@@ -43,16 +43,15 @@ function snap(node::Matrix{UInt8}, grid::AxisymmetricGrid{NZ, NR},
         A = min(j₁, j₂)
         B = max(j₁, j₂)
         C = i₁
-        if grid.z[C,A] ≉ Z1 || grid.r[C,A] ≉ R1 @warn "Inexact discretization ($Z1,$R1) discretized as ($(grid.r[C,A]), $(grid.z[C,A]))" end
-        if grid.z[C,B] ≉ Z2 || grid.r[C,B] ≉ R2 @warn "Inexact discretization ($Z2,$R2) discretized as ($(grid.r[C,B]), $(grid.z[C,B]))" end
 
-        id = node[C,A]
-        for j=A:B, i=C
-            if node[i,j] != id
-                @error "Segment defined over nodes with multiple materials"
-            end
+        if grid.z[C,A] ≉ min(Z1,Z2) || grid.r[C,A] ≉ min(R1,R2)
+            @warn "Inexact discretization ($(min(Z1,Z2)),$(min(R1,R2)) discretized as ($(grid.z[C,A]), $(grid.r[C,A]))"
         end
         
+        if grid.z[C,B] ≉ max(Z1,Z2) || grid.r[C,B] ≉ max(R1,R2)
+            @warn "Inexact discretization ($(max(Z1,Z2)),$(max(R1,R2)) discretized as ($(grid.z[C,B]), $(grid.r[C,B]))"
+        end
+
         if extend && A > 1 && node[C,A-1] < node[C,A]
             A += 1
         end
@@ -73,14 +72,13 @@ function snap(node::Matrix{UInt8}, grid::AxisymmetricGrid{NZ, NR},
         A = min(i₁, i₂)
         B = max(i₁, i₂)
         C = j₁
-        if grid.z[A,C] ≉ Z1 || grid.r[A,C] ≉ R1 @warn "Inexact discretization ($Z1,$R1) discretized as ($(grid.r[A,C]), $(grid.z[A,C]))" end
-        if grid.z[B,C] ≉ Z2 || grid.r[B,C] ≉ R2 @warn "Inexact discretization ($Z2,$R2) discretized as ($(grid.r[B,C]), $(grid.z[B,C]))" end
         
-        id = node[A,C]
-        for j=A:B, i=C
-            if node[i,j] != id
-                @error "Segment defined over nodes with multiple materials"
-            end
+        if grid.z[A,C] ≉ min(Z1,Z2) || grid.r[A,C] ≉ min(R1,R2)
+            @warn "Inexact discretization ($(min(Z1,Z2)),$(min(R1,R2))) discretized as ($(grid.z[A,C]), $(grid.r[A,C]))"
+        end
+        
+        if grid.z[B,C] ≉ max(Z1,Z2) || grid.r[B,C] ≉ max(R1,R2)
+            @warn "Inexact discretization ($(max(Z1,Z2)),$(max(R1,R2)) discretized as ($(grid.z[B,C]), $(grid.r[B,C]))"
         end
         
         if extend && A > 1 && node[A-1,C] < node[A,C]
