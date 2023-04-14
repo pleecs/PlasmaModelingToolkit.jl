@@ -3,7 +3,7 @@ import ..Domains: AxisymmetricDomain
 import ..Geometry: Shape, Segment
 
 abstract type AbstractGrid end
-struct AxisymmetricGrid{ZN, RN}
+struct AxisymmetricGrid{ZN, RN} <: AbstractGrid
 	z  :: Matrix{Float64}
     r  :: Matrix{Float64}
     dz :: Float64
