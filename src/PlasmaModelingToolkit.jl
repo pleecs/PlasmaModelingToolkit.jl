@@ -11,4 +11,5 @@ include("sources.jl")
 include("models.jl")
 include("units.jl")
 include("plots.jl")
+include("examples.jl")
 end

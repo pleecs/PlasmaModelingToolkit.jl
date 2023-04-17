@@ -8,9 +8,19 @@ import ..Materials: Material, Conductor
 import ..Grid: discretize, discretize!, snap
 import Base: setindex!
 
-abstract type AbstractModel end
+struct Model{D}
+	domain :: D
+	constraints :: Vector{Pair{Any, Any}}
+	Model(domain) = new{typeof(domain)}(domain, [])
+end
 
-struct FDTDModel <: AbstractModel
+function setindex!(model::Model, constraint, region)
+    push!(model.constraints, region => constraint)
+end
+
+abstract type DiscretizedModel end
+
+struct FDTDModel{CS} <: DiscretizedModel
 	grid :: AbstractGrid
 	materials :: Dict{Material, UInt8}
 	boundaries :: Dict{BoundaryCondition, UInt8}
@@ -18,8 +28,8 @@ struct FDTDModel <: AbstractModel
 	node_material :: Matrix{UInt8}
 end
 
-function FDTDModel(domain::AxisymmetricDomain, NZ, NR)
-	grid = discretize(domain, NZ, NR)
+function FDTDModel(model::Model{AxisymmetricDomain}, NZ, NR)
+	grid = discretize(model.domain, NZ, NR)
 	
 	materials = Dict{Material, UInt8}()
 	boundaries = Dict{BoundaryCondition, UInt8}()
@@ -29,12 +39,17 @@ function FDTDModel(domain::AxisymmetricDomain, NZ, NR)
 	edge_boundary = z_edge_boundary, r_edge_boundary
 	
 	materials[Conductor()] = 0x00
-	for (shape, material) in domain.materials
+	for (shape, material) in model.domain.materials
 		get!(materials, material, length(materials) + 1)
 		discretize!(node_material, grid, shape, materials[material])
 	end
-
-	return FDTDModel(grid, materials, boundaries, edge_boundary, node_material)
+	
+	fdtd =  FDTDModel{:ZR}(grid, materials, boundaries, edge_boundary, node_material)
+	
+	for (region, constraint) in model.constraints
+		fdtd[region] = constraint
+	end
+	return fdtd
 end
 
 function setindex!(model::FDTDModel, bc::BoundaryCondition, segment::Segment)
@@ -65,7 +80,7 @@ function setindex!(model::FDTDModel, bc::BoundaryCondition, segment::Segment)
 	end
 end
 
-struct FDMModel <: AbstractModel
+struct FDMModel <: DiscretizedModel
 	grid :: AbstractGrid
 	materials :: Dict{Material, UInt8}
 	boundaries :: Dict{BoundaryCondition, UInt8}
@@ -73,7 +88,7 @@ struct FDMModel <: AbstractModel
 	node_material :: Matrix{UInt8}
 end
 
-function FDMModel(domain::AxisymmetricDomain, NZ, NR; maxiter=1_000)
+function FDMModel(model::Model{AxisymmetricDomain}, NZ, NR)
 	grid = discretize(domain, NZ, NR)
 	
 	materials = Dict{Material, UInt8}()
@@ -86,7 +101,13 @@ function FDMModel(domain::AxisymmetricDomain, NZ, NR; maxiter=1_000)
 		discretize!(model.node_material, grid, shape, materials[material])
 	end
 
-	return FDMModel(grid, materials, boundaries, node_boundary, node_material)
+	fdm = FDMModel{:ZR}(grid, materials, boundaries, node_boundary, node_material)
+
+	for (region, constraint) in model.constraints
+		model[region] = constraint
+	end
+
+	return fdm
 end
 
 function setindex!(model::FDMModel, bc::BoundaryCondition, segment::Segment)
@@ -111,6 +132,6 @@ function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, shape::Shap
 	return nothing
 end
 
-struct PICModel <: AbstractModel end
-struct FEMModel <: AbstractModel end
+struct PICModel <: DiscretizedModel end
+struct FEMModel <: DiscretizedModel end
 end
