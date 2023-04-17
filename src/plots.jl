@@ -2,16 +2,16 @@ module SVG
 export Figure, save, svg
 import NativeSVG
 
-import ..Models: AbstractModel
+import ..Models: Model
 import ..Domains: AbstractDomain, AxisymmetricDomain
 import ..Geometry: Rectangle, Circle, Polygon, Segment, CompositeShape, Shape
 import ..Materials: Material, Medium, Conductor, Dielectric, PerfectlyMatchedLayer, Metal, Vacuum, PTFE, Air
 import ..BoundaryConditions: PerfectMagneticConductor, PerfectElectricConductor, SurfaceImpedance, BoundaryCondition
 import ..BoundaryConditions: ParticleBoundaryCondition
 import ..Sources: CoaxialPort, WaveguidePort, UniformPort
+import ..Constants: ε_0, μ_0
 
 default_colormap = Dict(
-	"Medium" => "blue",
 	"PerfectlyMatchedLayer" => "#9D9D9D",
 	"Conductor" => "#50514F",
 	"PerfectMagneticConductor" => "#247BA0",
@@ -20,15 +20,16 @@ default_colormap = Dict(
 	"CoaxialPort" => "#70C1B3",
 	"WaveguidePort" => "#70C1B3",
 	"UniformPort" => "#70C1B3",
-	"Dielectric" => "#B1B1B1",
+	"Vacuum" => "#FFFFFF",
+	"PTFE" => "#B1B1B1",
+	"Air" => "#8EB1C7",
 	"axis" => "#2D3142",
 	"font" => "#2D3142",
 	"normals" => "#2D3142"
 	)
 
 mutable struct Figure{D}
-	domain :: D
-	bcs :: Vector{Pair{Shape, BoundaryCondition}} 
+	model :: Model{D}
 	width :: Float64
 	margin :: Dict
 	offset :: Dict
@@ -40,7 +41,7 @@ mutable struct Figure{D}
 	normals :: Dict
 end
 
-function Figure(domain::AbstractDomain;
+function Figure(model::Model{AxisymmetricDomain};
 	width = 20,
 	margin = Dict("top" => 2.,"bottom" => 2., "left" => 2., "right" => 2.),
 	offset = Dict("top" => 0.5,"bottom" => 0.5, "left" => 0.5, "right" => 0.5),
@@ -53,34 +54,7 @@ function Figure(domain::AbstractDomain;
 	)
 
 	return Figure(
-		domain,
-		[],
-		float(width),
-		margin,
-		offset,
-		font,
-		x_axis,
-		y_axis,
-		colormap,
-		background,
-		normals)
-end
-
-function Figure(model::AbstractModel;
-	width = 20,
-	margin = Dict("top" => 2.,"bottom" => 2., "left" => 2., "right" => 2.),
-	offset = Dict("top" => 0.5,"bottom" => 0.5, "left" => 0.5, "right" => 0.5),
-	font = Dict("family" => "serif", "size" => 12),
-	x_axis = Dict("ticks" => [], "stroke_width" => 1, "label" => nothing, "label_offset" => 2, "start_from_zero" => false, "tick_labels_angle" => 0, "tick_labels_max_digits" => 3),
-	y_axis = Dict("ticks" => [], "stroke_width" => 1, "label" => nothing, "label_offset" => 2, "start_from_zero" => false, "tick_labels_angle" => 0, "tick_labels_max_digits" => 3), 
-	colormap = default_colormap,
-	background = Dict("color" => "white"),
-	normals = Dict("show" => true, "length" => 6, "thickness" => 1, "color" => default_colormap["normals"])
-	)
-
-	return Figure(
-		domain,
-		[],
+		model,
 		float(width),
 		margin,
 		offset,
@@ -102,10 +76,10 @@ function setproperty!(f::Figure, s::Symbol, val::T) where {T<:Number}
     end
 end
 
-color(p::PerfectlyMatchedLayer, colormap) = "#" * string(convert(UInt8, p), base=16) ^ 3
-color(d::Dielectric, colormap) = "#" * string(convert(UInt8, d), base=16) ^ 3
-
-color(::Medium, colormap) = colormap["Medium"]
+color(::PerfectlyMatchedLayer, colormap) = colormap["PerfectlyMatchedLayer"]
+color(::Dielectric{1.0006ε_0, μ_0, 0.0}, colormap) = colormap["Air"]
+color(::Dielectric{2.04ε_0, μ_0, 0.0}, colormap) = colormap["PTFE"]
+color(::Dielectric{ε_0, μ_0, 0.0}, colormap) = colormap["Vacuum"]
 color(::Conductor, colormap) = colormap["Conductor"]
 color(::PerfectMagneticConductor, colormap) = colormap["PerfectMagneticConductor"]
 color(::PerfectElectricConductor, colormap) = colormap["PerfectElectricConductor"]
@@ -113,6 +87,8 @@ color(::SurfaceImpedance, colormap) = colormap["SurfaceImpedance"]
 color(::CoaxialPort, colormap) = colormap["CoaxialPort"]
 color(::WaveguidePort, colormap) = colormap["WaveguidePort"]
 color(::UniformPort, colormap) = colormap["UniformPort"]
+color(m::Material, colormap) = get!(colormap, string(objectid(m)), "#ff00ff") # TODO: add fallback colors
+color(b::BoundaryCondition, colormap) = get!(colormap, string(objectid(b)), "#ff0000") # TODO: add fallback colors
 
 function draw(color::String, shape::Union{Rectangle, Circle, Polygon, CompositeShape})
 	return NativeSVG.use(href="#$(objectid(shape))", xlink!href="#$(objectid(shape))", fill=color)
@@ -170,37 +146,42 @@ function define(shape::CompositeShape{-})
 	define(shape.B)
 end
 
+function define(material::Material, f::Figure{AxisymmetricDomain})
+	if material isa PerfectlyMatchedLayer
+		Z = (f.model.domain.zmax - f.model.domain.zmin) * 1000
+		thickness = Z / 200
+
+		NativeSVG.pattern(id="$(objectid(material))", width="$(2*thickness)", height="$(2*thickness)", patternTransform="rotate(-45 0 0)", patternUnits="userSpaceOnUse") do
+			NativeSVG.rect(width="$thickness", height="$(2*thickness)", fill=color(material, f.colormap))
+			NativeSVG.rect(x="$thickness", width="$thickness", height="$(2*thickness)", fill=color(material.dielectric, f.colormap))
+		end
+
+		f.colormap["PerfectlyMatchedLayer"] = "url(#$(objectid(material)))"
+	end
+end
+
 
 function domain_svg(f::Figure{AxisymmetricDomain})
-	Z = (f.domain.zmax - f.domain.zmin) * 1000
-
+	
 	NativeSVG.defs() do
-		for (shape, _) in f.domain.materials
+		for (shape, material) in f.model.domain.materials
 			define(shape)
+			define(material, f)
 		end
 
-		for (segment, _) in f.bcs
-			define(segment)
-		end
-
-		if any(x-> x[2] isa PerfectlyMatchedLayer, values(f.domain.materials))
-			thickness = Z / 200
-			NativeSVG.pattern(id="PML", width="$(2*thickness)", height="$(2*thickness)", patternTransform="rotate(-45 0 0)", patternUnits="userSpaceOnUse") do
-				NativeSVG.rect(width="$thickness", height="$(2*thickness)", fill=f.colormap["PerfectlyMatchedLayer"])
-				NativeSVG.rect(x="$thickness", width="$thickness", height="$(2*thickness)", fill="transparent")
-			end
-
-			# hack
-			f.colormap["PerfectlyMatchedLayer"] = "url(#PML)"
+		for (shape, _) in f.model.constraints
+			define(shape)
 		end
 	end
 
+	Z = (f.model.domain.zmax - f.model.domain.zmin) * 1000
+
 	NativeSVG.g(id="domain", transform="rotate(-90 0 0) translate(-$Z)") do
-		for (shape, material) in f.domain.materials
+		for (shape, material) in f.model.domain.materials
 			draw(color(material, f.colormap), shape)
 		end
 
-		for (segment, bc) in f.bcs
+		for (segment, bc) in f.model.constraints
 			draw(color(bc, f.colormap), segment)
 		end
 	end
@@ -221,10 +202,10 @@ end
 function draw_normals(f::Figure{AxisymmetricDomain})
 	domain_width = f.width - f.offset["left"] - f.offset["right"] - f.margin["left"] - f.margin["right"]
 
-	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f.domain, domain_width)
+	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f.model.domain, domain_width)
 
 	NativeSVG.g(id="normals") do
-		for (segment, bc) in f.bcs
+		for (segment, bc) in f.model.constraints
 	
 			lX1, lY1, lX2, lY2 = 1000 .* typeof(segment).parameters
 
@@ -242,7 +223,7 @@ function draw_normals(f::Figure{AxisymmetricDomain})
 			dy = (Y2 - Y1) / √((X2 - X1)^2 + (Y2 - Y1)^2)
 
 			# length scaled down 10× for more convenient usage (avoid floats)
-			x2 = x1 + (f.normals["length"] / 10) * dy
+			x2 = x1 + (f.normals["length"] / 10) * +dy
 			y2 = y1 + (f.normals["length"] / 10) * -dx
 
 			NativeSVG.line(x1="$(x1)cm", y1="$(y1)cm", x2="$(x2)cm", y2="$(y2)cm", stroke=f.normals["color"], stroke_width="$(f.normals["thickness"])px", marker_end="url(#arrowhead)")
@@ -260,7 +241,7 @@ function svg(f::Figure)
 
 	@assert domain_width > 0 "Margins and offsets are too large!"
 
-	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f.domain, domain_width)
+	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f.model.domain, domain_width)
 
 	gdW_offset = (ldW_min/ldW * gdW)
 	gdH_offset = (ldH_min/ldH * gdH)
