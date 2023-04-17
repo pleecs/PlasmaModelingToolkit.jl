@@ -3,14 +3,15 @@ LENGTH = 0.1925           # lenght along z-axis [m]
 D_RADIUS = 0.5            # domain lenght along z-axis [m]
 D_LENGTH = 0.5            # domain lenght along z-axis [m]
 
-import PlasmaModelingToolkit.Models: FDTDModel
+import PlasmaModelingToolkit.Models: FDTDModel, Model
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain
 import PlasmaModelingToolkit.Geometry: Rectangle, Circle, Segment, Polygon
 import PlasmaModelingToolkit.Constants: ε_0, μ_0, η_0
 import PlasmaModelingToolkit.Materials: Air, Metal, PerfectlyMatchedLayer, PTFE, Vacuum
 import PlasmaModelingToolkit.BoundaryConditions: SurfaceImpedance, PerfectElectricConductor, PerfectMagneticConductor
 import PlasmaModelingToolkit.Sources: CoaxialPort
-import PlasmaModelingToolkit.TemporalFunctions: GeneralizedLogisticFunction, SineFunction
+import PlasmaModelingToolkit.TemporalFunctions: GeneralizedLogisticFunction
+import PlasmaModelingToolkit.Units: mm
 
 outer 	= Rectangle{0, 0, 171mm, RADIUS}()
 outer  -= Rectangle{30mm, 0, 141mm, 48mm}()
@@ -52,7 +53,9 @@ axis   = Segment{D_LENGTH, 0.0, 192.5mm, 0.0}()
 input  = Segment{171mm, 48mm, 171mm, 44mm}()
 sparkgap   = Segment{9mm, 0.0, 5mm, 0.0}()
 
-model = FDTDModel(domain, 401, 401)
+model = Model(domain)
 model[axis] = PerfectMagneticConductor()
-model[input] = CoaxialPort(AperiodicSignal{GeneralizedLogisticFunction(0.0, 1.0, 1e-9, 1e5)}(), 2.04ε_0) # FIXME: adjust GLF parameters
+model[input] = CoaxialPort(GeneralizedLogisticFunction(0.0, 1.0, 1e-9, 1e5), 2.04ε_0) # FIXME: adjust GLF parameters
 model[sparkgap] = SurfaceImpedance(GeneralizedLogisticFunction(η_0, 1e-2, 20e-9, 1e5), ε_0) # FIXME: adjust GLF parameters
+
+fdtd = FDTDModel(model, 401, 401)
