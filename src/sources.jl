@@ -22,4 +22,16 @@ struct UniformPort <: BoundaryCondition
 	signal :: TemporalFunction
 	ε :: Float64
 end
+
+struct ParticleSource 
+	rate :: TemporalFunction
+	x :: Distribution
+	v :: Distribution
+end
+
+struct ParticleLoader
+	init :: Int64
+	x :: Distribution
+	v :: Distribution
+end
 end
