@@ -372,51 +372,7 @@ function svg(f::Figure)
 			end
 		end
 
-		x = f.margin["left"] + f.offset["left"]
-		y = f.margin["top"] + f.offset["top"]
-		NativeSVG.svg(x="$(x)cm", y="$(y)cm", width="$(gdW)cm", height="$(gdH)cm", viewBox="$ldW_min $ldH_min $ldW $ldH") do 
-			domain_svg(f)
-		end 
-
-		# draw normals 
-		# need to be outside domain svg scope in case normals are wrongly defined,
-		# thus would be invisible outside domain svg viewBox
-		if f.normals["show"]
-			draw_normals(f)
-		end
+		model_svg(f)
 	end
-end
-end
-
-module Plot
-using PyPlot
-import ..Models: FDTDModel
-
-function plot_nodes(model::FDTDModel; s=10, lw=1)
-	nz, nr = size(model.node_material)
-	z, r = model.grid.z, model.grid.r
-	scatter(z, r, c=model.node_material, s=s, marker="s", linewidths=lw, edgecolors="black", cmap="tab10")
-	axis("equal")
-	xlabel("r (m)")
-	ylabel("z (m)")
-	
-	return nothing
-end
-
-function plot_edges(model::FDTDModel; s=10, lw=1)
-	nz, nr = size(model.node_material)
-	zz, rz = model.grid.z[1:nz-1,1:nr], model.grid.r[1:nz-1,1:nr]
-	zr, rr = model.grid.z[1:nz,1:nr-1], model.grid.r[1:nz,1:nr-1]
-	zz .+= model.grid.dz/2
-	rr .+= model.grid.dr/2
-	
-	scatter(zz, rz, c=first(model.edge_boundary), s=s, marker=">", linewidths=lw, edgecolors="black", cmap="tab10")
-	scatter(zr, rr, c=last(model.edge_boundary),  s=s, marker="^", linewidths=lw, edgecolors="black", cmap="tab10")
-	
-	axis("equal")
-	xlabel("r (m)")
-	ylabel("z (m)")
-	
-	return nothing
 end
 end
