@@ -256,7 +256,7 @@ function svg(f::Figure)
 
 			# arrowhead
 			NativeSVG.marker(id="arrowhead", viewBox="0 0 10 10", refX="5", refY="5", markerWidth="8", markerHeight="8", orient="auto-start-reverse") do
-				NativeSVG.path(d="M 0 0 L 10 5 L 0 10 z")
+				NativeSVG.path(d="M 0 0 L 10 5 L 0 10 z", stroke="context-stroke", fill="context-fill")
 			end
 
 			# tick mark
