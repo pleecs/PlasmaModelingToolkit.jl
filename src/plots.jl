@@ -2,7 +2,7 @@ module SVG
 export Figure, save, svg
 import NativeSVG
 
-import ..Models: Model
+import ..Models: Model, FDTDModel
 import ..Domains: AbstractDomain, AxisymmetricDomain
 import ..Geometry: Rectangle, Circle, Polygon, Segment, CompositeShape, Shape
 import ..Materials: Material, Medium, Conductor, Dielectric, PerfectlyMatchedLayer, Metal, Vacuum, PTFE, Air
@@ -28,8 +28,8 @@ default_colormap = Dict(
 	"normals" => "#2D3142"
 	)
 
-mutable struct Figure{D}
-	model :: Model{D}
+mutable struct Figure{M}
+	model :: M
 	width :: Float64
 	margin :: Dict
 	offset :: Dict
@@ -41,7 +41,7 @@ mutable struct Figure{D}
 	normals :: Dict
 end
 
-function Figure(model::Model{AxisymmetricDomain};
+function Figure(model;
 	width = 20,
 	margin = Dict("top" => 2.,"bottom" => 2., "left" => 2., "right" => 2.),
 	offset = Dict("top" => 0.5,"bottom" => 0.5, "left" => 0.5, "right" => 0.5),
@@ -146,7 +146,7 @@ function define(shape::CompositeShape{-})
 	define(shape.B)
 end
 
-function define(material::Material, f::Figure{AxisymmetricDomain})
+function define(material::Material, f::Figure{Model{AxisymmetricDomain}})
 	if material isa PerfectlyMatchedLayer
 		Z = (f.model.domain.zmax - f.model.domain.zmin) * 1000
 		thickness = Z / 200
@@ -160,8 +160,7 @@ function define(material::Material, f::Figure{AxisymmetricDomain})
 	end
 end
 
-
-function domain_svg(f::Figure{AxisymmetricDomain})
+function domain_svg(f::Figure{Model{AxisymmetricDomain}})
 	
 	NativeSVG.defs() do
 		for (shape, material) in f.model.domain.materials
@@ -187,22 +186,40 @@ function domain_svg(f::Figure{AxisymmetricDomain})
 	end
 end
 
-function get_domain_size(domain::AxisymmetricDomain, desired_width)
-	ldW = (domain.rmax - domain.rmin) * 1000
-	ldH = (domain.zmax - domain.zmin) * 1000
+function get_domain_size(f::Figure{Model{AxisymmetricDomain}})
+	desired_width = f.width - f.offset["left"] - f.offset["right"] - f.margin["left"] - f.margin["right"]
+
+	@assert desired_width > 0 "Margins and offsets are too large!"
+
+	ldW = (f.model.domain.rmax - f.model.domain.rmin) * 1000
+	ldH = (f.model.domain.zmax - f.model.domain.zmin) * 1000
 	gdW = float(desired_width)
 	gdH = desired_width * (ldH / ldW)
 
-	ldW_min = domain.rmin * 1000
-	ldH_min = domain.zmin * 1000
+	ldW_min = f.model.domain.rmin * 1000
+	ldH_min = f.model.domain.zmin * 1000
 
 	return gdW, gdH, ldW, ldH, ldW_min, ldH_min
 end
 
-function draw_normals(f::Figure{AxisymmetricDomain})
-	domain_width = f.width - f.offset["left"] - f.offset["right"] - f.margin["left"] - f.margin["right"]
+function get_domain_size(f::Figure{FDTDModel{:ZR}})
+	desired_width = f.width - f.offset["left"] - f.offset["right"] - f.margin["left"] - f.margin["right"]
 
-	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f.model.domain, domain_width)
+	@assert desired_width > 0 "Margins and offsets are too large!"
+
+	ldW = (maximum(f.model.grid.r) - minimum(f.model.grid.r)) * 1000
+	ldH = (maximum(f.model.grid.z) - minimum(f.model.grid.z)) * 1000
+	gdW = float(desired_width)
+	gdH = desired_width * (ldH / ldW)
+
+	ldW_min = minimum(f.model.grid.r) * 1000
+	ldH_min = minimum(f.model.grid.z) * 1000
+
+	return gdW, gdH, ldW, ldH, ldW_min, ldH_min
+end
+
+function draw_normals(f::Figure{Model{AxisymmetricDomain}})
+	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f)
 
 	NativeSVG.g(id="normals") do
 		for (segment, bc) in f.model.constraints
@@ -231,17 +248,97 @@ function draw_normals(f::Figure{AxisymmetricDomain})
 	end
 end
 
+function draw_node(x, y; nr="0", nc="black")
+	NativeSVG.circle(cx="$(x)cm", cy="$(y)cm", r="$(nr)", fill="$(nc)")
+end
+
+function draw_edge(x1, y1, x2, y2; sw="0", sc="black")
+	xm = (x1 + x2) / 2.0
+	ym = (y1 + y2) / 2.0
+	NativeSVG.line(x1="$(x1)cm", y1="$(y1)cm", x2="$(x2)cm", y2="$(y2)cm", stroke_width="$(sw)", stroke="$(sc)")
+	NativeSVG.line(x1="$(x1)cm", y1="$(y1)cm", x2="$(xm)cm", y2="$(ym)cm", stroke_width="$(sw)", fill="$(sc)", marker_end="url(#arrowhead)")
+end
+
+function model_svg(f::Figure{FDTDModel{:ZR}})
+    model = f.model
+    grid = model.grid
+	nz, nr = size(model.node_material)
+	z, r = grid.z, grid.r
+	c = model.node_material
+	cz, cr = model.edge_boundary
+	zz, rz = grid.z[1:nz-1,1:nr], grid.r[1:nz-1,1:nr]
+	zr, rr = grid.z[1:nz,1:nr-1], grid.r[1:nz,1:nr-1]
+	zz .+= grid.dz/2
+	rr .+= grid.dr/2
+    
+    materials = Dict{UInt8, String}()
+    boundaries = Dict{UInt8, String}()
+    
+    for (material, id) in model.materials
+    	materials[id] = color(material, f.colormap)
+    end
+
+    for (boundary, id) in model.boundaries
+    	boundaries[id] = color(boundary, f.colormap)
+    end
+
+	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f)
+
+	SW  = "$(300grid.dz / ldH * gdH)mm"
+	RAD = "$(1000grid.dz / ldH * gdH)mm"
+	NativeSVG.g(id="fdtd") do
+        for j=1:nr, i=1:nz-1
+            if cz[i,j] == 0x00 continue end
+            X1 = (1000r[i,j] - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
+            Y1 = gdH - ((1000z[i,j] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
+            X2 = (1000r[i+1,j] - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
+            Y2 = gdH - ((1000z[i+1,j] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
+            C  = boundaries[cz[i,j]]
+            draw_edge(X1, Y1, X2, Y2; sw=SW, sc=C)
+        end
+        for j=1:nr-1, i=1:nz
+            if cr[i,j] == 0x00 continue end
+            X1 = (1000r[i,j] - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
+            Y1 = gdH - ((1000z[i,j] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
+            X2 = (1000r[i,j+1] - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
+            Y2 = gdH - ((1000z[i,j+1] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
+            C  = boundaries[cr[i,j]]
+            draw_edge(X1, Y1, X2, Y2; sw=SW, sc=C)
+        end
+        for j=1:nr, i=1:nz
+            X1 = (1000r[i,j] - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
+            Y1 = gdH - ((1000z[i,j] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
+            C  = materials[c[i,j]]
+            draw_node(X1, Y1; nr=RAD, nc=C)
+        end
+	end    
+
+	return nothing
+end
+
+function model_svg(f::Figure{Model{AxisymmetricDomain}})
+	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f)
+
+	x = f.margin["left"] + f.offset["left"]
+	y = f.margin["top"] + f.offset["top"]
+	NativeSVG.svg(x="$(x)cm", y="$(y)cm", width="$(gdW)cm", height="$(gdH)cm", viewBox="$ldW_min $ldH_min $ldW $ldH") do 
+		domain_svg(f)
+	end
+
+	# draw normals 
+	# need to be outside domain svg scope in case normals are wrongly defined,
+	# thus would be invisible outside domain svg viewBox
+	if f.normals["show"]
+		draw_normals(f)
+	end
+end
+
 function save(fig::NativeSVG.SVG, filename="domain.svg")
 	write("plots/$filename", fig )
 end
 
 function svg(f::Figure)
-
-	domain_width = f.width - f.offset["left"] - f.offset["right"] - f.margin["left"] - f.margin["right"]
-
-	@assert domain_width > 0 "Margins and offsets are too large!"
-
-	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f.model.domain, domain_width)
+	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f)
 
 	gdW_offset = (ldW_min/ldW * gdW)
 	gdH_offset = (ldH_min/ldH * gdH)
