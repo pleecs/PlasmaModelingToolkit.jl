@@ -6,23 +6,23 @@ struct FDMModel <: DiscretizedModel
 	node_material :: Matrix{UInt8}
 end
 
-function FDMModel(model::Model{AxisymmetricDomain}, NZ, NR)
-	grid = discretize(domain, NZ, NR)
+function FDMModel(problem::BoundaryValueProblem{AxisymmetricDomain}, NZ, NR)
+	grid = discretize(problem.domain, NZ, NR)
 	
 	materials = Dict{Material, UInt8}()
 	boundaries = Dict{BoundaryCondition, UInt8}()
 	node_boundary = zeros(UInt8, NZ, NR)
 	node_material = zeros(UInt8, NZ, NR)
 	
-	for (shape, material) in domain.materials
+	for (shape, material) in problem.domain.materials
 		get!(materials, material, length(materials) + 1)
-		discretize!(model.node_material, grid, shape, materials[material])
+		discretize!(node_material, grid, shape, materials[material])
 	end
 
 	fdm = FDMModel{:ZR}(grid, materials, boundaries, node_boundary, node_material)
 
-	for (region, constraint) in model.constraints
-		model[region] = constraint
+	for (region, constraint) in problem.constraints
+		fdm[region] = constraint
 	end
 
 	return fdm

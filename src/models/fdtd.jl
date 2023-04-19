@@ -8,8 +8,8 @@ struct FDTDModel{CS} <: DiscretizedModel
 	node_material :: Matrix{UInt8}
 end
 
-function FDTDModel(model::Model{AxisymmetricDomain}, NZ, NR)
-	grid = discretize(model.domain, NZ, NR)
+function FDTDModel(problem::BoundaryValueProblem{AxisymmetricDomain}, NZ, NR)
+	grid = discretize(problem.domain, NZ, NR)
 	
 	materials = Dict{Material, UInt8}()
 	conditions = Dict{Condition, UInt8}()
@@ -19,14 +19,14 @@ function FDTDModel(model::Model{AxisymmetricDomain}, NZ, NR)
 	edge_boundary = z_edge_boundary, r_edge_boundary
 	
 	materials[Conductor()] = 0x00
-	for (shape, material) in model.domain.materials
+	for (shape, material) in problem.domain.materials
 		get!(materials, material, length(materials) + 1)
 		discretize!(node_material, grid, shape, materials[material])
 	end
 	
 	fdtd =  FDTDModel{:ZR}(grid, materials, conditions, edge_boundary, node_material)
 	
-	for (region, constraint) in model.constraints
+	for (region, constraint) in problem.constraints
 		fdtd[region] = constraint
 	end
 
