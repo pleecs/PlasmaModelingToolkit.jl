@@ -3,7 +3,8 @@ LENGTH = 0.1925           # lenght along z-axis [m]
 D_RADIUS = 0.5            # domain lenght along z-axis [m]
 D_LENGTH = 0.5            # domain lenght along z-axis [m]
 
-import PlasmaModelingToolkit.Models: FDTDModel, Model
+import PlasmaModelingToolkit.Models: FDTDModel
+import PlasmaModelingToolkit.Problems: BoundaryValueProblem
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain
 import PlasmaModelingToolkit.Geometry: Rectangle, Circle, Segment, Polygon
 import PlasmaModelingToolkit.Constants: ε_0, μ_0, η_0
@@ -53,9 +54,9 @@ axis   = Segment{D_LENGTH, 0.0, 192.5mm, 0.0}()
 input  = Segment{171mm, 48mm, 171mm, 44mm}()
 sparkgap   = Segment{9mm, 0.0, 5mm, 0.0}()
 
-model = Model(domain)
-model[axis] = PerfectMagneticConductor()
-model[input] = CoaxialPort(GeneralizedLogisticFunction(0.0, 1.0, 1e-9, 1e5), 2.04ε_0) # FIXME: adjust GLF parameters
-model[sparkgap] = SurfaceImpedance(GeneralizedLogisticFunction(η_0, 1e-2, 20e-9, 1e5), ε_0) # FIXME: adjust GLF parameters
+problem = BoundaryValueProblem(domain)
+problem[axis] = PerfectMagneticConductor()
+problem[input] = CoaxialPort(GeneralizedLogisticFunction(0.0, 1.0, 1e-9, 1e5), 2.04ε_0) # FIXME: adjust GLF parameters
+problem[sparkgap] = SurfaceImpedance(GeneralizedLogisticFunction(η_0, 1e-2, 20e-9, 1e5), ε_0) # FIXME: adjust GLF parameters
 
-fdtd = FDTDModel(model, 401, 401)
+model = FDTDModel(problem, 401, 401)
