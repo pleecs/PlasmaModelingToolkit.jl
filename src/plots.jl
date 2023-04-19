@@ -2,7 +2,8 @@ module SVG
 export Figure, save, svg
 import NativeSVG
 
-import ..Models: Model, FDTDModel
+import ..Models: FDTDModel
+import ..Problems: BoundaryValueProblem
 import ..Domains: AbstractDomain, AxisymmetricDomain
 import ..Geometry: Rectangle, Circle, Polygon, Segment, CompositeShape, Shape
 import ..Materials: Material, Medium, Conductor, Dielectric, PerfectlyMatchedLayer, Metal, Vacuum, PTFE, Air
@@ -148,7 +149,7 @@ function define(shape::CompositeShape{-})
 	define(shape.B)
 end
 
-function define(material::Material, f::Figure{Model{AxisymmetricDomain}})
+function define(material::Material, f::Figure{BoundaryValueProblem{AxisymmetricDomain}})
 	if material isa PerfectlyMatchedLayer
 		Z = (f.model.domain.zmax - f.model.domain.zmin) * 1000
 		thickness = Z / 200
@@ -162,7 +163,7 @@ function define(material::Material, f::Figure{Model{AxisymmetricDomain}})
 	end
 end
 
-function domain_svg(f::Figure{Model{AxisymmetricDomain}})
+function domain_svg(f::Figure{BoundaryValueProblem{AxisymmetricDomain}})
 	
 	NativeSVG.defs() do
 		for (shape, material) in f.model.domain.materials
@@ -188,7 +189,7 @@ function domain_svg(f::Figure{Model{AxisymmetricDomain}})
 	end
 end
 
-function get_domain_size(f::Figure{Model{AxisymmetricDomain}})
+function get_domain_size(f::Figure{BoundaryValueProblem{AxisymmetricDomain}})
 	desired_width = f.width - f.offset["left"] - f.offset["right"] - f.margin["left"] - f.margin["right"]
 
 	@assert desired_width > 0 "Margins and offsets are too large!"
@@ -220,7 +221,7 @@ function get_domain_size(f::Figure{FDTDModel{:ZR}})
 	return gdW, gdH, ldW, ldH, ldW_min, ldH_min
 end
 
-function draw_normals(f::Figure{Model{AxisymmetricDomain}})
+function draw_normals(f::Figure{BoundaryValueProblem{AxisymmetricDomain}})
 	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f)
 
 	NativeSVG.g(id="normals") do
@@ -318,7 +319,7 @@ function model_svg(f::Figure{FDTDModel{:ZR}})
 	return nothing
 end
 
-function model_svg(f::Figure{Model{AxisymmetricDomain}})
+function model_svg(f::Figure{BoundaryValueProblem{AxisymmetricDomain}})
 	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f)
 
 	x = f.margin["left"] + f.offset["left"]
