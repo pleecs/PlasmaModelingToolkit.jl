@@ -6,7 +6,8 @@ R_coax = 0.002
 RADIUS = 0.05            # radius along r-axis [m]
 LENGTH = 0.05            # lenght along z-axis [m]
 
-import PlasmaModelingToolkit.Models: FDTDModel, Model
+import PlasmaModelingToolkit.Models: FDTDModel
+import PlasmaModelingToolkit.Problems: BoundaryValueProblem
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain
 import PlasmaModelingToolkit.Geometry: Rectangle, Circle, Segment
 import PlasmaModelingToolkit.Constants: ε_0, η_0
@@ -38,10 +39,10 @@ side   = Segment{0, RADIUS, LENGTH, RADIUS}()
 input  = Segment{0, r_coax, 0, R_coax}()
 output = Segment{LENGTH, RADIUS, LENGTH, 0}()
 
-model = Model(domain)
-model[axis]   = PerfectMagneticConductor()
-model[side]   = PerfectElectricConductor()
-model[input]  = CoaxialPort(SineFunction{1.0, 50GHz}(), 2.04ε_0)
-model[output] = PerfectElectricConductor()
+problem = BoundaryValueProblem(domain)
+problem[axis]   = PerfectMagneticConductor()
+problem[side]   = PerfectElectricConductor()
+problem[input]  = CoaxialPort(SineFunction{1.0, 50GHz}(), 2.04ε_0)
+problem[output] = PerfectElectricConductor()
 
-fdtd = FDTDModel(model, 101, 101)
+model = FDTDModel(problem, 101, 101)

@@ -14,7 +14,8 @@ import PlasmaModelingToolkit.Constants: η_0, ε_0
 import PlasmaModelingToolkit.BoundaryConditions: SurfaceImpedance, PerfectElectricConductor, PerfectMagneticConductor
 import PlasmaModelingToolkit.Sources: CoaxialPort, UniformPort
 import PlasmaModelingToolkit.TemporalFunctions: GeneralizedLogisticFunction, GaussianWavePacket
-import PlasmaModelingToolkit.Models: FDTDModel, Model
+import PlasmaModelingToolkit.Models: FDTDModel
+import PlasmaModelingToolkit.Problems: BoundaryValueProblem
 
 inner  = Rectangle{0.0,    0.0, LENGTH, r_coax}()
 inner -= Rectangle{LENGTH-KNEE, 0.0, KNEE, R_coax}()
@@ -36,14 +37,14 @@ source = GeneralizedLogisticFunction(η_0/√(2.04), 30η_0/√(2.04), 13e-9, 1e
 spark  = GeneralizedLogisticFunction(1e5, 1e-3, 100e-9, 1e11)
 signal = GeneralizedLogisticFunction(0.0, 1.0, 2e-9, 1e9)
 
-model = Model(domain)
+problem = BoundaryValueProblem(domain)
 
-#model[output] = PerfectElectricConductor()
-#model[input]  = SurfaceImpedance(η_0, ε_0)
-#model[axis]   = UniformPort(GaussianWavePacket{1.0, 0.5/FREQ, FREQ}(), 2.04ε_0)
-model[output] = PerfectMagneticConductor()
-model[input]  = SurfaceImpedance(source, 2.04ε_0)
-model[input]  = CoaxialPort(signal, 2.04ε_0)
-model[axis]   = SurfaceImpedance(spark, 2.04ε_0)
+#problem[output] = PerfectElectricConductor()
+#problem[input]  = SurfaceImpedance(η_0, ε_0)
+#problem[axis]   = UniformPort(GaussianWavePacket{1.0, 0.5/FREQ, FREQ}(), 2.04ε_0)
+problem[output] = PerfectMagneticConductor()
+problem[input]  = SurfaceImpedance(source, 2.04ε_0)
+problem[input]  = CoaxialPort(signal, 2.04ε_0)
+problem[axis]   = SurfaceImpedance(spark, 2.04ε_0)
 
-fdtd = FDTDModel(model, NZ, NR)
+model = FDTDModel(problem, NZ, NR)
