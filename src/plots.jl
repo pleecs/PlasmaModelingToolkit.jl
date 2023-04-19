@@ -2,8 +2,9 @@ module SVG
 export Figure, save, svg
 import NativeSVG
 
-import ..Models: FDTDModel
+import ..Models: FDTDModel, FDMModel
 import ..Problems: BoundaryValueProblem
+import ..Grid: AxisymmetricGrid
 import ..Domains: AbstractDomain, AxisymmetricDomain
 import ..Geometry: Rectangle, Circle, Polygon, Segment, CompositeShape, Shape
 import ..Materials: Material, Medium, Conductor, Dielectric, PerfectlyMatchedLayer, Metal, Vacuum, PTFE, Air
@@ -189,36 +190,39 @@ function domain_svg(f::Figure{BoundaryValueProblem{AxisymmetricDomain}})
 	end
 end
 
-function get_domain_size(f::Figure{BoundaryValueProblem{AxisymmetricDomain}})
+function get_domain_size(f::Figure)
 	desired_width = f.width - f.offset["left"] - f.offset["right"] - f.margin["left"] - f.margin["right"]
-
 	@assert desired_width > 0 "Margins and offsets are too large!"
-
-	ldW = (f.model.domain.rmax - f.model.domain.rmin) * 1000
-	ldH = (f.model.domain.zmax - f.model.domain.zmin) * 1000
+	ldW, ldH, ldW_min, ldH_min = get_domain_size(f.model)
 	gdW = float(desired_width)
-	gdH = desired_width * (ldH / ldW)
-
-	ldW_min = f.model.domain.rmin * 1000
-	ldH_min = f.model.domain.zmin * 1000
+	gdH = float(desired_width) * (ldH / ldW)
 
 	return gdW, gdH, ldW, ldH, ldW_min, ldH_min
 end
+function get_domain_size(problem::BoundaryValueProblem{AxisymmetricDomain})
+	return get_domain_size(problem.domain)
+end
+function get_domain_size(model::FDTDModel{:ZR})
+	return get_domain_size(model.grid)
+end
+function get_domain_size(model::FDMModel{:ZR})
+	return get_domain_size(model.grid)
+end
+function get_domain_size(domain::AxisymmetricDomain)
+	ldW = (domain.rmax - domain.rmin) * 1000
+	ldH = (domain.zmax - domain.zmin) * 1000
+	ldW_min = domain.rmin * 1000
+	ldH_min = domain.zmin * 1000
 
-function get_domain_size(f::Figure{FDTDModel{:ZR}})
-	desired_width = f.width - f.offset["left"] - f.offset["right"] - f.margin["left"] - f.margin["right"]
+	return ldW, ldH, ldW_min, ldH_min
+end
+function get_domain_size(grid::AxisymmetricGrid)
+	ldW = (maximum(grid.r) - minimum(grid.r)) * 1000
+	ldH = (maximum(grid.z) - minimum(grid.z)) * 1000
+	ldW_min = minimum(grid.r) * 1000
+	ldH_min = minimum(grid.z) * 1000
 
-	@assert desired_width > 0 "Margins and offsets are too large!"
-
-	ldW = (maximum(f.model.grid.r) - minimum(f.model.grid.r)) * 1000
-	ldH = (maximum(f.model.grid.z) - minimum(f.model.grid.z)) * 1000
-	gdW = float(desired_width)
-	gdH = desired_width * (ldH / ldW)
-
-	ldW_min = minimum(f.model.grid.r) * 1000
-	ldH_min = minimum(f.model.grid.z) * 1000
-
-	return gdW, gdH, ldW, ldH, ldW_min, ldH_min
+	return ldW, ldH, ldW_min, ldH_min
 end
 
 function draw_normals(f::Figure{BoundaryValueProblem{AxisymmetricDomain}})
@@ -313,6 +317,43 @@ function model_svg(f::Figure{FDTDModel{:ZR}})
             Y1 = gdH - ((1000z[i,j] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
             C  = materials[c[i,j]]
             draw_node(X1, Y1; nr=RAD, nc=C)
+        end
+	end    
+
+	return nothing
+end
+
+function model_svg(f::Figure{FDMModel{:ZR}})
+    model = f.model
+    grid = model.grid
+	nz, nr = size(model.node_material)
+	z, r = grid.z, grid.r
+	c = model.node_material
+	b = model.node_boundary
+    
+    materials = Dict{UInt8, String}()
+    conditions = Dict{UInt8, String}()
+    
+    for (material, id) in model.materials
+    	materials[id] = color(material, f.colormap)
+    end
+
+    for (condition, id) in model.conditions
+    	conditions[id] = color(condition, f.colormap)
+    end
+
+	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f)
+	
+	RADM = "$(2000grid.dz / ldH * gdH)mm"
+	RADB = "$(3000grid.dz / ldH * gdH)mm"
+	NativeSVG.g(id="fdm") do
+        for j=1:nr, i=1:nz
+            X1 = (1000r[i,j] - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
+            Y1 = gdH - ((1000z[i,j] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
+            if b[i,j] > 0x00
+            	draw_node(X1, Y1; nr=RADB, nc=conditions[b[i,j]])
+            end
+            draw_node(X1, Y1; nr=RADM, nc=materials[c[i,j]])
         end
 	end    
 
