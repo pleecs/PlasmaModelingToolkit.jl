@@ -1,7 +1,9 @@
+const Condition = Union{BoundaryCondition, InterfaceCondition}
+
 struct FDTDModel{CS} <: DiscretizedModel
 	grid :: AbstractGrid
 	materials :: Dict{Material, UInt8}
-	boundaries :: Dict{BoundaryCondition, UInt8}
+	conditions :: Dict{Condition, UInt8}
 	edge_boundary :: NTuple{2, Matrix{UInt8}}
 	node_material :: Matrix{UInt8}
 end
@@ -10,7 +12,7 @@ function FDTDModel(model::Model{AxisymmetricDomain}, NZ, NR)
 	grid = discretize(model.domain, NZ, NR)
 	
 	materials = Dict{Material, UInt8}()
-	boundaries = Dict{BoundaryCondition, UInt8}()
+	conditions = Dict{Condition, UInt8}()
 	z_edge_boundary = zeros(UInt8, NZ-1, NR)
 	r_edge_boundary = zeros(UInt8, NZ, NR-1)
 	node_material = zeros(UInt8, NZ, NR)
@@ -22,18 +24,29 @@ function FDTDModel(model::Model{AxisymmetricDomain}, NZ, NR)
 		discretize!(node_material, grid, shape, materials[material])
 	end
 	
-	fdtd =  FDTDModel{:ZR}(grid, materials, boundaries, edge_boundary, node_material)
+	fdtd =  FDTDModel{:ZR}(grid, materials, conditions, edge_boundary, node_material)
 	
 	for (region, constraint) in model.constraints
 		fdtd[region] = constraint
 	end
+
+	dielectrics = Dict{UInt8, Dielectric}()
+	for (material, id) in materials
+		if material isa Dielectric
+			dielectrics[id] = material
+		end
+	end
+
+	detect_interface_z!(conditions, z_edge_boundary, node_material, dielectrics)
+	detect_interface_r!(conditions, r_edge_boundary, node_material, dielectrics)
+	
 	return fdtd
 end
 
 function setindex!(model::FDTDModel, bc::BoundaryCondition, segment::Segment)
 	grid = model.grid
-	bcs = model.boundaries
-	get!(bcs, bc, length(bcs) + 1)
+	cond = model.conditions
+	get!(cond, bc, length(cond) + 1)
 	node_material = model.node_material
 	z_edges, r_edges = model.edge_boundary
 
@@ -44,7 +57,7 @@ function setindex!(model::FDTDModel, bc::BoundaryCondition, segment::Segment)
 		R1 = first(js)
 		R2 = last(js)
 		for j=R1:R2-1, i=Z0
-			r_edges[i,j] = bcs[bc]
+			r_edges[i,j] = cond[bc]
 		end
 	end
 
@@ -53,7 +66,7 @@ function setindex!(model::FDTDModel, bc::BoundaryCondition, segment::Segment)
 		Z2 = last(is)
 		R0 = first(js)
 		for j=R0, i=Z1:Z2-1
-			z_edges[i,j] = bcs[bc]
+			z_edges[i,j] = cond[bc]
 		end
 	end
 end
