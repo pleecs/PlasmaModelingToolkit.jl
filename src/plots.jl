@@ -6,6 +6,7 @@ import ..Models: Model, FDTDModel
 import ..Domains: AbstractDomain, AxisymmetricDomain
 import ..Geometry: Rectangle, Circle, Polygon, Segment, CompositeShape, Shape
 import ..Materials: Material, Medium, Conductor, Dielectric, PerfectlyMatchedLayer, Metal, Vacuum, PTFE, Air
+import ..InterfaceConditions: DielectricInterface
 import ..BoundaryConditions: PerfectMagneticConductor, PerfectElectricConductor, SurfaceImpedance, BoundaryCondition
 import ..BoundaryConditions: ParticleBoundaryCondition
 import ..Sources: CoaxialPort, WaveguidePort, UniformPort
@@ -88,7 +89,8 @@ color(::CoaxialPort, colormap) = colormap["CoaxialPort"]
 color(::WaveguidePort, colormap) = colormap["WaveguidePort"]
 color(::UniformPort, colormap) = colormap["UniformPort"]
 color(m::Material, colormap) = get!(colormap, string(objectid(m)), "#ff00ff") # TODO: add fallback colors
-color(b::BoundaryCondition, colormap) = get!(colormap, string(objectid(b)), "#ff0000") # TODO: add fallback colors
+color(bc::BoundaryCondition, colormap) = get!(colormap, string(objectid(bc)), "#ff0000") # TODO: add fallback colors
+color(di::DielectricInterface, colormap) = get!(colormap, string(objectid(di)), "#cccccc") # TODO: add fallback colors
 
 function draw(color::String, shape::Union{Rectangle, Circle, Polygon, CompositeShape})
 	return NativeSVG.use(href="#$(objectid(shape))", xlink!href="#$(objectid(shape))", fill=color)
@@ -252,11 +254,11 @@ function draw_node(x, y; nr="0", nc="black")
 	NativeSVG.circle(cx="$(x)cm", cy="$(y)cm", r="$(nr)", fill="$(nc)")
 end
 
-function draw_edge(x1, y1, x2, y2; sw="0", sc="black")
+function draw_edge(x1, y1, x2, y2; lw="0", sw="0", sc="black")
 	xm = (x1 + x2) / 2.0
 	ym = (y1 + y2) / 2.0
-	NativeSVG.line(x1="$(x1)cm", y1="$(y1)cm", x2="$(x2)cm", y2="$(y2)cm", stroke_width="$(sw)", stroke="$(sc)")
-	NativeSVG.line(x1="$(x1)cm", y1="$(y1)cm", x2="$(xm)cm", y2="$(ym)cm", stroke_width="$(sw)", fill="$(sc)", marker_end="url(#arrowhead)")
+	if lw != "0" NativeSVG.line(x1="$(x1)cm", y1="$(y1)cm", x2="$(x2)cm", y2="$(y2)cm", stroke_width="$(lw)", stroke="$(sc)") end
+	if sw != "0" NativeSVG.line(x1="$(x1)cm", y1="$(y1)cm", x2="$(xm)cm", y2="$(ym)cm", stroke_width="$(sw)", fill="$(sc)", marker_end="url(#arrowhead)") end
 end
 
 function model_svg(f::Figure{FDTDModel{:ZR}})
@@ -272,20 +274,20 @@ function model_svg(f::Figure{FDTDModel{:ZR}})
 	rr .+= grid.dr/2
     
     materials = Dict{UInt8, String}()
-    boundaries = Dict{UInt8, String}()
+    conditions = Dict{UInt8, String}()
     
     for (material, id) in model.materials
     	materials[id] = color(material, f.colormap)
     end
 
-    for (boundary, id) in model.boundaries
-    	boundaries[id] = color(boundary, f.colormap)
+    for (condition, id) in model.conditions
+    	conditions[id] = color(condition, f.colormap)
     end
 
 	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f)
-
-	SW  = "$(300grid.dz / ldH * gdH)mm"
-	RAD = "$(1000grid.dz / ldH * gdH)mm"
+	
+	SW  = "$(500grid.dz / ldH * gdH)mm"  # edge's arrow size
+	RAD = "$(2000grid.dz / ldH * gdH)mm" # edge's line size / node's size
 	NativeSVG.g(id="fdtd") do
         for j=1:nr, i=1:nz-1
             if cz[i,j] == 0x00 continue end
@@ -293,8 +295,8 @@ function model_svg(f::Figure{FDTDModel{:ZR}})
             Y1 = gdH - ((1000z[i,j] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
             X2 = (1000r[i+1,j] - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
             Y2 = gdH - ((1000z[i+1,j] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
-            C  = boundaries[cz[i,j]]
-            draw_edge(X1, Y1, X2, Y2; sw=SW, sc=C)
+            C  = conditions[cz[i,j]]
+            draw_edge(X1, Y1, X2, Y2; lw=RAD, sc=C)
         end
         for j=1:nr-1, i=1:nz
             if cr[i,j] == 0x00 continue end
@@ -302,8 +304,8 @@ function model_svg(f::Figure{FDTDModel{:ZR}})
             Y1 = gdH - ((1000z[i,j] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
             X2 = (1000r[i,j+1] - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
             Y2 = gdH - ((1000z[i,j+1] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
-            C  = boundaries[cr[i,j]]
-            draw_edge(X1, Y1, X2, Y2; sw=SW, sc=C)
+            C  = conditions[cr[i,j]]
+            draw_edge(X1, Y1, X2, Y2; lw=RAD, sc=C)
         end
         for j=1:nr, i=1:nz
             X1 = (1000r[i,j] - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
