@@ -35,6 +35,10 @@ function FDTDModel(problem::BoundaryValueProblem{AxisymmetricDomain}, NZ, NR)
 		if material isa Dielectric
 			dielectrics[id] = material
 		end
+
+		if material isa PerfectlyMatchedLayer
+			dielectrics[id] = material.dielectric
+		end
 	end
 
 	detect_interface_z!(conditions, z_edge_boundary, node_material, dielectrics)
