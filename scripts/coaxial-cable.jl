@@ -21,4 +21,4 @@ f.y_axis["label_offset"] = 1.2
 
 f.normals["length"] = 3
 
-save(svg(f), "coaxial-cable.svg")
+save(svg(f), "plots/coaxial-cable.svg")

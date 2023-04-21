@@ -16,4 +16,4 @@ f.y_axis["tick_labels_max_digits"] = 4
 f.y_axis["label"] = "z-coordinate [m]"
 f.y_axis["label_offset"] = 2
 
-save(svg(f), "circular-waveguide.svg")
+save(svg(f), "plots/circular-waveguide.svg")
