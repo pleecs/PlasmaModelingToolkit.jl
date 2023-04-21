@@ -377,8 +377,8 @@ function model_svg(f::Figure{BoundaryValueProblem{AxisymmetricDomain}})
 	end
 end
 
-function save(fig::NativeSVG.SVG, filename="domain.svg")
-	write("plots/$filename", fig )
+function save(fig::NativeSVG.SVG, filename="plots/domain.svg")
+	write(filename, fig )
 end
 
 function svg(f::Figure)

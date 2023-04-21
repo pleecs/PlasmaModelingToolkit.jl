@@ -20,4 +20,4 @@ f.y_axis["start_from_zero"] = true
 f.font["size"]	 = 12
 f.font["family"] = "serif"
 
-save(svg(f), "swo.svg")
+save(svg(f), "plots/swo.svg")

@@ -20,4 +20,4 @@ f.y_axis["start_from_zero"] = true
 
 f.font["size"] = 12
 
-save(svg(f), "dipole-antenna.svg")
+save(svg(f), "plots/dipole-antenna.svg")
