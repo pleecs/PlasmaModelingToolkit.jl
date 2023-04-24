@@ -66,7 +66,7 @@ function ∈((x, y), polygon::Polygon{N}) where {N}
 	# d_y = cos(θ)/(sqrt(sin(θ)^2 + cos(θ)^2))
 	# ray = Ray((x,y),(d_x, d_y))
 
-	ray = Ray((x,y),(1., 0.))
+	ray = Ray((x,y),(1., 1.)) # diagonal ray
 
 	n_crossings = 0
 	for segment in polygon.segments
