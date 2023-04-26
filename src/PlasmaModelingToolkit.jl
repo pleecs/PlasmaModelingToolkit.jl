@@ -1,5 +1,6 @@
 module PlasmaModelingToolkit
 include("constants.jl")
+include("atoms.jl")
 include("temporal.jl")
 include("materials.jl")
 include("geometry.jl")
