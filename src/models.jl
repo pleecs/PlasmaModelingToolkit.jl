@@ -8,17 +8,6 @@ import ..Materials: Material, Conductor
 import ..Distributions: Distribution
 
 import ..Grid: discretize, discretize!, snap
-import Base: setindex!
-
-struct Model{D}
-	domain :: D
-	constraints :: Vector{Pair{Any, Any}}
-	Model(domain) = new{typeof(domain)}(domain, [])
-end
-
-function setindex!(model::Model, constraint, region)
-    push!(model.constraints, region => constraint)
-end
 
 abstract type DiscretizedModel end
 
