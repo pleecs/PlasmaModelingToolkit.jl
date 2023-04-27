@@ -14,6 +14,22 @@ mutable struct SurfaceImpedance  <: BoundaryCondition
     η :: Union{Float64, TemporalFunction}
     ε :: Float64
 end
+end
 
-abstract type ParticleBoundaryCondition <: BoundaryCondition end
+module ParticleBoundaries
+abstract type ParticleBoundary end
+struct ReflectingBoundary{N} <: ParticleBoundary
+    particles :: NTuple{N, Particles}
+    ReflectingBoundary() = new{0}([]) 
+end
+
+struct PeriodicBoundary{N} <: ParticleBoundary
+    particles :: NTuple{N,Particles}
+    PeriodicBoundary() = new{0}([])
+end
+
+struct AbsorbingBoundary{N} <: ParticleBoundary
+    particles :: NTuple{N, Particles}
+    AbsorbingBoundary() = new{}([])
+end
 end
