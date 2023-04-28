@@ -41,11 +41,6 @@ lower = Segment{0.0, 0.0, 0.0, R}()
 upper = Segment{Z, R, Z, 0.0}()
 whole = Rectangle{0.0, 0.0, Z, R}()
 
-problem = ParticleProblem{2,3}(domain)
-problem[side] = ReflectingBoundary()
-problem[lower] = AbsorbingBoundary()
-problem[upper] = AbsorbingBoundary()
-
 bvp = BoundaryValueProblem(domain)
 bvp[axis] = NeumannBoundaryCondition()
 bvp[side] = NeumannBoundaryCondition()
@@ -56,13 +51,27 @@ e   = electrons()
 iHe = ions(Helium)
 He  = gas(Helium)
 
-# ν_drift = (z, r, θ)
+problem = ParticleProblem{2,3}(domain)
+problem[side] = ReflectingBoundary()
+problem[lower] = AbsorbingBoundary()
+problem[upper] = AbsorbingBoundary()
+
 problem[whole] = SpeciesLoader(e, n_0,   UniformDistribution(), MaxwellBoltzmannDistribution{T_e, e.mass}())
 problem[whole] = SpeciesLoader(iHe, n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_i, iHe.mass}())
-problem[whole] = SpeciesLoader(He, n_He, UniformDistribution(), MaxwellBoltzmannDistribution{T_He, He.mass}())
+
+chemistry = CollisionProblem{2,3}()
+chemistry[whole] = SpeciesLoader(He, n_He, UniformDistribution(), MaxwellBoltzmannDistribution{T_He, He.mass}())
+
+chemistry += IsotropicScatteringCollision(e, He, σ=Biagi(:elastic))
+chemistry += IonizationCollision(e, He, σ=Biagi(:ionization), ω=ω_He)
+chemistry += ExcitationCollsion(e, He, σ=Biagi(:excitation))
+
+chemistry += IsotropicScatteringCollision(iHe, He, σ=Biagi(:excitation))
+chemistry += BackwardScatteringCollision(iHe, He, σ=Biagi(:excitation))
 
 es  = FDMModel(bvp, NZ + 1, NR + 1)
 pic = PICModel(problem, NZ + 1, NR + 1, Δt = Δt, maxcount = (e => 200_000, iHe => 200_000))
+# mcc = MCCModel(..., temperature = (He => T_He,))
 
 # Hennel.j;
-solver = Hennel.Solvers.create(pic, es)
+# solver = Hennel.Solvers.create(pic, es, mcc)
