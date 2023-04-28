@@ -2,8 +2,8 @@ module Grid
 import ..Domains: AxisymmetricDomain
 import ..Geometry: Shape, Segment
 
-abstract type AbstractGrid end
-struct AxisymmetricGrid{ZN, RN} <: AbstractGrid
+abstract type AbstractGrid{D} end
+struct AxisymmetricGrid{ZN, RN} <: AbstractGrid{2}
 	z  :: Matrix{Float64}
     r  :: Matrix{Float64}
     dz :: Float64

@@ -1,8 +1,10 @@
 module Species
 import ..PlasmaModelingToolkit.Atoms: Atom
 
-struct Particles{SYM, Q, M} end
-struct Fluid{SYM, M} end
+abstract type Species end
+
+struct Particles{SYM, Q, M} <: Species end
+struct Fluid{SYM, M} <: Species end
 
 electrons() = Particles{:e, -q_e, m_e}()
 ions(atom::Atom, n = 1) = Particles{Symbol("i"^n * String(atom.sym)), (n * q_e), atom.mass - (n * m_e)}()

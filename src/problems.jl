@@ -1,5 +1,5 @@
 module Problems
-import ..Geometry: Rectangle
+import ..Geometry: Rectangle, Segment
 import ..Boundaries: ParticleBoundary
 import ..BoundaryConditions: BoundaryCondition
 import ..Sources: SpeciesSource, SpeciesLoader
@@ -7,20 +7,22 @@ import Base: setindex!
 
 struct ParticleProblem{D}
 	domain :: D
-	boundaries :: Vector{Pair{Any, ParticleBoundary}}
+	boundaries :: Vector{Pair{Segment, ParticleBoundary}}
 	sources :: Vector{Pair{Rectangle, SpeciesSource}}
 	loaders :: Vector{Pair{Rectangle, SpeciesLoader}} 
 	ParticleProblem(domain) = new{typeof(domain)}(domain, [], [], [])
 end
 
-function setindex!(problem::ParticleProblem, phenomenon, region)
-	if phenomenon isa ParticleBoundary
-    	push!(model.boundaries, region => phenomenon)
-    elseif phenomenon isa SpeciesSource
-    	push!(model.sources, region => phenomenon)
-	elseif phenomenon isa SpeciesLoader
-		push!(model.loaders, region => phenomenon)
-	end
+function setindex!(problem::ParticleProblem, boundary::ParticleBoundary, segment::Segment)
+	push!(model.boundaries, segment => boundary)
+end
+
+function setindex!(problem::ParticleProblem, source::SpeciesSource, rectangle::Rectangle) 
+	push!(model.sources, rectangle => source)
+end
+
+function setindex!(problem::ParticleProblem, loader::SpeciesLoader, rectangle::Rectangle)
+	push!(model.loaders, rectangle => loader)
 end
 
 struct BoundaryValueProblem{D}
