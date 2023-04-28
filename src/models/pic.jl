@@ -1,8 +1,11 @@
-struct PICModel <: DiscretizedModel 
-	grid :: AbstractGrid
-	species :: Vector{KineticSpecies}
-	gas :: FluidSpecies
-	bcs :: Vector{Pair{Segment, ParticleBoundaryCondition}}
-	sources :: Vector{Pair{Shape, ParticleSource}}
-	loaders :: Vector{Pair{Shape, ParticleLoader}} 
+struct PICModel{D,V} <: DiscretizedModel 
+      grid :: AbstractGrid{D}
+  timestep :: Float64
+    fluids :: Vector{Fluid}
+ particles :: Vector{Particles}
+   weights :: Dict{Particles, Float64}
+  maxcount :: Dict{Particles, UInt64}
+boundaries :: Vector{Pair{Segment, ParticleBoundaryCondition}}
+   sources :: Vector{Pair{Rectangle, SpeciesSource}}
+   loaders :: Vector{Pair{Rectangle, SpeciesLoader}} 
 end
