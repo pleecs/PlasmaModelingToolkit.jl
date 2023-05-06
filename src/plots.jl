@@ -75,7 +75,7 @@ function setproperty!(f::Figure, s::Symbol, val::T) where {T<:Number}
     	val = float(val)
         return setfield!(f, s, Dict("top" => val, "bottom" => val, "left" => val, "right" => val))
     else
-        return setfield!(f, s, value)
+        return setfield!(f, s, val)
     end
 end
 
