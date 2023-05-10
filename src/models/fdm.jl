@@ -47,6 +47,13 @@ function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, shape::Shap
 	grid = model.grid
 	bcs = model.conditions
 	get!(bcs, dbc, length(bcs) + 1)
-	discretize!(model.node_boundary, grid, shape, bcs[dbc])
+
+	nz, nr = size(grid.z)
+	for j=1:nr, i=1:nz
+		if (grid.z[i,j], grid.r[i,j]) ∈ shape && (model.node_material[i,j] == 0x00)
+			model.node_boundary[i,j] = bcs[dbc]
+		end
+	end
+
 	return nothing
 end
