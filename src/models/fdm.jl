@@ -16,7 +16,7 @@ function FDMModel(problem::BoundaryValueProblem{AxisymmetricDomain}, NZ, NR)
 	
 	materials[Conductor()] = 0x00
 	for (shape, material) in problem.domain.materials
-		get!(materials, material, length(materials) + 1)
+		get!(materials, material, length(materials))
 		discretize!(node_material, grid, shape, materials[material])
 	end
 
