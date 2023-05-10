@@ -29,7 +29,7 @@ function FDMModel(problem::BoundaryValueProblem{AxisymmetricDomain}, NZ, NR)
 	return fdm
 end
 
-function setindex!(model::FDMModel, bc::BoundaryCondition, segment::Segment)
+function setindex!(model::FDMModel, bc::NeumannBoundaryCondition, segment::Segment)
 	nodes = model.node_material
 	grid = model.grid
 	bcs = model.conditions
@@ -40,6 +40,20 @@ function setindex!(model::FDMModel, bc::BoundaryCondition, segment::Segment)
         model.node_boundary[i,j] = bcs[bc]
     end
 	
+	return nothing
+end
+
+function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, segment::Segment)
+	nodes = model.node_material
+	grid = model.grid
+	bcs = model.conditions
+	get!(bcs, dbc, length(bcs) + 1)
+
+	is, js = snap(nodes, grid, segment)
+    for j=js, i=is
+        model.node_boundary[i,j] = bcs[dbc]
+    end
+
 	return nothing
 end
 

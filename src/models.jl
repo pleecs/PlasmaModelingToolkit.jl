@@ -1,5 +1,5 @@
 module Models
-import ..BoundaryConditions: BoundaryCondition, DirichletBoundaryCondition
+import ..BoundaryConditions: BoundaryCondition, NeumannBoundaryCondition, DirichletBoundaryCondition
 import ..InterfaceConditions: InterfaceCondition
 import ..Grid: AbstractGrid, AxisymmetricGrid
 import ..Domains: AxisymmetricDomain
