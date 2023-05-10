@@ -17,4 +17,7 @@ struct GaussianFunction{A, MU, SIGMA} <: TemporalFunction end
 
 # f(t) = A * sin(2\pi * FREQ * t) * exp(-\frac{(t - \mu)^2}{2\sigma^2})
 struct GaussianWavePacket{A, MU, SIGMA, FREQ} <: TemporalFunction end
+
+# f(t) = A * (exp(-\alpha * t) - exp(-\beta * t))
+struct DoubleExponentialPulse{A, ALPHA, BETA} <: TemporalFunction end
 end
