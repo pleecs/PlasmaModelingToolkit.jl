@@ -71,3 +71,8 @@ function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, shape::Shap
 
 	return nothing
 end
+
+function setindex!(model::FDMModel, dbc::PeriodicBoundaryCondition, shape::Shape)
+	# TODO: add PeriodicBoundaryCondition handling
+	return nothing
+end

@@ -1,7 +1,6 @@
 module Domains
 	import ..Geometry: Shape, Rectangle, Segment
 	import ..Materials: Material
-	import ..BoundaryConditions: BoundaryCondition, ParticleBoundaryCondition
 	export AxisymmetricDomain
 	import Base: ∈, setindex!
 

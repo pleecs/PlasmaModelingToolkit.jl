@@ -1,13 +1,18 @@
 module Models
-import ..BoundaryConditions: BoundaryCondition, NeumannBoundaryCondition, DirichletBoundaryCondition
+import ..BoundaryConditions: BoundaryCondition, NeumannBoundaryCondition, DirichletBoundaryCondition, PeriodicBoundaryCondition
 import ..InterfaceConditions: InterfaceCondition
 import ..Grid: AbstractGrid, AxisymmetricGrid
 import ..Domains: AxisymmetricDomain
-import ..Geometry: Shape, Segment
-import ..Materials: Material, Conductor
+import ..Geometry: Shape, Segment, Rectangle
+import ..Materials: Material, Conductor, Dielectric, PerfectlyMatchedLayer
 import ..Distributions: Distribution
-
+import ..Problems: BoundaryValueProblem, ParticleProblem, CollisionProblem
+import ..InterfaceConditions: detect_interface_z!, detect_interface_r!
 import ..Grid: discretize, discretize!, snap
+import ..Species: Particles, Fluid
+import ..ParticleBoundaries: ParticleBoundary
+import ..Sources: SpeciesSource, SpeciesLoader
+import Base: setindex!
 
 abstract type DiscretizedModel end
 
