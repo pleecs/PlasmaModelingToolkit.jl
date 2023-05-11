@@ -15,5 +15,5 @@ const c²  = c^2            # speed of light squared [m^2/s^2]
 
 # ionization energy division coefficients
 # from Opal et al. "Measurements of secondary electron spectra produced by electron impact ionization of a number of simple gases,"
-# const ω_He = 15.8
+const ω_He = 15.8
 end

@@ -10,7 +10,7 @@ import ..Geometry: Rectangle, Circle, Polygon, Segment, CompositeShape, Shape
 import ..Materials: Material, Medium, Conductor, Dielectric, PerfectlyMatchedLayer, Metal, Vacuum, PTFE, Air
 import ..InterfaceConditions: DielectricInterface
 import ..BoundaryConditions: PerfectMagneticConductor, PerfectElectricConductor, SurfaceImpedance, BoundaryCondition
-import ..BoundaryConditions: ParticleBoundaryCondition
+import ..ParticleBoundaries: ParticleBoundary
 import ..Sources: CoaxialPort, WaveguidePort, UniformPort
 import ..Constants: ε_0, μ_0
 
