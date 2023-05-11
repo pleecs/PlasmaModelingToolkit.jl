@@ -16,4 +16,8 @@ Metal()  = Conductor()
 Vacuum() = Dielectric{ε_0, μ_0, 0.0}()
 PTFE()   = Dielectric{2.04ε_0, μ_0, 0.0}()
 Air()    = Dielectric{1.0006ε_0, μ_0, 0.0}()
+
+permittivity(::Medium{EPSILON, MU, SIGMA}) where {EPSILON, MU, SIGMA} = EPSILON
+conductivity(::Medium{EPSILON, MU, SIGMA}) where {EPSILON, MU, SIGMA} = SIGMA
+permeability(::Medium{EPSILON, MU, SIGMA}) where {EPSILON, MU, SIGMA} = MU
 end
