@@ -1,18 +1,20 @@
-RADIUS = 0.05             # radius along r-axis [m]
-LENGTH = 0.1925           # lenght along z-axis [m]
-D_RADIUS = 0.5            # domain lenght along z-axis [m]
-D_LENGTH = 0.5            # domain lenght along z-axis [m]
+
 
 import PlasmaModelingToolkit.Models: FDTDModel
 import PlasmaModelingToolkit.Problems: BoundaryValueProblem
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain
 import PlasmaModelingToolkit.Geometry: Rectangle, Circle, Segment, Polygon
 import PlasmaModelingToolkit.Constants: ε_0, μ_0, η_0
-import PlasmaModelingToolkit.Materials: Air, Metal, PerfectlyMatchedLayer, PTFE, Vacuum
+import PlasmaModelingToolkit.Materials: Air, Metal, PerfectlyMatchedLayer, PTFE, Vacuum, permittivity, permeability
 import PlasmaModelingToolkit.BoundaryConditions: SurfaceImpedance, PerfectElectricConductor, PerfectMagneticConductor
 import PlasmaModelingToolkit.Sources: CoaxialPort
 import PlasmaModelingToolkit.TemporalFunctions: GeneralizedLogisticFunction
 import PlasmaModelingToolkit.Units: mm
+
+RADIUS = 0.05             # radius along r-axis [m]
+LENGTH = 0.1925           # lenght along z-axis [m]
+D_RADIUS = 0.5            # domain lenght along z-axis [m]
+D_LENGTH = 0.5            # domain lenght along z-axis [m]
 
 outer 	= Rectangle{0, 0, 171mm, RADIUS}()
 outer  -= Rectangle{30mm, 0, 141mm, 48mm}()
@@ -54,9 +56,15 @@ axis   = Segment{D_LENGTH, 0.0, 192.5mm, 0.0}()
 input  = Segment{171mm, 48mm, 171mm, 44mm}()
 sparkgap   = Segment{9mm, 0.0, 5mm, 0.0}()
 
+ε₁ = permittivity(Air())
+ε₂ = permittivity(PTFE())
+
+μ = permeability(Air())
+η = √(μ/ε₁)
+
 problem = BoundaryValueProblem(domain)
 problem[axis] = PerfectMagneticConductor()
-problem[input] = CoaxialPort(GeneralizedLogisticFunction(0.0, 1.0, 1e-9, 1e5), 2.04ε_0) # FIXME: adjust GLF parameters
-problem[sparkgap] = SurfaceImpedance(GeneralizedLogisticFunction(η_0, 1e-2, 20e-9, 1e5), ε_0) # FIXME: adjust GLF parameters
+problem[input] = CoaxialPort(GeneralizedLogisticFunction(0.0, 1.0, 1e-9, 1e5), ε₂)
+problem[sparkgap] = SurfaceImpedance(GeneralizedLogisticFunction(η, 1e-2, 20e-9, 1e5), ε₁)
 
 model = FDTDModel(problem, 401, 401)
