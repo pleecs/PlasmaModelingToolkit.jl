@@ -51,8 +51,9 @@ problem[upper] = PeriodicBoundary()			 		#assumes its a full edge of a domain
 e   = electrons()
 iHe = ions(Helium)
 
-problem[whole] = SpeciesLoader(e, 0.5n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_e, e.mass}(), drift = (+ν_drift, 0.0, 0.0)) # ν_drift = (z, r, θ)
-problem[whole] = SpeciesLoader(e, 0.5n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_e, e.mass}(), drift = (-ν_drift, 0.0, 0.0)) # ν_drift = (z, r, θ)
+
+problem[whole] = SpeciesLoader(e, 0.5n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_e, e.mass}(), drift = [:z => +ν_drift])
+problem[whole] = SpeciesLoader(e, 0.5n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_e, e.mass}(), drift = [:z => -ν_drift])
 problem[whole] = SpeciesLoader(iHe, n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_i, iHe.mass}())
 
 es  = FDMModel(bvp, NZ + 1, NR + 1)

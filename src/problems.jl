@@ -4,6 +4,7 @@ import ..ParticleBoundaries: ParticleBoundary
 import ..BoundaryConditions: BoundaryCondition
 import ..Sources: SpeciesSource, SpeciesLoader
 import ..Collisions: Collision
+import ..Species: Particles, Fluid
 import Base: setindex!, +
 
 include("problems/bval.jl")

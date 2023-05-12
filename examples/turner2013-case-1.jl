@@ -3,7 +3,7 @@ import PlasmaModelingToolkit.Domains: AxisymmetricDomain
 import PlasmaModelingToolkit.Geometry: Segment, Rectangle
 import PlasmaModelingToolkit.BoundaryConditions: DirichletBoundaryCondition, NeumannBoundaryCondition
 import PlasmaModelingToolkit.ParticleBoundaries: AbsorbingBoundary, ReflectingBoundary
-import PlasmaModelingToolkit.Problems: ParticleProblem, BoundaryValueProblem, CollisionProblem
+import PlasmaModelingToolkit.Problems: ParticleProblem, BoundaryValueProblem, ParticleCollisionProblem
 import PlasmaModelingToolkit.Models: FDMModel, PICModel
 import PlasmaModelingToolkit.Species: electrons, ions, gas
 import PlasmaModelingToolkit.Sources: SpeciesLoader
@@ -53,24 +53,22 @@ e   = electrons()
 iHe = ions(Helium)
 He  = gas(Helium)
 
-problem = ParticleProblem(domain)
-problem[side] = ReflectingBoundary()
-problem[lower] = AbsorbingBoundary()
-problem[upper] = AbsorbingBoundary()
+problem = ParticleCollisionProblem(domain)
+problem[side] = ReflectingBoundary(e, iHe)
+problem[lower] = AbsorbingBoundary(e, iHe)
+problem[upper] = AbsorbingBoundary(e, iHe)
 
 problem[whole] = SpeciesLoader(e, n_0,   UniformDistribution(), MaxwellBoltzmannDistribution{T_e, e.mass}())
 problem[whole] = SpeciesLoader(iHe, n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_i, iHe.mass}())
+problem[whole] = SpeciesLoader(He, n_He, UniformDistribution(), MaxwellBoltzmannDistribution{T_He, He.mass}())
 
-chemistry = CollisionProblem(domain)
-chemistry[whole] = SpeciesLoader(He, n_He, UniformDistribution(), MaxwellBoltzmannDistribution{T_He, He.mass}())
+problem += IsotropicScatteringCollision(e, He, σ=Biagi(:elastic))
+problem += IonizationCollision(e, He, σ=Biagi(:ionization), ω=ω_He)
+problem += ExcitationCollision(e, He, σ=Biagi(:excitation))
 
-chemistry += IsotropicScatteringCollision(e, He, σ=Biagi(:elastic))
-chemistry += IonizationCollision(e, He, σ=Biagi(:ionization), ω=ω_He)
-chemistry += ExcitationCollision(e, He, σ=Biagi(:excitation))
-
-chemistry += IsotropicScatteringCollision(iHe, He, σ=Biagi(:excitation))
-chemistry += BackwardScatteringCollision(iHe, He, σ=Biagi(:excitation))
+problem += IsotropicScatteringCollision(iHe, He, σ=Biagi(:excitation))
+problem += BackwardScatteringCollision(iHe, He, σ=Biagi(:excitation))
 
 es  = FDMModel(bvp, NZ + 1, NR + 1)
-# pic = PICModel(problem, NZ + 1, NR + 1, Δt = Δt, maxcount = (e => 200_000, iHe => 200_000))
-# mcc = MCCModel(..., temperature = (He => T_He,))
+pic = PICModel{2,3}(problem, NZ + 1, NR + 1, maxcount = (e => 200_000, iHe => 200_000), weights = (e => WG, iHe => WG))
+# mcc = MCCModel{2,3}(problem)
