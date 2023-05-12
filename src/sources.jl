@@ -26,20 +26,21 @@ struct UniformPort <: BoundaryCondition
 end
 
 struct SpeciesSource
+	species :: AbstractSpecies
 	rate :: TemporalFunction
 	x :: Distribution
 	v :: Distribution
 end
 
-struct SpeciesLoader{V}
+struct SpeciesLoader
 	species :: AbstractSpecies
-	η :: Float64
+	density :: Float64
 	x :: Distribution
 	v :: Distribution
-	drift :: NTuple{V, Float64}
+	drift :: Vector{Pair{Symbol, Float64}}
 end
 
-SpeciesLoader(species::AbstractSpecies, η::Float64, x::Distribution, v::Distribution) = SpeciesLoader{3}(species, η, x, v, (0.0, 0.0, 0.0)) # FIXME: how to resolve problem of a drift length?
-SpeciesLoader(species, η, x, v; drift::NTuple{V, Float64}) where {V} = SpeciesLoader{V}(species, η, x, v, drift)
+SpeciesLoader(species::AbstractSpecies, density::Float64, x::Distribution, v::Distribution) = SpeciesLoader(species, density, x, v, [])
+SpeciesLoader(species, density, x, v; drift)= SpeciesLoader(species, density, x, v, drift)
 
 end

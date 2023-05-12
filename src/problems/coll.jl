@@ -1,15 +1,25 @@
-struct CollisionProblem{DOMAIN}
-	domain :: DOMAIN
-	loaders :: Vector{Pair{Rectangle, SpeciesLoader}}
+struct ParticleCollisionProblem{DOMAIN}
+	particles :: ParticleProblem{DOMAIN}
 	collisions :: Vector{Collision}
-	CollisionProblem(domain) = new{typeof(domain)}(domain, [], [])
+	loaders :: Vector{Pair{Rectangle, SpeciesLoader}}
+	ParticleCollisionProblem(domain) = new{typeof(domain)}(ParticleProblem(domain), [], [])
 end
 
-function setindex!(problem::CollisionProblem, loader::SpeciesLoader, region)
-    push!(problem.loaders, region => loader)
+function setindex!(problem::ParticleCollisionProblem, loader::SpeciesLoader, region)
+	if loader.species isa Fluid
+		push!(problem.loaders, region => loader)
+	end
+
+	if loader.species isa Particles
+		problem.particles[region] = loader
+	end
 end
 
-function +(problem::CollisionProblem, collision::Collision)
+function setindex!(problem::ParticleCollisionProblem, boundary::ParticleBoundary, segment::Segment)
+	problem.particles[segment] = boundary
+end
+
+function +(problem::ParticleCollisionProblem, collision::Collision)
 	push!(problem.collisions, collision)
 	return problem
 end

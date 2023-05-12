@@ -6,7 +6,7 @@ import ..Domains: AxisymmetricDomain
 import ..Geometry: Shape, Segment, Rectangle
 import ..Materials: Material, Conductor, Dielectric, PerfectlyMatchedLayer
 import ..Distributions: Distribution
-import ..Problems: BoundaryValueProblem, ParticleProblem, CollisionProblem
+import ..Problems: BoundaryValueProblem, ParticleProblem, ParticleCollisionProblem
 import ..InterfaceConditions: detect_interface_z!, detect_interface_r!
 import ..Grid: discretize, discretize!, snap
 import ..Species: Particles, Fluid
