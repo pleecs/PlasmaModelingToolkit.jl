@@ -4,7 +4,7 @@ import PlasmaModelingToolkit.Geometry: Segment, Rectangle
 import PlasmaModelingToolkit.BoundaryConditions: DirichletBoundaryCondition, NeumannBoundaryCondition
 import PlasmaModelingToolkit.ParticleBoundaries: AbsorbingBoundary, ReflectingBoundary
 import PlasmaModelingToolkit.Problems: ParticleProblem, BoundaryValueProblem, ParticleCollisionProblem
-import PlasmaModelingToolkit.Models: FDMModel, PICModel
+import PlasmaModelingToolkit.Models: FDMModel, PICModel, MCCModel
 import PlasmaModelingToolkit.Species: electrons, ions, gas
 import PlasmaModelingToolkit.Sources: SpeciesLoader
 import PlasmaModelingToolkit.TemporalFunctions: SineFunction, ConstantFunction
@@ -71,4 +71,4 @@ problem += BackwardScatteringCollision(iHe, He, σ=Biagi(:excitation))
 
 es  = FDMModel(bvp, NZ + 1, NR + 1)
 pic = PICModel{2,3}(problem, NZ + 1, NR + 1, maxcount = (e => 200_000, iHe => 200_000), weights = (e => WG, iHe => WG))
-# mcc = MCCModel{2,3}(problem)
+mcc = MCCModel{2,3}(problem)
