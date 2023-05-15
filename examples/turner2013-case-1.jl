@@ -1,6 +1,6 @@
 import PlasmaModelingToolkit.Materials: Vacuum
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain
-import PlasmaModelingToolkit.Geometry: Segment, Rectangle
+import PlasmaModelingToolkit.Geometry: Segment2D, Rectangle
 import PlasmaModelingToolkit.BoundaryConditions: DirichletBoundaryCondition, NeumannBoundaryCondition
 import PlasmaModelingToolkit.ParticleBoundaries: AbsorbingBoundary, ReflectingBoundary
 import PlasmaModelingToolkit.Problems: ParticleProblem, BoundaryValueProblem, ParticleCollisionProblem
@@ -37,10 +37,10 @@ const N_A =  12_800
 
 domain = AxisymmetricDomain(Z, R, Vacuum())
 
-axis  = Segment{Z, 0.0, 0.0, 0.0}()
-side  = Segment{0.0, R, Z, R}()
-lower = Segment{0.0, 0.0, 0.0, R}()
-upper = Segment{Z, R, Z, 0.0}()
+axis  = Segment2D{Z, 0.0, 0.0, 0.0}()
+side  = Segment2D{0.0, R, Z, R}()
+lower = Segment2D{0.0, 0.0, 0.0, R}()
+upper = Segment2D{Z, R, Z, 0.0}()
 whole = Rectangle{0.0, 0.0, Z, R}()
 
 bvp = BoundaryValueProblem(domain)

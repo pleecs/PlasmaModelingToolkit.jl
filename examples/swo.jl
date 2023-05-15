@@ -1,7 +1,7 @@
 import PlasmaModelingToolkit.Models: FDTDModel
 import PlasmaModelingToolkit.Problems: BoundaryValueProblem
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain
-import PlasmaModelingToolkit.Geometry: Rectangle, Circle, Segment, Polygon
+import PlasmaModelingToolkit.Geometry: Rectangle, Circle, Segment2D, Polygon
 import PlasmaModelingToolkit.Constants: ε_0, μ_0, η_0
 import PlasmaModelingToolkit.Materials: Air, Metal, PerfectlyMatchedLayer, PTFE, Vacuum, permittivity, permeability
 import PlasmaModelingToolkit.BoundaryConditions: SurfaceImpedance, PerfectElectricConductor, PerfectMagneticConductor
@@ -50,9 +50,9 @@ domain[top_pml]	= PerfectlyMatchedLayer(Air(), 0.7(0.02/π), 2)
 domain[side_pml] = PerfectlyMatchedLayer(Air(), 0.7(0.02/π), 2)
 domain[bottom_pml] = PerfectlyMatchedLayer(Air(), 0.7(0.02/π), 2)
 
-axis   = Segment{D_LENGTH, 0.0, 192.5mm, 0.0}()
-input  = Segment{171mm, 48mm, 171mm, 44mm}()
-sparkgap   = Segment{9mm, 0.0, 5mm, 0.0}()
+axis   = Segment2D{D_LENGTH, 0.0, 192.5mm, 0.0}()
+input  = Segment2D{171mm, 48mm, 171mm, 44mm}()
+sparkgap   = Segment2D{9mm, 0.0, 5mm, 0.0}()
 
 ε₁ = permittivity(Air())
 ε₂ = permittivity(PTFE())

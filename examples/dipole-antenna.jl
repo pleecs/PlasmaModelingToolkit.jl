@@ -1,7 +1,7 @@
 import PlasmaModelingToolkit.Models: FDTDModel
 import PlasmaModelingToolkit.Problems: BoundaryValueProblem
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain
-import PlasmaModelingToolkit.Geometry: Rectangle, Circle, Segment
+import PlasmaModelingToolkit.Geometry: Rectangle, Circle, Segment2D
 import PlasmaModelingToolkit.Constants: ε_0, η_0
 import PlasmaModelingToolkit.Materials: Air, Metal, PerfectlyMatchedLayer, PTFE, permittivity
 import PlasmaModelingToolkit.BoundaryConditions: SurfaceImpedance, PerfectElectricConductor, PerfectMagneticConductor
@@ -32,10 +32,10 @@ domain[dielec] = PTFE()
 domain[inner]  = Metal()
 domain[obstacle] = PTFE()
 
-axis   = Segment{LENGTH, 0, 0, 0}()
-side   = Segment{0, RADIUS, LENGTH, RADIUS}()
-input  = Segment{0, r_coax, 0, R_coax}()
-output = Segment{LENGTH, RADIUS, LENGTH, 0}()
+axis   = Segment2D{LENGTH, 0, 0, 0}()
+side   = Segment2D{0, RADIUS, LENGTH, RADIUS}()
+input  = Segment2D{0, r_coax, 0, R_coax}()
+output = Segment2D{LENGTH, RADIUS, LENGTH, 0}()
 
 ε = permittivity(PTFE())
 

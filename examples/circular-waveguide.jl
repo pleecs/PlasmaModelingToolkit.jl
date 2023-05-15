@@ -2,7 +2,7 @@ import PlasmaModelingToolkit.Models: FDTDModel
 import PlasmaModelingToolkit.Problems: BoundaryValueProblem
 import PlasmaModelingToolkit.Materials: Air, Metal, permittivity, permeability
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain
-import PlasmaModelingToolkit.Geometry: Circle, Segment
+import PlasmaModelingToolkit.Geometry: Circle, Segment2D
 import PlasmaModelingToolkit.Constants: η_0, ε_0
 import PlasmaModelingToolkit.BoundaryConditions: PerfectMagneticConductor, PerfectElectricConductor, SurfaceImpedance
 import PlasmaModelingToolkit.Units: MHz
@@ -19,10 +19,10 @@ obstacle = Circle{LENGTH/2, 0.0, RADIUS/3}()
 domain   = AxisymmetricDomain(LENGTH, RADIUS, Air())
 domain[obstacle] = Metal()
 
-axis   = Segment{LENGTH, 0, 0, 0}()
-side   = Segment{0, RADIUS, LENGTH, RADIUS}()
-input  = Segment{0, 0, 0, RADIUS}()
-output = Segment{LENGTH, RADIUS, LENGTH, 0}()
+axis   = Segment2D{LENGTH, 0, 0, 0}()
+side   = Segment2D{0, RADIUS, LENGTH, RADIUS}()
+input  = Segment2D{0, 0, 0, RADIUS}()
+output = Segment2D{LENGTH, RADIUS, LENGTH, 0}()
 
 ε = permittivity(Air())
 μ = permeability(Air())

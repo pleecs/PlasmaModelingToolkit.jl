@@ -47,7 +47,7 @@ function FDTDModel(problem::BoundaryValueProblem{AxisymmetricDomain}, NZ, NR)
 	return fdtd
 end
 
-function setindex!(model::FDTDModel, bc::BoundaryCondition, segment::Segment)
+function setindex!(model::FDTDModel, bc::BoundaryCondition, segment::Segment2D)
 	grid = model.grid
 	cond = model.conditions
 	get!(cond, bc, length(cond) + 1)
