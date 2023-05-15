@@ -2,7 +2,7 @@ import PlasmaModelingToolkit.Models: FDTDModel
 import PlasmaModelingToolkit.Problems: BoundaryValueProblem
 import PlasmaModelingToolkit.Materials: Air, permittivity, permeability
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain
-import PlasmaModelingToolkit.Geometry: Segment
+import PlasmaModelingToolkit.Geometry: Segment2D
 import PlasmaModelingToolkit.Constants: η_0, ε_0
 import PlasmaModelingToolkit.BoundaryConditions: SurfaceImpedance, PerfectElectricConductor, PerfectMagneticConductor
 import PlasmaModelingToolkit.Sources: CoaxialPort
@@ -16,10 +16,10 @@ FREQ   = 20MHz
 
 domain = AxisymmetricDomain((0, L_coax), (r_coax, R_coax), Air())
 
-inner  = Segment{L_coax, r_coax, 0.0, r_coax}()
-outer  = Segment{0.0, R_coax, L_coax, R_coax}()
-input  = Segment{0.0, r_coax, 0.0, R_coax}()
-output = Segment{L_coax, R_coax, L_coax, r_coax}()
+inner  = Segment2D{L_coax, r_coax, 0.0, r_coax}()
+outer  = Segment2D{0.0, R_coax, L_coax, R_coax}()
+input  = Segment2D{0.0, r_coax, 0.0, R_coax}()
+output = Segment2D{L_coax, R_coax, L_coax, r_coax}()
 
 ε = permittivity(Air())
 μ = permeability(Air())

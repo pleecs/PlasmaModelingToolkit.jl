@@ -15,7 +15,7 @@ function setindex!(problem::ParticleCollisionProblem, loader::SpeciesLoader, reg
 	end
 end
 
-function setindex!(problem::ParticleCollisionProblem, boundary::ParticleBoundary, segment::Segment)
+function setindex!(problem::ParticleCollisionProblem, boundary::ParticleBoundary, segment::Segment2D)
 	problem.particles[segment] = boundary
 end
 
