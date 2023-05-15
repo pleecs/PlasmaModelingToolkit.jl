@@ -20,4 +20,9 @@ struct GaussianWavePacket{A, MU, SIGMA, FREQ} <: TemporalFunction end
 
 # f(t) = A * (exp(-\alpha * t) - exp(-\beta * t))
 struct DoubleExponentialPulse{A, ALPHA, BETA} <: TemporalFunction end
+
+# f(t) = { (t - A) / (B - A) * (HIGH - LOW) + LOW, A <= t <= B,
+#           LOW,  t < A,
+#           HIGH, t > B }
+struct RampFunction{A, B, LOW, HIGH} <: TemporalFunction end
 end
