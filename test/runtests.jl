@@ -2,7 +2,7 @@ using Test
 
 @testset "Geometry" begin
 
-import PlasmaModelingToolkit.Geometry: Polygon, Segment, Ray, ∩, ∈
+import PlasmaModelingToolkit.Geometry: Polygon, Segment2D, Ray, ∩, ∈
 
 p1 = Polygon([(0.,0.), (4.,0.), (4.,4.), (0.,4.)])
 p2 = Polygon([(-4.,-4.), (-2.,-4.), (-2.,-2.), (-4.,-2.)])
@@ -36,11 +36,11 @@ p2 = Polygon([(-4.,-4.), (-2.,-4.), (-2.,-2.), (-4.,-2.)])
 	@test !((1e-5,1e-5) ∈ p2)		# outside
 end
 
-s1 = Segment{0.,0.,0.,4.}()
+s1 = Segment2D{0.,0.,0.,4.}()
 r1 = Ray((-2.,2.),(1.,0.))
 r2 = Ray((2.,2.),(-1.,0.))
 
-@testset "Ray-Segment intersection" begin
+@testset "Ray-Segment2D intersection" begin
 	@test r1 ∩ s1
 	@test r2 ∩ s1
 end

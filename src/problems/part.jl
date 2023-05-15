@@ -1,12 +1,12 @@
 struct ParticleProblem{DOMAIN}
 	domain :: DOMAIN
-	boundaries :: Vector{Pair{Segment, ParticleBoundary}}
+	boundaries :: Vector{Pair{Segment2D, ParticleBoundary}}
 	sources :: Vector{Pair{Rectangle, SpeciesSource}}
 	loaders :: Vector{Pair{Rectangle, SpeciesLoader}} 
 	ParticleProblem(domain) = new{typeof(domain)}(domain, [], [], [])
 end
 
-function setindex!(problem::ParticleProblem, boundary::ParticleBoundary, segment::Segment)
+function setindex!(problem::ParticleProblem, boundary::ParticleBoundary, segment::Segment2D)
 	push!(problem.boundaries, segment => boundary)
 end
 

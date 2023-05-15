@@ -6,7 +6,7 @@ import ..Models: FDTDModel, FDMModel
 import ..Problems: BoundaryValueProblem
 import ..Grid: AxisymmetricGrid
 import ..Domains: AbstractDomain, AxisymmetricDomain
-import ..Geometry: Rectangle, Circle, Polygon, Segment, CompositeShape, Shape
+import ..Geometry: Rectangle, Circle, Polygon, Segment2D, CompositeShape, Shape2D
 import ..Materials: Material, Medium, Conductor, Dielectric, PerfectlyMatchedLayer, Metal, Vacuum, PTFE, Air
 import ..InterfaceConditions: DielectricInterface
 import ..BoundaryConditions: PerfectMagneticConductor, PerfectElectricConductor, SurfaceImpedance, BoundaryCondition
@@ -98,7 +98,7 @@ function draw(color::String, shape::Union{Rectangle, Circle, Polygon, CompositeS
 	return NativeSVG.use(href="#$(objectid(shape))", xlink!href="#$(objectid(shape))", fill=color)
 end
 
-function draw(color::String, shape::Segment)
+function draw(color::String, shape::Segment2D)
 	return NativeSVG.use(href="#$(objectid(shape))", xlink!href="#$(objectid(shape))", stroke=color, stroke_width="1%")
 end
 
@@ -122,7 +122,7 @@ function define(polygon::Polygon)
 	return NativeSVG.polygon(id="$(objectid(polygon))", points=points)
 end
 
-function define(shape::Segment{X1,Y1,X2,Y2}) where {X1,Y1,X2,Y2}
+function define(shape::Segment2D{X1,Y1,X2,Y2}) where {X1,Y1,X2,Y2}
 	x1,y1,x2,y2 = 1000 .* (X1,Y1,X2,Y2)
 	return NativeSVG.line(id="$(objectid(shape))", x1="$x1", y1="$y1", x2="$x2", y2="$y2")
 end

@@ -1,6 +1,6 @@
 import PlasmaModelingToolkit.Materials: Air, PTFE, Metal, permittivity, permeability
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain
-import PlasmaModelingToolkit.Geometry: Segment, Rectangle, Circle
+import PlasmaModelingToolkit.Geometry: Segment2D, Rectangle, Circle
 import PlasmaModelingToolkit.Constants: η_0, ε_0
 import PlasmaModelingToolkit.BoundaryConditions: SurfaceImpedance, PerfectElectricConductor, PerfectMagneticConductor
 import PlasmaModelingToolkit.Sources: CoaxialPort, UniformPort
@@ -27,9 +27,9 @@ domain = AxisymmetricDomain((0, LENGTH), (0, RADIUS), PTFE())
 domain[inner]  = Metal()
 domain[outer]  = Metal()
 
-input  = Segment{0.0, r_coax, 0.0, R_coax}()
-output = Segment{LENGTH, RADIUS, LENGTH, 0.0}()
-axis   = Segment{LENGTH - KNEE + R_coax, 0.0, LENGTH - KNEE + r_coax, 0.0}()
+input  = Segment2D{0.0, r_coax, 0.0, R_coax}()
+output = Segment2D{LENGTH, RADIUS, LENGTH, 0.0}()
+axis   = Segment2D{LENGTH - KNEE + R_coax, 0.0, LENGTH - KNEE + r_coax, 0.0}()
 
 ε = permittivity(PTFE())
 μ = permeability(PTFE())

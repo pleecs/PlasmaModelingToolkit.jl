@@ -3,7 +3,7 @@ import ..BoundaryConditions: BoundaryCondition, NeumannBoundaryCondition, Dirich
 import ..InterfaceConditions: InterfaceCondition
 import ..Grid: AbstractGrid, AxisymmetricGrid
 import ..Domains: AxisymmetricDomain
-import ..Geometry: Shape, Segment, Rectangle
+import ..Geometry: Shape2D, Segment2D, Rectangle
 import ..Materials: Material, Conductor, Dielectric, PerfectlyMatchedLayer
 import ..Distributions: Distribution
 import ..Problems: BoundaryValueProblem, ParticleProblem, ParticleCollisionProblem

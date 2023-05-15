@@ -29,7 +29,7 @@ function FDMModel(problem::BoundaryValueProblem{AxisymmetricDomain}, NZ, NR)
 	return fdm
 end
 
-function setindex!(model::FDMModel, bc::NeumannBoundaryCondition, segment::Segment)
+function setindex!(model::FDMModel, bc::NeumannBoundaryCondition, segment::Segment2D)
 	nodes = model.node_material
 	grid = model.grid
 	bcs = model.conditions
@@ -43,7 +43,7 @@ function setindex!(model::FDMModel, bc::NeumannBoundaryCondition, segment::Segme
 	return nothing
 end
 
-function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, segment::Segment)
+function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, segment::Segment2D)
 	nodes = model.node_material
 	grid = model.grid
 	bcs = model.conditions
@@ -57,7 +57,7 @@ function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, segment::Se
 	return nothing
 end
 
-function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, shape::Shape)
+function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, shape::Shape2D)
 	grid = model.grid
 	bcs = model.conditions
 	get!(bcs, dbc, length(bcs) + 1)
@@ -72,7 +72,7 @@ function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, shape::Shap
 	return nothing
 end
 
-function setindex!(model::FDMModel, dbc::PeriodicBoundaryCondition, shape::Shape)
+function setindex!(model::FDMModel, dbc::PeriodicBoundaryCondition, shape::Shape2D)
 	# TODO: add PeriodicBoundaryCondition handling
 	return nothing
 end
