@@ -1,5 +1,6 @@
 import PlasmaModelingToolkit.SVG: Figure, svg, save
-import PlasmaModelingToolkit.Examples.SwitchedWaveOscillator: model, RADIUS, LENGTH
+
+include("../examples/swo.jl")
 
 f = Figure(model; width=25)
 f.margin 			= 1

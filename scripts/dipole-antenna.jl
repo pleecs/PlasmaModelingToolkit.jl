@@ -1,5 +1,6 @@
 import PlasmaModelingToolkit.SVG: Figure, svg, save
-import PlasmaModelingToolkit.Examples.DipoleAntenna: model, r_coax, R_coax, RADIUS, LENGTH
+
+include("../examples/dipole-antenna.jl")
 
 f = Figure(model; width=25)
 f.margin            = 1

@@ -1,5 +1,3 @@
-
-
 import PlasmaModelingToolkit.Models: FDTDModel
 import PlasmaModelingToolkit.Problems: BoundaryValueProblem
 import PlasmaModelingToolkit.Domains: AxisymmetricDomain

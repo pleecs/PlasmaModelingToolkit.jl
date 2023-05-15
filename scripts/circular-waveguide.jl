@@ -1,5 +1,6 @@
 import PlasmaModelingToolkit.SVG: Figure, svg, save
-import PlasmaModelingToolkit.Examples.CircularWaveguide: model, RADIUS, LENGTH
+
+include("../examples/circular-waveguide.jl")
 
 f = Figure(model; width=25)
 f.margin["right"]  = 15.5

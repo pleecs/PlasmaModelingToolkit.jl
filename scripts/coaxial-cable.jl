@@ -1,5 +1,6 @@
 import PlasmaModelingToolkit.SVG: Figure, svg, save
-import PlasmaModelingToolkit.Examples.CoaxialCable: model, r_coax, R_coax, L_coax
+
+include("../examples/coaxial-cable.jl")
 
 f = Figure(model; width=25)
 f.margin["right"]  = 19
