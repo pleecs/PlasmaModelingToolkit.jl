@@ -4,8 +4,8 @@ import NativeSVG
 
 import ..Models: FDTDModel, FDMModel
 import ..Problems: BoundaryValueProblem
-import ..Grid: AxisymmetricGrid
-import ..Domains: AbstractDomain, AxisymmetricDomain
+import ..Grids: AxisymmetricGrid
+import ..Domains: AxisymmetricDomain
 import ..Geometry: Rectangle, Circle, Polygon, Segment2D, CompositeShape, Shape2D
 import ..Materials: Material, Medium, Conductor, Dielectric, PerfectlyMatchedLayer, Metal, Vacuum, PTFE, Air
 import ..InterfaceConditions: DielectricInterface
@@ -102,12 +102,17 @@ function draw(color::String, shape::Segment2D)
 	return NativeSVG.use(href="#$(objectid(shape))", xlink!href="#$(objectid(shape))", stroke=color, stroke_width="1%")
 end
 
-function define(shape::Rectangle{X, Y, W, H}) where {X, Y, W, H}
+function define(rectangle::Rectangle)
+	X, Y = rectangle.origin
+	W = rectangle.width
+	H = rectangle.height
 	x, y, w, h = 1000 .* (X, Y, W, H)
 	return NativeSVG.rect(id="$(objectid(shape))", x="$x", y="$y", width="$w", height="$h")
 end
 
-function define(shape::Circle{X, Y, R}) where {X, Y, R}
+function define(circle::Circle)
+	X, Y = circle.origin
+	R = circle.radius
 	x, y, r = 1000 .* (X, Y, R)
 	return NativeSVG.circle(id="$(objectid(shape))", cx="$x", cy="$y", r="$r")
 end
@@ -122,9 +127,11 @@ function define(polygon::Polygon)
 	return NativeSVG.polygon(id="$(objectid(polygon))", points=points)
 end
 
-function define(shape::Segment2D{X1,Y1,X2,Y2}) where {X1,Y1,X2,Y2}
+function define(segment::Segment2D)
+	X1,Y1 = segment.p₁
+	X2,Y2 = segment.p₂
 	x1,y1,x2,y2 = 1000 .* (X1,Y1,X2,Y2)
-	return NativeSVG.line(id="$(objectid(shape))", x1="$x1", y1="$y1", x2="$x2", y2="$y2")
+	return NativeSVG.line(id="$(objectid(segment))", x1="$x1", y1="$y1", x2="$x2", y2="$y2")
 end
 
 function define(shape::CompositeShape{+})
@@ -199,13 +206,13 @@ function get_domain_size(f::Figure)
 
 	return gdW, gdH, ldW, ldH, ldW_min, ldH_min
 end
-function get_domain_size(problem::BoundaryValueProblem{AxisymmetricDomain})
+function get_domain_size(problem::BoundaryValueProblem{2,:ZR})
 	return get_domain_size(problem.domain)
 end
-function get_domain_size(model::FDTDModel{:ZR})
+function get_domain_size(model::FDTDModel{2,:ZR})
 	return get_domain_size(model.grid)
 end
-function get_domain_size(model::FDMModel{:ZR})
+function get_domain_size(model::FDMModel{2,:ZR})
 	return get_domain_size(model.grid)
 end
 function get_domain_size(domain::AxisymmetricDomain)
@@ -225,7 +232,7 @@ function get_domain_size(grid::AxisymmetricGrid)
 	return ldW, ldH, ldW_min, ldH_min
 end
 
-function draw_normals(f::Figure{BoundaryValueProblem{AxisymmetricDomain}})
+function draw_normals(f::Figure{BoundaryValueProblem{2,:ZR}})
 	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f)
 
 	NativeSVG.g(id="normals") do
@@ -266,7 +273,7 @@ function draw_edge(x1, y1, x2, y2; lw="0", sw="0", sc="black")
 	if sw != "0" NativeSVG.line(x1="$(x1)cm", y1="$(y1)cm", x2="$(xm)cm", y2="$(ym)cm", stroke_width="$(sw)", fill="$(sc)", marker_end="url(#arrowhead)") end
 end
 
-function model_svg(f::Figure{FDTDModel{:ZR}})
+function model_svg(f::Figure{FDTDModel{2,:ZR}})
     model = f.model
     grid = model.grid
 	nz, nr = size(model.node_material)
@@ -323,7 +330,7 @@ function model_svg(f::Figure{FDTDModel{:ZR}})
 	return nothing
 end
 
-function model_svg(f::Figure{FDMModel{:ZR}})
+function model_svg(f::Figure{FDMModel{2,:ZR}})
     model = f.model
     grid = model.grid
 	nz, nr = size(model.node_material)
@@ -360,7 +367,7 @@ function model_svg(f::Figure{FDMModel{:ZR}})
 	return nothing
 end
 
-function model_svg(f::Figure{BoundaryValueProblem{AxisymmetricDomain}})
+function model_svg(f::Figure{BoundaryValueProblem{2,:ZR}})
 	gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f)
 
 	x = f.margin["left"] + f.offset["left"]

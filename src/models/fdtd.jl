@@ -1,14 +1,14 @@
 const Condition = Union{BoundaryCondition, InterfaceCondition}
 
-struct FDTDModel{CS} <: DiscretizedModel
-	grid :: AbstractGrid
+struct FDTDModel{D, CS} <: DiscretizedModel
+	grid :: Grid{D, CS}
 	materials :: Dict{Material, UInt8}
 	conditions :: Dict{Condition, UInt8}
-	edge_boundary :: NTuple{2, Matrix{UInt8}}
-	node_material :: Matrix{UInt8}
+	edge_boundary :: NTuple{D, Array{UInt8, D}} # TODO: check if right definition
+	node_material :: Array{UInt8, D}
 end
 
-function FDTDModel(problem::BoundaryValueProblem{AxisymmetricDomain}, NZ, NR)
+function FDTDModel(problem::BoundaryValueProblem{2, :ZR}, NZ, NR)
 	grid = discretize(problem.domain, NZ, NR)
 	
 	materials = Dict{Material, UInt8}()
@@ -24,7 +24,7 @@ function FDTDModel(problem::BoundaryValueProblem{AxisymmetricDomain}, NZ, NR)
 		discretize!(node_material, grid, shape, materials[material])
 	end
 	
-	fdtd =  FDTDModel{:ZR}(grid, materials, conditions, edge_boundary, node_material)
+	fdtd =  FDTDModel{2, :ZR}(grid, materials, conditions, edge_boundary, node_material)
 	
 	for (region, constraint) in problem.constraints
 		fdtd[region] = constraint
@@ -47,7 +47,7 @@ function FDTDModel(problem::BoundaryValueProblem{AxisymmetricDomain}, NZ, NR)
 	return fdtd
 end
 
-function setindex!(model::FDTDModel, bc::BoundaryCondition, segment::Segment2D)
+function setindex!(model::FDTDModel{2,:ZR}, bc::BoundaryCondition, segment::Segment2D)
 	grid = model.grid
 	cond = model.conditions
 	get!(cond, bc, length(cond) + 1)

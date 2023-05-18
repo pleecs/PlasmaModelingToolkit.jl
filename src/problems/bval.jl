@@ -1,9 +1,9 @@
-struct BoundaryValueProblem{DOMAIN}
-	domain :: DOMAIN
-	constraints :: Vector{Pair{Shape2D, BoundaryCondition}}
-	BoundaryValueProblem(domain) = new{typeof(domain)}(domain, [])
+struct BoundaryValueProblem{D,CS}
+	domain :: Domain{D}
+	constraints :: Vector{Pair{Shape{D}, BoundaryCondition}}
+	BoundaryValueProblem(domain::Domain{D,CS}) where {D,CS} = new{D,CS}(domain, [])
 end
 
-function setindex!(problem::BoundaryValueProblem, constraint::BoundaryCondition, region::Shape2D)
+function setindex!(problem::BoundaryValueProblem{D,CS}, constraint::BoundaryCondition, region::Shape{D}) where {D,CS}
     push!(problem.constraints, region => constraint)
 end

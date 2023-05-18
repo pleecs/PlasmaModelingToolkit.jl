@@ -1,12 +1,12 @@
-struct FDMModel{CS} <: DiscretizedModel
-	grid :: AbstractGrid
+struct FDMModel{D, CS} <: DiscretizedModel
+	grid :: Grid{D, CS}
 	materials :: Dict{Material, UInt8}
 	conditions :: Dict{BoundaryCondition, UInt8}
-	node_boundary :: Matrix{UInt8}
-	node_material :: Matrix{UInt8}
+	node_boundary :: Array{UInt8, D}
+	node_material :: Array{UInt8, D}
 end
 
-function FDMModel(problem::BoundaryValueProblem{AxisymmetricDomain}, NZ, NR)
+function FDMModel(problem::BoundaryValueProblem{2, :ZR}, NZ, NR)
 	grid = discretize(problem.domain, NZ, NR)
 	
 	materials = Dict{Material, UInt8}()
@@ -20,7 +20,7 @@ function FDMModel(problem::BoundaryValueProblem{AxisymmetricDomain}, NZ, NR)
 		discretize!(node_material, grid, shape, materials[material])
 	end
 
-	fdm = FDMModel{:ZR}(grid, materials, conditions, node_boundary, node_material)
+	fdm = FDMModel{2, :ZR}(grid, materials, conditions, node_boundary, node_material)
 
 	for (region, constraint) in problem.constraints
 		fdm[region] = constraint
@@ -29,7 +29,7 @@ function FDMModel(problem::BoundaryValueProblem{AxisymmetricDomain}, NZ, NR)
 	return fdm
 end
 
-function setindex!(model::FDMModel, bc::NeumannBoundaryCondition, segment::Segment2D)
+function setindex!(model::FDMModel{2, CS}, bc::NeumannBoundaryCondition, segment::Segment2D) where {CS}
 	nodes = model.node_material
 	grid = model.grid
 	bcs = model.conditions
@@ -43,7 +43,7 @@ function setindex!(model::FDMModel, bc::NeumannBoundaryCondition, segment::Segme
 	return nothing
 end
 
-function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, segment::Segment2D)
+function setindex!(model::FDMModel{2, CS}, dbc::DirichletBoundaryCondition, segment::Segment2D) where {CS}
 	nodes = model.node_material
 	grid = model.grid
 	bcs = model.conditions
@@ -57,7 +57,7 @@ function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, segment::Se
 	return nothing
 end
 
-function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, shape::Shape2D)
+function setindex!(model::FDMModel{2, CS}, dbc::DirichletBoundaryCondition, shape::Shape2D) where {CS}
 	grid = model.grid
 	bcs = model.conditions
 	get!(bcs, dbc, length(bcs) + 1)
@@ -72,7 +72,55 @@ function setindex!(model::FDMModel, dbc::DirichletBoundaryCondition, shape::Shap
 	return nothing
 end
 
-function setindex!(model::FDMModel, dbc::PeriodicBoundaryCondition, shape::Shape2D)
+function setindex!(model::FDMModel{2, CS}, dbc::PeriodicBoundaryCondition, shape::Shape2D) where {CS}
 	# TODO: add PeriodicBoundaryCondition handling
+	return nothing
+end
+
+function FDMModel(problem::BoundaryValueProblem{1, :X}, nx)
+	grid = discretize(problem.domain, nx)
+	materials = Dict{Material, UInt8}()
+	conditions = Dict{BoundaryCondition, UInt8}()
+	node_boundary = zeros(UInt8, nx)
+	node_material = zeros(UInt8, nx)
+	
+	materials[Conductor()] = 0x00
+	for (shape, material) in problem.domain.materials
+		get!(materials, material, length(materials))
+		discretize!(node_material, grid, shape, materials[material])
+	end
+
+	fdm = FDMModel{1, :X}(grid, materials, conditions, node_boundary, node_material)
+
+	for (region, constraint) in problem.constraints
+		fdm[region] = constraint
+	end
+
+	return fdm
+end
+
+function setindex!(model::FDMModel{1, CS}, dbc::DirichletBoundaryCondition, segment::Segment1D) where {CS}
+	nodes = model.node_material
+	grid = model.grid
+	bcs = model.conditions
+	get!(bcs, dbc, length(bcs) + 1)
+
+	is = snap(nodes, grid, segment)
+    for i=is
+        model.node_boundary[i] = bcs[dbc]
+    end
+
+	return nothing
+end
+
+function setindex!(model::FDMModel{1, CS}, dbc::DirichletBoundaryCondition, point::Point1D) where {CS}
+	nodes = model.node_material
+	grid = model.grid
+	bcs = model.conditions
+	get!(bcs, dbc, length(bcs) + 1)
+
+	i = snap(nodes, grid, point)
+    model.node_boundary[i] = bcs[dbc]
+
 	return nothing
 end

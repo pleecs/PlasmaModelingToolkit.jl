@@ -1,12 +1,8 @@
-struct Domain1D
-	xmin :: Float64
-	xmax :: Float64
-	materials :: Vector{Pair{Segment2D, Material}}
-end
+const Domain1D = Domain{1, :X}
 
 function Domain1D(xmin::Float64, xmax::Float64, material::Material)
-	region = Segment1D{xmin, xmax}()
-	return Domain1D(xmin, xmax, [region => material])
+	region = Segment1D(xmin, xmax)
+	return Domain1D(tuple(xmin), tuple(xmax), [region => material])
 end
 
 function setindex!(domain::Domain1D, material::Material, shape::Shape1D)
