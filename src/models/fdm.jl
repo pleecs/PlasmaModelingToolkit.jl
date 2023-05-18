@@ -1,9 +1,9 @@
-const FDMBoundaryConditions = Union{NeumannBoundaryCondition, DirichletBoundaryCondition, PeriodicBoundaryCondition}
+const FDMCondition = Union{NeumannBoundaryCondition, DirichletBoundaryCondition, PeriodicBoundaryCondition}
 
 struct FDMModel{D, CS} <: DiscretizedModel
 	grid :: Grid{D, CS}
 	materials :: Dict{Material, UInt8}
-	conditions :: Dict{FDMBoundaryConditions, UInt8}
+	conditions :: Dict{FDMCondition, UInt8}
 	node_boundary :: Array{UInt8, D}
 	node_material :: Array{UInt8, D}
 end
@@ -12,7 +12,7 @@ function FDMModel(problem::BoundaryValueProblem{D,CS}, args...) where {D,CS}
 	grid = discretize(problem.domain, args...)
 	
 	materials = Dict{Material, UInt8}()
-	conditions = Dict{BoundaryCondition, UInt8}()
+	conditions = Dict{FDMCondition, UInt8}()
 	node_boundary = zeros(UInt8, args...)
 	node_material = zeros(UInt8, args...)
 	
@@ -31,7 +31,7 @@ function FDMModel(problem::BoundaryValueProblem{D,CS}, args...) where {D,CS}
 	return fdm
 end
 
-function setindex!(model::FDMModel{2}, bc::FDMBoundaryConditions, segment::Segment2D)
+function setindex!(model::FDMModel{2}, bc::FDMCondition, segment::Segment2D)
 	nodes = model.node_material
 	grid = model.grid
 	bcs = model.conditions

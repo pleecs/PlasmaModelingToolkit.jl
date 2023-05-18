@@ -1,4 +1,4 @@
-const Condition = Union{BoundaryCondition, InterfaceCondition}
+const FDTDCondition = Union{BoundaryCondition, InterfaceCondition}
 
 struct FDTDModel{D, CS} <: DiscretizedModel
 	grid :: Grid{D, CS}
