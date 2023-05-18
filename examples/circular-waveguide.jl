@@ -14,15 +14,15 @@ RADIUS  = 0.10            # radius along r-axis [m]
 LENGTH  = 0.60            # lenght along z-axis [m]
 FREQ    = 20MHz
 
-obstacle = Circle{LENGTH/2, 0.0, RADIUS/3}()
+obstacle = Circle(LENGTH/2, 0.0, RADIUS/3)
 
 domain   = AxisymmetricDomain(LENGTH, RADIUS, Air())
 domain[obstacle] = Metal()
 
-axis   = Segment2D{LENGTH, 0, 0, 0}()
-side   = Segment2D{0, RADIUS, LENGTH, RADIUS}()
-input  = Segment2D{0, 0, 0, RADIUS}()
-output = Segment2D{LENGTH, RADIUS, LENGTH, 0}()
+axis   = Segment2D(LENGTH, 0, 0, 0)
+side   = Segment2D(0, RADIUS, LENGTH, RADIUS)
+input  = Segment2D(0, 0, 0, RADIUS)
+output = Segment2D(LENGTH, RADIUS, LENGTH, 0)
 
 ε = permittivity(Air())
 μ = permeability(Air())

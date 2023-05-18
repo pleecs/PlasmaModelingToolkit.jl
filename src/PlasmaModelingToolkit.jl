@@ -1,4 +1,9 @@
 module PlasmaModelingToolkit
+function ++(code::Expr, block::Expr)
+    push!(code.args, block)
+    return code
+end
+
 include("units.jl")
 include("constants.jl")
 include("atoms.jl")

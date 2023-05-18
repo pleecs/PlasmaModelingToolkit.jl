@@ -1,11 +1,11 @@
-struct MCCModel{D,V}
+struct MCCModel{D,V,CS}
 	particles :: Set{Particles}
 	fluids :: Set{Fluid}
 	collisions :: Vector{Collision}
-	loaders :: Vector{Pair{Rectangle, SpeciesLoader}}
+	loaders :: Vector{Pair{Shape{D}, SpeciesLoader}}
 end
 
-function MCCModel{2,3}(problem::ParticleCollisionProblem)
+function MCCModel(problem::ParticleCollisionProblem{1,:X})
 	particles = Set{Particles}()
 	fluids = Set{Fluid}()
 	collisions = problem.collisions
@@ -18,5 +18,5 @@ function MCCModel{2,3}(problem::ParticleCollisionProblem)
 			push!(fluids, collision.target)
 		end
 	end
-	return MCCModel{2,3}(particles, fluids, collisions, loaders)
+	return MCCModel{1,3,:X}(particles, fluids, collisions, loaders)
 end

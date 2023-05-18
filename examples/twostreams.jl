@@ -31,11 +31,11 @@ const WG = n_0 * Z * π * R^2 / (NZ * NR * 20)
 
 domain = AxisymmetricDomain(Z, R, Vacuum())
 
-axis  = Segment2D{Z, 0.0, 0.0, 0.0}()
-side  = Segment2D{0.0, R, Z, R}()
-lower = Segment2D{0.0, 0.0, 0.0, R}()
-upper = Segment2D{Z, R, Z, 0.0}()
-whole = Rectangle{0.0, 0.0, Z, R}()
+axis  = Segment2D(Z, 0.0, 0.0, 0.0)
+side  = Segment2D(0.0, R, Z, R)
+lower = Segment2D(0.0, 0.0, 0.0, R)
+upper = Segment2D(Z, R, Z, 0.0)
+whole = Rectangle(0.0, 0.0, Z, R)
 
 bvp = BoundaryValueProblem(domain)
 bvp[axis] = NeumannBoundaryCondition()
@@ -57,4 +57,4 @@ problem[whole] = SpeciesLoader(e, 0.5n_0, UniformDistribution(), MaxwellBoltzman
 problem[whole] = SpeciesLoader(iHe, n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_i, iHe.mass}())
 
 es  = FDMModel(bvp, NZ + 1, NR + 1)
-# pic = PICModel(problem, NZ + 1, NR + 1, Δt = 5, weight = (e => WG, iHe => WG), maxcount = (e => 20_000, iHe => 20_000))
+pic = PICModel(problem, NZ + 1, NR + 1, weights = (e => WG, iHe => WG), maxcount = (e => 20_000, iHe => 20_000))

@@ -2,15 +2,40 @@ module Geometry
 export Rectangle, Circle, Segment2D, Polygon
 import Base: +, -, ∈, ∩
 
-const mm = 1e-3 # unit conversion ratio [mm/m]
-const cm = 1e-2 # unit conversion ratio [cm/m]
+abstract type Shape{D} end
+const Shape1D = Shape{1}
+const Shape2D = Shape{2}
 
-abstract type Shape2D end
+struct Segment{D} <: Shape{D}
+	p₁ :: NTuple{D, Float64}
+	p₂ :: NTuple{D, Float64}
+end
 
-struct Segment1D{X1, X2} <: Shape2D end 	
-struct Segment2D{X1, Y1, X2, Y2} <: Shape2D end # by default Segment2D has its normal vector oriented to the left  				
-struct Rectangle{X, Y, W, H} <: Shape2D end
-struct Circle{X, Y, R} <: Shape2D end
+const Segment1D = Segment{1}
+const Segment2D = Segment{2}
+Segment1D(x₁::Float64, x₂::Float64) = Segment(tuple(x₁), tuple(x₂))
+Segment2D(x₁, y₁, x₂, y₂) = Segment(tuple(float(x₁),float(y₁)), tuple(float(x₂),float(y₂)))
+
+struct Point{D} <: Shape{D}
+	coords :: NTuple{D, Float64}
+end
+
+const Point1D = Point{1}
+Point1D(x::Float64) = Point(tuple(x))
+			
+struct Rectangle <: Shape2D 
+	origin :: Tuple{Float64, Float64}
+	width  :: Float64
+	height :: Float64
+end
+Rectangle(x, y, w, h) = Rectangle((x, y), w, h)
+
+struct Circle <: Shape2D 
+	origin :: Tuple{Float64, Float64}
+	radius :: Float64
+end
+Circle(x, y, r) = Circle((x, y), r)
+
 struct CompositeShape{OPERATOR}  <: Shape2D
 	A :: Shape2D
 	B :: Shape2D 
@@ -22,25 +47,34 @@ end
 function Polygon(nodes::Vector{NTuple{2, Float64}})
 	segments = Vector{Segment2D}()
 	for i=1:(length(nodes) - 1)
-		push!(segments, Segment2D{nodes[i]..., nodes[i+1]...}())
+		push!(segments, Segment2D(nodes[i]..., nodes[i+1]...))
 	end
-	push!(segments, Segment2D{nodes[end]..., nodes[1]...}())
+	push!(segments, Segment2D(nodes[end]..., nodes[1]...))
 	return Polygon{length(segments)}(Tuple(segments))
 end
 
-struct Ray
-	origin :: NTuple{2, Float64}
-	direction :: NTuple{2, Float64}
+struct Ray{D}
+	origin :: NTuple{D, Float64}
+	direction :: NTuple{D, Float64}
 end
+
+const Ray2D = Ray{2}
 	
-function ∈((x, y), ::Rectangle{X, Y, W, H}) where {X, Y, W, H}
+function ∈((x, y), rectangle::Rectangle)
+	X, Y = rectangle.origin
+	W = rectangle.width
+	H = rectangle.height
+
 	if (X <= x <= X + W) && (Y <= y <= Y + H)
 		return true
 	end
 	return false
 end
 
-function ∈((x, y), ::Circle{X, Y, R}) where {X, Y, R}
+function ∈((x, y), circle::Circle)
+	X, Y = circle.origin
+	R = circle.radius
+
 	r² = (x - X)^2 + (y - Y)^2
 	if r² <= R^2
 		return true
@@ -48,19 +82,22 @@ function ∈((x, y), ::Circle{X, Y, R}) where {X, Y, R}
 	return false
 end
 
-function ∈((x, y), ::Segment2D{X1, Y1, X2, Y2}) where {X1, Y1, X2, Y2}
-	d₁ = sqrt((x - X1)^2 + (y - Y1)^2)
-	d₂ = sqrt((x - X2)^2 + (y - Y2)^2)
-	d₃ = sqrt((X1 - X2)^2 + (Y1 - Y2)^2)
+function ∈((x, y), segment::Segment2D)
+	x₁, y₁ = segment.p₁
+	x₂, y₂ = segment.p₂
+	d₁ = sqrt((x - x₁)^2 + (y - y₁)^2)
+	d₂ = sqrt((x - x₂)^2 + (y - y₂)^2)
+	d₃ = sqrt((x₁ - x₂)^2 + (y₁ - y₂)^2)
 	return d₁ + d₂ ≈ d₃
 end
 
-function ∈(x, ::Segment1D{X1, X2}) where {X1, X2}
-	return min(X1,X2) <= x <= max(X1,X2)
+function ∈((x,), segment::Segment1D)
+	x₁, = segment.p₁
+	x₂, = segment.p₂
+	return min(x₁,x₂) <= x <= max(x₁,x₂)
 end
 
 function ∈((x, y), polygon::Polygon{N}) where {N}
-
 	if any(s->((x,y) ∈ s), polygon.segments)
 		return true
 	end
@@ -70,11 +107,11 @@ function ∈((x, y), polygon::Polygon{N}) where {N}
 	# d_y = cos(θ)/(sqrt(sin(θ)^2 + cos(θ)^2))
 	# ray = Ray((x,y),(d_x, d_y))
 
-	ray = Ray((x,y),(1., 1.)) # diagonal ray
+	ray = Ray((x,y),(1., 0.))
 
 	n_crossings = 0
 	for segment in polygon.segments
-		if ray ∩ segment
+		if ∩(ray, segment, exclude_endpoints=(true,false))
 			n_crossings += 1
 		end
 	end
@@ -85,9 +122,9 @@ end
 ×(v₁::Tuple{Float64,Float64}, v₂::Tuple{Float64,Float64}) = v₁[1] * v₂[2] - v₁[2] * v₂[1]
 ⋅(v₁::Tuple{Float64,Float64}, v₂::Tuple{Float64,Float64}) = v₁[1] * v₂[1] + v₁[2] * v₂[2]
 
-function ∩(ray::Ray, segment::Segment2D{X1, Y1, X2, Y2}) where {X1, Y1, X2, Y2}
-	a = (X1, Y1)
-	b = (X2, Y2)
+function ∩(ray::Ray2D, segment::Segment2D; exclude_endpoints=(false, false))
+	a = segment.p₁
+	b = segment.p₂
 
 	v₁ = ray.origin .- a
 	v₂ = b .- a
@@ -100,7 +137,13 @@ function ∩(ray::Ray, segment::Segment2D{X1, Y1, X2, Y2}) where {X1, Y1, X2, Y2
 	t₁ = (v₂ × v₁) / (v₂v₃)
 	t₂ = (v₁ ⋅ v₃) / (v₂v₃)
 
-	return (t₁ >= 0) && (0 <= t₂ <= 1)
+	P = ray.origin .+ ray.direction .* t₁
+
+	if (exclude_endpoints[1] && all(P .≈ a)) || (exclude_endpoints[2] && all(P .≈ b))
+		return false
+	end 
+
+	return (t₁ >= 0) && (0 <= t₂ <= 1) 
 end
 
 +(A::Shape2D, B::Shape2D) = CompositeShape{+}(A, B)

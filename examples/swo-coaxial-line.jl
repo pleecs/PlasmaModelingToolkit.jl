@@ -15,21 +15,21 @@ RADIUS = 0.050    # radius along r-axis [m]
 LENGTH = 0.342    # lenght along z-axis [m]
 FREQ   = 50e8     # Excitation frequency [Hz]
 
-inner  = Rectangle{0.0, 0.0, LENGTH, r_coax}()
-inner -= Rectangle{LENGTH - KNEE, 0.0, KNEE, R_coax}()
-inner += Circle{LENGTH - KNEE, 0.0, r_coax}()
-outer  = Rectangle{0.0, R_coax, LENGTH, RADIUS}()
-outer += Rectangle{LENGTH - KNEE, 0.0, KNEE, R_coax}()
-outer -= Circle{LENGTH - KNEE, 0.0, R_coax}()
+inner  = Rectangle(0.0, 0.0, LENGTH, r_coax)
+inner -= Rectangle(LENGTH - KNEE, 0.0, KNEE, R_coax)
+inner += Circle(LENGTH - KNEE, 0.0, r_coax)
+outer  = Rectangle(0.0, R_coax, LENGTH, RADIUS)
+outer += Rectangle(LENGTH - KNEE, 0.0, KNEE, R_coax)
+outer -= Circle(LENGTH - KNEE, 0.0, R_coax)
 
 domain = AxisymmetricDomain((0, LENGTH), (0, RADIUS), PTFE())
 
 domain[inner]  = Metal()
 domain[outer]  = Metal()
 
-input  = Segment2D{0.0, r_coax, 0.0, R_coax}()
-output = Segment2D{LENGTH, RADIUS, LENGTH, 0.0}()
-axis   = Segment2D{LENGTH - KNEE + R_coax, 0.0, LENGTH - KNEE + r_coax, 0.0}()
+input  = Segment2D(0.0, r_coax, 0.0, R_coax)
+output = Segment2D(LENGTH, RADIUS, LENGTH, 0.0)
+axis   = Segment2D(LENGTH - KNEE + R_coax, 0.0, LENGTH - KNEE + r_coax, 0.0)
 
 ε = permittivity(PTFE())
 μ = permeability(PTFE())

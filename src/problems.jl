@@ -1,5 +1,6 @@
 module Problems
-import ..Geometry: Rectangle, Segment2D, Shape2D
+import ..Geometry: Rectangle, Segment2D, Shape2D, Shape, Point1D, Segment, Segment1D
+import ..Domains: Domain
 import ..ParticleBoundaries: ParticleBoundary
 import ..BoundaryConditions: BoundaryCondition
 import ..Sources: SpeciesSource, SpeciesLoader
