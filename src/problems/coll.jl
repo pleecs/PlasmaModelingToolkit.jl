@@ -5,7 +5,7 @@ struct ParticleCollisionProblem{D, CS}
 	ParticleCollisionProblem(domain::Domain{D,CS}) where {D,CS} = new{D,CS}(ParticleProblem(domain), [], [])
 end
 
-function setindex!(problem::ParticleCollisionProblem{2,CS}, loader::SpeciesLoader, region::Rectangle) where {CS}
+function setindex!(problem::ParticleCollisionProblem{2}, loader::SpeciesLoader, region::Rectangle)
 	if loader.species isa Fluid
 		push!(problem.loaders, region => loader)
 	end
@@ -15,15 +15,15 @@ function setindex!(problem::ParticleCollisionProblem{2,CS}, loader::SpeciesLoade
 	end
 end
 
-function setindex!(problem::ParticleCollisionProblem{2,CS}, boundary::ParticleBoundary, segment::Segment2D) where {CS}
+function setindex!(problem::ParticleCollisionProblem{2}, boundary::ParticleBoundary, segment::Segment2D)
 	problem.particles[segment] = boundary
 end
 
-function setindex!(problem::ParticleCollisionProblem{1, CS}, boundary::ParticleBoundary, point::Point1D) where {CS}
+function setindex!(problem::ParticleCollisionProblem{1}, boundary::ParticleBoundary, point::Point1D)
 	problem.particles[point] = boundary
 end
 
-function setindex!(problem::ParticleCollisionProblem{1,CS}, loader::SpeciesLoader, region::Segment1D) where {CS}
+function setindex!(problem::ParticleCollisionProblem{1}, loader::SpeciesLoader, region::Segment1D)
 	if loader.species isa Fluid
 		push!(problem.loaders, region => loader)
 	end

@@ -6,19 +6,19 @@ struct ParticleProblem{D, CS}
 	ParticleProblem(domain::Domain{D,CS}) where {D,CS} = new{D,CS}(domain, [], [], [])
 end
 
-function setindex!(problem::ParticleProblem{2, CS}, boundary::ParticleBoundary, segment::Segment2D) where {CS}
+function setindex!(problem::ParticleProblem{2}, boundary::ParticleBoundary, segment::Segment2D)
 	push!(problem.boundaries, segment => boundary)
 end
 
-function setindex!(problem::ParticleProblem{2, CS}, source::SpeciesSource, rectangle::Rectangle) where {CS}
+function setindex!(problem::ParticleProblem{2}, source::SpeciesSource, rectangle::Rectangle)
 	push!(problem.sources, rectangle => source)
 end
 
-function setindex!(problem::ParticleProblem{2, CS}, loader::SpeciesLoader, rectangle::Rectangle) where {CS}
+function setindex!(problem::ParticleProblem{2}, loader::SpeciesLoader, rectangle::Rectangle)
 	push!(problem.loaders, rectangle => loader)
 end
 
-function setindex!(problem::ParticleProblem{1, CS}, boundary::ParticleBoundary, point::Point1D) where {CS}
+function setindex!(problem::ParticleProblem{1}, boundary::ParticleBoundary, point::Point1D)
 	xmin = problem.domain.xmin
 	xmax = problem.domain.xmax
 	x, = point.coords
@@ -28,18 +28,18 @@ function setindex!(problem::ParticleProblem{1, CS}, boundary::ParticleBoundary, 
 	push!(problem.boundaries, point => boundary)
 end
 
-function setindex!(problem::ParticleProblem{1, CS}, source::SpeciesSource, point::Point1D) where {CS}
+function setindex!(problem::ParticleProblem{1}, source::SpeciesSource, point::Point1D)
 	push!(problem.sources, point => source)
 end
 
-function setindex!(problem::ParticleProblem{1, CS}, loader::SpeciesLoader, point::Point1D) where {CS}
+function setindex!(problem::ParticleProblem{1}, loader::SpeciesLoader, point::Point1D)
 	push!(problem.loaders, point => loader)
 end
 
-function setindex!(problem::ParticleProblem{1, CS}, source::SpeciesSource, segment::Segment1D) where {CS}
+function setindex!(problem::ParticleProblem{1}, source::SpeciesSource, segment::Segment1D)
 	push!(problem.sources, segment => source)
 end
 
-function setindex!(problem::ParticleProblem{1, CS}, loader::SpeciesLoader, segment::Segment1D) where {CS}
+function setindex!(problem::ParticleProblem{1}, loader::SpeciesLoader, segment::Segment1D)
 	push!(problem.loaders, segment => loader)
 end
