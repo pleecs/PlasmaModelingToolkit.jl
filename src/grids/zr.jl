@@ -1,9 +1,4 @@
-struct AxisymmetricGrid{ZN, RN} <: AbstractGrid{2}
-	z  :: Matrix{Float64}
-    r  :: Matrix{Float64}
-    dz :: Float64
-    dr :: Float64
-end
+const AxisymmetricGrid = Grid{2,:ZR}
 
 function discretize(domain::AxisymmetricDomain, nz, nr)
     zs = range(domain.zmin, domain.zmax, length=nz)
@@ -12,11 +7,12 @@ function discretize(domain::AxisymmetricDomain, nz, nr)
     dr = step(rs)
     z  = repeat(zs,  1, nr)
     r  = repeat(rs', nz, 1)
-    return AxisymmetricGrid{nz, nr}(z, r, dz, dr)
+    return AxisymmetricGrid((z, r), (dz, dr), (nz, nr))
 end
 
-function discretize!(node::Matrix{UInt8}, grid::AxisymmetricGrid{NZ, NR},
-    shape::Shape2D, v::UInt8) where {NZ, NR}
+function discretize!(node::Matrix{UInt8}, grid::AxisymmetricGrid, shape::Shape2D, v::UInt8)
+    NR = grid.nr
+    NZ = grid.nz
     for j=1:NR, i=1:NZ
         if (grid.z[i,j], grid.r[i,j]) ∈ shape
             node[i,j] = v
@@ -24,8 +20,12 @@ function discretize!(node::Matrix{UInt8}, grid::AxisymmetricGrid{NZ, NR},
     end
 end
 
-function snap(node::Matrix{UInt8}, grid::AxisymmetricGrid{NZ, NR},
-    segment::Segment2D{Z1, R1, Z2, R2}; extend=false) where {NZ, NR, Z1, Z2, R1, R2}
+function snap(node::Matrix{UInt8}, grid::AxisymmetricGrid, segment::Segment2D; extend=false)
+    Z1, R1 = segment.p₁
+    Z2, R2 = segment.p₂
+    NZ = grid.nz
+    NR = grid.nr
+
     if Z1 ≈ Z2
         ε, z = modf(Z1 / grid.dz - minimum(grid.z) / grid.dz)
         i₁ = i₂ = Int(z) + 1

@@ -15,14 +15,14 @@ RADIUS = 0.05            # radius along r-axis [m]
 LENGTH = 0.05            # lenght along z-axis [m]
 FREQ   = 50GHz
 
-ground = Rectangle{0, 0, 15mm, RADIUS}()
-dielec = Rectangle{0, 0, 15mm, R_coax}()
-inner  = Rectangle{0, 0, 22mm, r_coax}()
-inner += Circle{22mm, 0, r_coax}() 
-top    = Rectangle{LENGTH - 1mm, 0mm, 1mm, RADIUS}()
-wall   = Rectangle{0mm, RADIUS - 1mm, LENGTH, 1mm}()
-obstacle = Circle{30mm, 14.9mm, 9mm}()
-obstacle-= Circle{30mm, 14.9mm, 5mm}()
+ground = Rectangle(0, 0, 15mm, RADIUS)
+dielec = Rectangle(0, 0, 15mm, R_coax)
+inner  = Rectangle(0, 0, 22mm, r_coax)
+inner += Circle(22mm, 0, r_coax)
+top    = Rectangle(LENGTH - 1mm, 0mm, 1mm, RADIUS)
+wall   = Rectangle(0mm, RADIUS - 1mm, LENGTH, 1mm)
+obstacle = Circle(30mm, 14.9mm, 9mm)
+obstacle-= Circle(30mm, 14.9mm, 5mm)
 
 domain = AxisymmetricDomain(LENGTH, RADIUS, Air())
 domain[top]    = PerfectlyMatchedLayer(Air(), 0.7(0.02/π), 2)
@@ -32,10 +32,10 @@ domain[dielec] = PTFE()
 domain[inner]  = Metal()
 domain[obstacle] = PTFE()
 
-axis   = Segment2D{LENGTH, 0, 0, 0}()
-side   = Segment2D{0, RADIUS, LENGTH, RADIUS}()
-input  = Segment2D{0, r_coax, 0, R_coax}()
-output = Segment2D{LENGTH, RADIUS, LENGTH, 0}()
+axis   = Segment2D(LENGTH, 0, 0, 0)
+side   = Segment2D(0, RADIUS, LENGTH, RADIUS)
+input  = Segment2D(0, r_coax, 0, R_coax)
+output = Segment2D(LENGTH, RADIUS, LENGTH, 0)
 
 ε = permittivity(PTFE())
 

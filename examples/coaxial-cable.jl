@@ -16,10 +16,10 @@ FREQ   = 20MHz
 
 domain = AxisymmetricDomain((0, L_coax), (r_coax, R_coax), Air())
 
-inner  = Segment2D{L_coax, r_coax, 0.0, r_coax}()
-outer  = Segment2D{0.0, R_coax, L_coax, R_coax}()
-input  = Segment2D{0.0, r_coax, 0.0, R_coax}()
-output = Segment2D{L_coax, R_coax, L_coax, r_coax}()
+inner  = Segment2D(L_coax, r_coax, 0.0, r_coax)
+outer  = Segment2D(0.0, R_coax, L_coax, R_coax)
+input  = Segment2D(0.0, r_coax, 0.0, R_coax)
+output = Segment2D(L_coax, R_coax, L_coax, r_coax)
 
 ε = permittivity(Air())
 μ = permeability(Air())
