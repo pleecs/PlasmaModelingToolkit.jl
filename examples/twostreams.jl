@@ -40,17 +40,16 @@ whole = Rectangle(0.0, 0.0, Z, R)
 bvp = BoundaryValueProblem(domain)
 bvp[axis] = NeumannBoundaryCondition()
 bvp[side] = NeumannBoundaryCondition()
-bvp[upper] = PeriodicBoundaryCondition()			#assumes its a full edge of a domain 
-bvp[lower] = PeriodicBoundaryCondition()			#assumes its a full edge of a domain 
+bvp[upper] = PeriodicBoundaryCondition()
+bvp[lower] = PeriodicBoundaryCondition()
 
 problem = ParticleProblem(domain)
 problem[side] = ReflectingBoundary()
-problem[lower] = PeriodicBoundary()					#assumes its a full edge of a domain 
-problem[upper] = PeriodicBoundary()			 		#assumes its a full edge of a domain 
+problem[lower] = PeriodicBoundary()
+problem[upper] = PeriodicBoundary()
 
 e   = electrons()
 iHe = ions(Helium)
-
 
 problem[whole] = SpeciesLoader(e, 0.5n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_e, e.mass}(), drift = [:z => +ν_drift])
 problem[whole] = SpeciesLoader(e, 0.5n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_e, e.mass}(), drift = [:z => -ν_drift])

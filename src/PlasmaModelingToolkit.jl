@@ -1,7 +1,7 @@
 module PlasmaModelingToolkit
 function ++(code::Expr, block::Expr)
-    push!(code.args, block)
-    return code
+  push!(code.args, block)
+  return code
 end
 
 include("units.jl")

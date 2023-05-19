@@ -5,11 +5,11 @@ import ..Constants: m_e, q_e
 abstract type AbstractSpecies end
 
 struct Particles{SYM} <: AbstractSpecies
-	charge :: Float64
-	mass :: Float64
+  charge :: Float64
+  mass :: Float64
 end
 struct Fluid{SYM} <: AbstractSpecies
-	mass :: Float64
+  mass :: Float64
 end
 
 electrons() = Particles{:e}(-q_e, m_e)

@@ -10,35 +10,35 @@ struct TM01 <: WaveguideMode end
 struct TEM <: WaveguideMode end
 
 struct CoaxialPort <: BoundaryCondition
-	signal :: TemporalFunction
-	ε :: Float64
+  signal :: TemporalFunction
+  ε :: Float64
 end
 
 struct WaveguidePort <: BoundaryCondition
-	signal :: TemporalFunction
-	mode :: WaveguideMode
-	ε :: Float64
+  signal :: TemporalFunction
+  mode :: WaveguideMode
+  ε :: Float64
 end
 
 struct UniformPort <: BoundaryCondition
-	signal :: TemporalFunction
-	ε :: Float64
+  signal :: TemporalFunction
+  ε :: Float64
 end
 
 struct SpeciesSource
-	species :: AbstractSpecies
-	rate :: TemporalFunction
-	x :: Distribution
-	v :: Distribution
-	drift :: Vector{Pair{Symbol, Float64}}
+  species :: AbstractSpecies
+  rate :: TemporalFunction
+  x :: Distribution
+  v :: Distribution
+  drift :: Vector{Pair{Symbol, Float64}}
 end
 
 struct SpeciesLoader
-	species :: AbstractSpecies
-	density :: Float64
-	x :: Distribution
-	v :: Distribution
-	drift :: Vector{Pair{Symbol, Float64}}
+  species :: AbstractSpecies
+  density :: Float64
+  x :: Distribution
+  v :: Distribution
+  drift :: Vector{Pair{Symbol, Float64}}
 end
 
 SpeciesSource(species::AbstractSpecies, rate, x::Distribution, v::Distribution) = SpeciesSource(species, rate, x, v, [])

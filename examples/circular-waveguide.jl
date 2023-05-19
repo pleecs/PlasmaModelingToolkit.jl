@@ -16,7 +16,7 @@ FREQ    = 20MHz
 
 obstacle = Circle(LENGTH/2, 0.0, RADIUS/3)
 
-domain   = AxisymmetricDomain(LENGTH, RADIUS, Air())
+domain = AxisymmetricDomain(LENGTH, RADIUS, Air())
 domain[obstacle] = Metal()
 
 axis   = Segment2D(LENGTH, 0, 0, 0)

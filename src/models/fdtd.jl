@@ -1,10 +1,20 @@
-const FDTDCondition = Union{BoundaryCondition, InterfaceCondition}
+import ..BoundaryConditions: BoundaryCondition
+import ..InterfaceConditions: InterfaceCondition
+import ..Grids: Grid, discretize, discretize!, snap
+import ..Domains: AxisymmetricDomain, Domain1D
+import ..Geometry: Shape2D, Segment2D, Rectangle, Segment1D, Point1D, Shape
+import ..Materials: Material, Conductor, Dielectric, PerfectlyMatchedLayer
+import ..Problems: BoundaryValueProblem
+import ..InterfaceConditions: detect_interface_z!, detect_interface_r!
+import Base: setindex!
 
-struct FDTDModel{D, CS} <: DiscretizedModel
+const Condition = Union{BoundaryCondition, InterfaceCondition}
+
+struct FDTDModel{D, CS}
 	grid :: Grid{D, CS}
 	materials :: Dict{Material, UInt8}
 	conditions :: Dict{Condition, UInt8}
-	edge_boundary :: NTuple{D, Array{UInt8, D}} # TODO: check if right definition
+	edge_boundary :: NTuple{D, Array{UInt8, D}}
 	node_material :: Array{UInt8, D}
 end
 
