@@ -1,1 +1,1 @@
-struct FEMModel <: DiscretizedModel end
+struct FEMModel end
