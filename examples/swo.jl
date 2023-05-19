@@ -50,9 +50,9 @@ domain[top_pml]	= PerfectlyMatchedLayer(Air(), 0.7(0.02/π), 2)
 domain[side_pml] = PerfectlyMatchedLayer(Air(), 0.7(0.02/π), 2)
 domain[bottom_pml] = PerfectlyMatchedLayer(Air(), 0.7(0.02/π), 2)
 
-axis   = Segment2D(D_LENGTH, 0.0, 192.5mm, 0.0)
-input  = Segment2D(171mm, 48mm, 171mm, 44mm)
-sparkgap   = Segment2D(9mm, 0.0, 5mm, 0.0)
+axis     = Segment2D(D_LENGTH, 0.0, 192.5mm, 0.0)
+input    = Segment2D(171mm, 48mm, 171mm, 44mm)
+sparkgap = Segment2D(9mm, 0.0, 5mm, 0.0)
 
 ε₁ = permittivity(Air())
 ε₂ = permittivity(PTFE())

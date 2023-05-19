@@ -15,21 +15,21 @@ import PlasmaModelingToolkit.Units: MHz, cm
 import PlasmaModelingToolkit.CrossSections: Biagi
 import PlasmaModelingToolkit.Constants: ω_He
 
-const X    = 6.7cm				# electrode separation
-const R    = √(1/π)				# electrode radius
-const n_He = 9.64e20			# neutral density
-const T_He = 300.0 				# neutral temperature
-const FREQ = 13.56MHz 			# RF frequency
-const VOLT = 450.0 				# voltage
+const X    = 6.7cm                    # electrode separation
+const R    = √(1/π)                   # electrode radius
+const n_He = 9.64e20                  # neutral density
+const T_He = 300.0                    # neutral temperature
+const FREQ = 13.56MHz                 # RF frequency
+const VOLT = 450.0                    # voltage
 
-const n_0 = 2.56e14 			# plasma density
-const T_e = 30_000.0 			# electron temperature
-const T_i = 300.0 				# ion temperature
-const N_C = 512 				# particles per cell
+const n_0 = 2.56e14                   # plasma density
+const T_e = 30_000.0                  # electron temperature
+const T_i = 300.0                     # ion temperature
+const N_C = 512                       # particles per cell
 
-const NX = 128 					# number of cells
+const NX = 128                        # number of cells
 const WG = (n_0 * X * π * R^2) / 
-		   (N_C * NX) 			# weight
+       (N_C * NX)                     # weight
 
 const Δt  = 1 / 400FREQ
 const N_S = 512_000
@@ -39,7 +39,7 @@ domain = Domain1D(0.0, X, Vacuum())
 
 cathode = Point1D(0.0)
 anode   = Point1D(X)
-whole	= Segment1D(0.0, X)
+whole   = Segment1D(0.0, X)
 
 bvp = BoundaryValueProblem(domain)
 bvp[cathode] = DirichletBoundaryCondition(SineFunction{VOLT, FREQ}())

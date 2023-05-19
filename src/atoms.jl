@@ -2,8 +2,8 @@ module Atoms
 import ..PlasmaModelingToolkit.Constants: Da
 
 struct Atom
-	sym  :: Symbol
-	mass :: Float64
+  sym  :: Symbol
+  mass :: Float64
 end
 
 const Helium = Atom(:He, 4.002602Da)

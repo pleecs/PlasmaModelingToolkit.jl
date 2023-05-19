@@ -1,4 +1,12 @@
-struct PICModel{D,V,CS} <: DiscretizedModel 
+import ..Grids: Grid
+import ..Geometry: Shape
+import ..Problems: ParticleProblem, ParticleCollisionProblem
+import ..Grids: discretize
+import ..Species: Particles
+import ..ParticleBoundaries: ParticleBoundary
+import ..Sources: SpeciesSource, SpeciesLoader
+
+struct PICModel{D,V,CS}
       grid :: Grid{D,CS}
  particles :: Set{Particles}
    weights :: Dict{Particles, Float64}
