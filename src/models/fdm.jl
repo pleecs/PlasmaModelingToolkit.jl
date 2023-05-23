@@ -52,6 +52,21 @@ function setindex!(model::FDMModel{2}, bc::FDMCondition, segment::Segment2D)
   return nothing
 end
 
+ function setindex!(model::FDMModel{2}, dbc::DirichletBoundaryCondition, shape::Shape2D)
+  grid = model.grid
+  bcs = model.conditions
+  get!(bcs, dbc, length(bcs) + 1)
+
+  nz, nr = size(grid.z)
+  for j=1:nr, i=1:nz
+    if (grid.z[i,j], grid.r[i,j]) ∈ shape && (model.node_material[i,j] == 0x00)
+      model.node_boundary[i,j] = bcs[dbc]
+    end
+  end
+
+  return nothing
+ end
+
 function setindex!(model::FDMModel{1}, dbc::DirichletBoundaryCondition, point::Point1D)
   nodes = model.node_material
   grid = model.grid
