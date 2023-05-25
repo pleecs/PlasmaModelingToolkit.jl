@@ -1,5 +1,5 @@
 module Geometry
-import Base: +, -, ∈, ∩
+import Base: +, -, ∈, ∩, ≈
 
 abstract type Shape{D} end
 const Shape1D = Shape{1}
@@ -96,22 +96,39 @@ function ∈((x,), segment::Segment1D)
   return min(x₁,x₂) <= x <= max(x₁,x₂)
 end
 
+≈(t₁::Tuple{Float64, Float64}, t₂::Tuple{Float64, Float64}) = all(t₁ .≈ t₂)
+
 function ∈((x, y), polygon::Polygon{N}) where {N}
   if any(s->((x,y) ∈ s), polygon.segments)
     return true
   end
 
-  # θ = 2π * rand() 
-  # d_x = sin(θ)/(sqrt(sin(θ)^2 + cos(θ)^2))
-  # d_y = cos(θ)/(sqrt(sin(θ)^2 + cos(θ)^2))
-  # ray = Ray((x,y),(d_x, d_y))
-
-  ray = Ray((x,y),(1., 0.))
-
+  repeat = true
   n_crossings = 0
-  for segment in polygon.segments
-    if ∩(ray, segment, exclude_endpoints=(true,false))
-      n_crossings += 1
+
+  while repeat
+    repeat = false
+
+    θ = 2π * rand() 
+    d_x = sin(θ)/(sqrt(sin(θ)^2 + cos(θ)^2))
+    d_y = cos(θ)/(sqrt(sin(θ)^2 + cos(θ)^2))
+    ray = Ray((x,y),(d_x, d_y))
+
+    for segment in polygon.segments
+      P = ray ∩ segment
+
+      if P === (NaN, NaN) continue end
+
+      if P ≈ segment.p₁
+        # ray intersect with segment endpoint - case is ambigous, pick another ray
+        repeat = true
+        n_crossings = 0
+        break
+      end
+
+      if P ≉ segment.p₂
+        n_crossings += 1
+      end
     end
   end
 
@@ -121,7 +138,7 @@ end
 ×(v₁::Tuple{Float64,Float64}, v₂::Tuple{Float64,Float64}) = v₁[1] * v₂[2] - v₁[2] * v₂[1]
 ⋅(v₁::Tuple{Float64,Float64}, v₂::Tuple{Float64,Float64}) = v₁[1] * v₂[1] + v₁[2] * v₂[2]
 
-function ∩(ray::Ray2D, segment::Segment2D; exclude_endpoints=(false, false))
+function ∩(ray::Ray2D, segment::Segment2D)
   a = segment.p₁
   b = segment.p₂
 
@@ -131,18 +148,20 @@ function ∩(ray::Ray2D, segment::Segment2D; exclude_endpoints=(false, false))
 
   v₂v₃ = v₂ ⋅ v₃
   
-  if v₂v₃ ≈ 0.0 return false end
+  if v₂v₃ ≈ 0.0 
+    return (NaN, NaN) 
+  end
 
   t₁ = (v₂ × v₁) / (v₂v₃)
   t₂ = (v₁ ⋅ v₃) / (v₂v₃)
 
+  if !((t₁ >= 0) && (0 <= t₂ <= 1))
+    return (NaN, NaN)
+  end
+
   P = ray.origin .+ ray.direction .* t₁
 
-  if (exclude_endpoints[1] && all(P .≈ a)) || (exclude_endpoints[2] && all(P .≈ b))
-    return false
-  end 
-
-  return (t₁ >= 0) && (0 <= t₂ <= 1) 
+  return P
 end
 
 +(A::Shape2D, B::Shape2D) = CompositeShape{+}(A, B)

@@ -41,8 +41,8 @@ r1 = Ray((-2.,2.),(1.,0.))
 r2 = Ray((2.,2.),(-1.,0.))
 
 @testset "Ray-Segment2D intersection" begin
-  @test r1 ∩ s1
-  @test r2 ∩ s1
+  @test (r1 ∩ s1) !== (NaN, NaN)
+  @test (r2 ∩ s1) !== (NaN, NaN)
 end
 
 end
