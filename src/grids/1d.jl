@@ -2,6 +2,7 @@ import ..Domains: Domain1D
 import ..Geometry: Shape1D, Segment1D, Point1D
 
 const Grid1D = Grid{1, :X} 
+const OneDimensionalGrid = Grid{1, :X}
 
 function discretize(domain::Domain1D, nx)
   zx = range(domain.xmin, domain.xmax, length=nx)
