@@ -1,6 +1,8 @@
 module Distributions
-abstract type Distribution end
+abstract type PositionDistribution end
+abstract type VelocityDistribution end
 
-struct UniformDistribution <: Distribution end
-struct MaxwellBoltzmannDistribution{T, M} <: Distribution end
+struct UniformDistribution <: PositionDistribution end
+struct MaxwellBoltzmannDistribution{T, M} <: VelocityDistribution end
+
 end
