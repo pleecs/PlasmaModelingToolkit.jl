@@ -3,7 +3,7 @@ import ..Grids: Grid
 import ..Geometry: Segment2D, Point1D
 import ..Materials: Material, Conductor
 import ..Problems: BoundaryValueProblem
-import ..Grids: discretize, discretize!, snap
+import ..Grids: discretize, discretize!, snap_node
 import Base: setindex!
 
 const FDMCondition = Union{NeumannBoundaryCondition, DirichletBoundaryCondition, PeriodicBoundaryCondition}
@@ -44,8 +44,10 @@ function setindex!(model::FDMModel{2}, bc::FDMCondition, segment::Segment2D)
   bcs = model.conditions
   get!(bcs, bc, length(bcs) + 1)
 
-  is, js = snap(nodes, grid, segment)
-  for j=js, i=is
+  i1, j1 = snap_node(grid, segment.p₁)
+  i2, j2 = snap_node(grid, segment.p₂)
+  
+  for j=min(j1,j2):max(j1,j2), i=min(i1,i2):max(i1,i2)
     model.node_boundary[i,j] = bcs[bc]
   end
   
@@ -73,7 +75,7 @@ function setindex!(model::FDMModel{1}, dbc::DirichletBoundaryCondition, point::P
   bcs = model.conditions
   get!(bcs, dbc, length(bcs) + 1)
 
-  i = snap(nodes, grid, point)
+  i = snap_node(grid, point)
   model.node_boundary[i] = bcs[dbc]
 
   return nothing

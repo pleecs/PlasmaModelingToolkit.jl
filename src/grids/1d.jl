@@ -21,38 +21,15 @@ function discretize!(node::Vector{UInt8}, grid::Grid1D, shape::Shape1D, v::UInt8
   end
 end
 
-function snap(node::Vector{UInt8}, grid::Grid1D, segment::Segment1D)
-  x₁, = segment.p₁
-  x₂, = segment.p₂
-  Δx, = grid.Δs
-
-  ε₁, i₁ = modf(x₁ / Δx - minimum(grid.coords) / Δx)
-  i₁ = Int(i₁) + 1
-
-  ε₂, i₂ = modf(x₂ / Δx - minimum(grid.coords) / Δx)
-  i₂ = Int(i₂) + 1
-
-  A = min(i₁, i₂)
-  B = max(i₁, i₂)
-
-  if ε₁ ≉ 0.0 || ε₂ ≉ 0.0
-    @warn "Inexact discretization ($(min(x₁, x₂)),$(max(x₁, x₂)) discretized as ($(grid.coords[A]), $(grid.coords[B]))"
-  end
-
-  return A:B
+function snap_node(grid::Grid1D, p::Point1D)
+  snap_node(grid, p.coords)
 end
 
-function snap(node::Vector{UInt8}, grid::Grid1D, point::Point1D)
-  x₁, = point.coords
-  x = grid.x
-  Δx = grid.Δx
-
-  ε, i = modf(x₁ / Δx - minimum(x) / Δx)
-  A = Int(i) + 1
-
-  if ε ≉ 0.0
-    @warn "Inexact discretization ($(x) discretized as $(grid.x[A]))"
+function snap_node(grid::Grid1D, p::NTuple{1, Float64})
+  x, = p
+  i  = round(Int64, x / grid.Δx - minimum(grid.x) / grid.Δx) + 1
+  if grid.x[i] ≉ x
+    @warn "Inexact discretization ($(x) discretized as $(grid.x[i]))"
   end
-
-  return A
+  return i
 end

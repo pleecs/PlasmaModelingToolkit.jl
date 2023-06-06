@@ -1,6 +1,7 @@
+
 import ..BoundaryConditions: BoundaryCondition
 import ..InterfaceConditions: InterfaceCondition
-import ..Grids: Grid, discretize, discretize!, snap
+import ..Grids: Grid, discretize, discretize!, snap_boundary
 import ..Domains: AxisymmetricDomain, Domain1D
 import ..Geometry: Shape2D, Segment2D, Rectangle, Segment1D, Point1D, Shape
 import ..Materials: Material, Conductor, Dielectric, PerfectlyMatchedLayer
@@ -36,10 +37,6 @@ function FDTDModel(problem::BoundaryValueProblem{2, :ZR}, NZ, NR)
 	
 	fdtd =  FDTDModel{2, :ZR}(grid, materials, conditions, edge_boundary, node_material)
 	
-	for (region, constraint) in problem.constraints
-		fdtd[region] = constraint
-	end
-
 	dielectrics = Dict{UInt8, Dielectric}()
 	for (material, id) in materials
 		if material isa Dielectric
@@ -54,6 +51,10 @@ function FDTDModel(problem::BoundaryValueProblem{2, :ZR}, NZ, NR)
 	detect_interface_z!(conditions, z_edge_boundary, node_material, dielectrics)
 	detect_interface_r!(conditions, r_edge_boundary, node_material, dielectrics)
 	
+	for (region, constraint) in problem.constraints
+		fdtd[region] = constraint
+	end
+
 	return fdtd
 end
 
@@ -64,22 +65,24 @@ function setindex!(model::FDTDModel{2,:ZR}, bc::BoundaryCondition, segment::Segm
 	node_material = model.node_material
 	z_edges, r_edges = model.edge_boundary
 
-	is, js = snap(node_material, grid, segment; extend=true)
-	
-	if first(is) == last(is) && first(js) < last(js)
-		Z0 = first(is)
-		R1 = first(js)
-		R2 = last(js)
-		for j=R1:R2-1, i=Z0
+	i1, j1 = snap_boundary(r_edges, grid, segment.p₁)
+	i2, j2 = snap_boundary(r_edges, grid, segment.p₂)
+	if i1 == i2 && j1 != j2
+		Z0 = i1
+		R1 = min(j1, j2)
+		R2 = max(j1, j2)
+		for j=R1:R2, i=Z0
 			r_edges[i,j] = cond[bc]
 		end
 	end
 
-    if first(is) < last(is) && first(js) == last(js)
-		Z1 = first(is)
-		Z2 = last(is)
-		R0 = first(js)
-		for j=R0, i=Z1:Z2-1
+	i1, j1 = snap_boundary(z_edges, grid, segment.p₁)
+	i2, j2 = snap_boundary(z_edges, grid, segment.p₂)
+	if i1 != i2 && j1 == j2
+		Z1 = min(i1, i2)
+		Z2 = max(i1, i2)
+		R0 = j1
+		for j=R0, i=Z1:Z2
 			z_edges[i,j] = cond[bc]
 		end
 	end
