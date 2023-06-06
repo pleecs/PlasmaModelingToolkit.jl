@@ -34,6 +34,7 @@ default_colormap = Dict(
 mutable struct Figure{M}
   model :: M
   width :: Float64
+  limit :: Tuple
   margin :: Dict
   offset :: Dict
   font :: Dict
@@ -46,6 +47,7 @@ end
 
 function Figure(model;
   width = 20,
+  limit = (-Inf, Inf, -Inf, Inf),
   margin = Dict("top" => 2.,"bottom" => 2., "left" => 2., "right" => 2.),
   offset = Dict("top" => 0.5,"bottom" => 0.5, "left" => 0.5, "right" => 0.5),
   font = Dict("family" => "serif", "size" => 12),
@@ -59,6 +61,7 @@ function Figure(model;
   return Figure(
     model,
     float(width),
+    limit,
     margin,
     offset,
     font,
@@ -200,6 +203,13 @@ function get_domain_size(f::Figure)
   desired_width = f.width - f.offset["left"] - f.offset["right"] - f.margin["left"] - f.margin["right"]
   @assert desired_width > 0 "Margins and offsets are too large!"
   ldW, ldH, ldW_min, ldH_min = get_domain_size(f.model)
+  x1, x2, y1, y2 = f.limit
+  lmW, lmH, lmW_min, lmH_min = 1000.0(y2 - y1), 1000.0(x2 - x1), 1000.0y1, 1000.0x1
+  ldW_min = ldW_min < lmW_min ? lmW_min : ldW_min
+  ldH_min = ldH_min < lmH_min ? lmH_min : ldH_min
+  ldW = ldW > lmW ? lmW : ldW
+  ldH = ldH > lmH ? lmH : ldH
+
   gdW = float(desired_width)
   gdH = float(desired_width) * (ldH / ldW)
 
@@ -284,10 +294,6 @@ function model_svg(f::Figure{FDTDModel{2,:ZR}})
   z, r = grid.z, grid.r
   c = model.node_material
   cz, cr = model.edge_boundary
-  zz, rz = grid.z[1:nz-1,1:nr], grid.r[1:nz-1,1:nr]
-  zr, rr = grid.z[1:nz,1:nr-1], grid.r[1:nz,1:nr-1]
-  zz .+= grid.dz/2
-  rr .+= grid.dr/2
     
     materials = Dict{UInt8, String}()
     conditions = Dict{UInt8, String}()
@@ -302,10 +308,13 @@ function model_svg(f::Figure{FDTDModel{2,:ZR}})
 
   gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f)
   
+  z1, z2, r1, r2 = f.limit
   SW  = "$(500grid.dz / ldH * gdH)mm"  # edge's arrow size
   RAD = "$(2000grid.dz / ldH * gdH)mm" # edge's line size / node's size
   NativeSVG.g(id="fdtd") do
         for j=1:nr, i=1:nz-1
+            if z[i,j] < z1 || z[i,j] > z2 continue end
+            if r[i,j] < r1 || r[i,j] > r2 continue end
             if cz[i,j] == 0x00 continue end
             X1 = (1000r[i,j] - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
             Y1 = gdH - ((1000z[i,j] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
@@ -315,6 +324,8 @@ function model_svg(f::Figure{FDTDModel{2,:ZR}})
             draw_edge(X1, Y1, X2, Y2; lw=RAD, sc=C)
         end
         for j=1:nr-1, i=1:nz
+            if z[i,j] < z1 || z[i,j] > z2 continue end
+            if r[i,j] < r1 || r[i,j] > r2 continue end
             if cr[i,j] == 0x00 continue end
             X1 = (1000r[i,j] - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
             Y1 = gdH - ((1000z[i,j] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
@@ -324,6 +335,8 @@ function model_svg(f::Figure{FDTDModel{2,:ZR}})
             draw_edge(X1, Y1, X2, Y2; lw=RAD, sc=C)
         end
         for j=1:nr, i=1:nz
+            if z[i,j] < z1 || z[i,j] > z2 continue end
+            if r[i,j] < r1 || r[i,j] > r2 continue end
             X1 = (1000r[i,j] - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
             Y1 = gdH - ((1000z[i,j] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
             C  = materials[c[i,j]]
