@@ -50,7 +50,7 @@ function snap_boundary(edge_boundary, grid::AxisymmetricGrid, p::NTuple{2, Float
 
   nz, nr = size(edge_boundary)
   if nz < grid.nz # r-edge
-    for (ei, ej) in ((i,j), (i,j-1), (i-1,j), (i-1,j-1), (i+1,j), (i+1,j-1))
+    for (ei, ej) in ((i,j), (i-1,j), (i,j-1), (i-1,j-1), (i,j+1), (i-1,j+1))
       if 1 <= (ei) <= nz && 1 <= (ej) <= nr
         e = (grid.z[ei,ej] + grid.dz/2, grid.r[ei,ej])
         push!(ij, (ei,ej))
@@ -59,7 +59,7 @@ function snap_boundary(edge_boundary, grid::AxisymmetricGrid, p::NTuple{2, Float
     end
   end
   if nr < grid.nr # z-edge
-    for (ei, ej) in ((i,j), (i-1,j), (i,j-1), (i-1,j-1), (i,j+1), (i-1,j+1))
+    for (ei, ej) in ((i,j), (i,j-1), (i-1,j), (i-1,j-1), (i+1,j), (i+1,j-1))
       if 1 <= (ei) <= nz && 1 <= (ej) <= nr
         e = (grid.z[ei,ej], grid.r[ei,ej] + grid.dr/2)
         push!(ij, (ei,ej))
