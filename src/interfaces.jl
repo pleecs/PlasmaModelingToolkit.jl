@@ -1,5 +1,6 @@
 module InterfaceConditions
 import ..Materials: Dielectric
+import ..BoundaryConditions: PerfectElectricConductor
 
 abstract type InterfaceCondition end
 struct DielectricInterface{EPS1, EPS2, SIG} <: InterfaceCondition end
@@ -43,7 +44,9 @@ function detect_interface_z!(boundaries, edge_boundary, node_material, dielectri
         get!(boundaries, iface, length(boundaries) + 1)
         edge_boundary[n:m, l] .= boundaries[iface]
       else
-        @debug "Skipped metal boundary ($n,$l) ($m,$l)"
+        metal = PerfectElectricConductor()
+        get!(boundaries, metal, length(boundaries) + 1)
+        edge_boundary[n:m, l] .= boundaries[metal]
       end
     end
   end
@@ -84,7 +87,9 @@ function detect_interface_r!(boundaries, edge_boundary, node_material, dielectri
         get!(boundaries, iface, length(boundaries) + 1)
         edge_boundary[l, n:m] .= boundaries[iface]
       else
-        @debug "Skipped metal boundary ($l,$n) ($l,$m)"
+        metal = PerfectElectricConductor()
+        get!(boundaries, metal, length(boundaries) + 1)
+        edge_boundary[l, n:m] .= boundaries[metal]
       end
     end
   end
