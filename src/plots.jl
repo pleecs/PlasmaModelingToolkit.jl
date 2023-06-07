@@ -368,10 +368,13 @@ function model_svg(f::Figure{FDMModel{2,:ZR}})
 
   gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f)
   
+  z1, z2, r1, r2 = f.limit
   RADM = "$(2000grid.dz / ldH * gdH)mm"
   RADB = "$(3000grid.dz / ldH * gdH)mm"
   NativeSVG.g(id="fdm") do
     for j=1:nr, i=1:nz
+      if z[i,j] < z1 || z[i,j] > z2 continue end
+      if r[i,j] < r1 || r[i,j] > r2 continue end
       X1 = (1000r[i,j] - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
       Y1 = gdH - ((1000z[i,j] - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
       if b[i,j] > 0x00
