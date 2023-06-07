@@ -12,6 +12,7 @@ DirichletBoundaryCondition(α::Float64) = DirichletBoundaryCondition(ConstantFun
 
 struct PerfectElectricConductor  <: BoundaryCondition end
 struct PerfectMagneticConductor  <: BoundaryCondition end
+struct AbsorbingBoundaryCondition <: BoundaryCondition end
 struct SurfaceImpedance  <: BoundaryCondition
   η :: TemporalFunction
   ε :: Float64
