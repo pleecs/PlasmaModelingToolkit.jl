@@ -110,21 +110,20 @@ function define(rectangle::Rectangle)
   W = rectangle.width
   H = rectangle.height
   x, y, w, h = 1000 .* (X, Y, W, H)
-  return NativeSVG.rect(id="$(objectid(shape))", x="$x", y="$y", width="$w", height="$h")
+  return NativeSVG.rect(id="$(objectid(rectangle))", x="$x", y="$y", width="$w", height="$h")
 end
 
 function define(circle::Circle)
   X, Y = circle.origin
   R = circle.radius
   x, y, r = 1000 .* (X, Y, R)
-  return NativeSVG.circle(id="$(objectid(shape))", cx="$x", cy="$y", r="$r")
+  return NativeSVG.circle(id="$(objectid(circle))", cx="$x", cy="$y", r="$r")
 end
 
 function define(polygon::Polygon)
   points = ""
   for segment in polygon.segments
-    x,y,_,_ = typeof(segment).parameters
-    x,y = 1000 .* (x,y)
+    x,y = 1000 .* segment.p₁
     points *= "$x,$y " 
   end
   return NativeSVG.polygon(id="$(objectid(polygon))", points=points)
@@ -160,7 +159,7 @@ function define(shape::CompositeShape{-})
   define(shape.B)
 end
 
-function define(material::Material, f::Figure{BoundaryValueProblem{AxisymmetricDomain}})
+function define(material::Material, f::Figure{BoundaryValueProblem{2, :ZR}})
   if material isa PerfectlyMatchedLayer
     Z = (f.model.domain.zmax - f.model.domain.zmin) * 1000
     thickness = Z / 200
@@ -174,7 +173,7 @@ function define(material::Material, f::Figure{BoundaryValueProblem{AxisymmetricD
   end
 end
 
-function domain_svg(f::Figure{BoundaryValueProblem{AxisymmetricDomain}})
+function domain_svg(f::Figure{BoundaryValueProblem{2, :ZR}})
   NativeSVG.defs() do
     for (shape, material) in f.model.domain.materials
       define(shape)
@@ -250,28 +249,30 @@ function draw_normals(f::Figure{BoundaryValueProblem{2,:ZR}})
   gdW, gdH, ldW, ldH, ldW_min, ldH_min = get_domain_size(f)
 
   NativeSVG.g(id="normals") do
-    for (segment, bc) in f.model.constraints
-  
-      lX1, lY1, lX2, lY2 = 1000 .* typeof(segment).parameters
+    for (shape, bc) in f.model.constraints
+      if shape isa Segment2D  
+        lX1, lY1 = 1000 .* shape.p₁
+        lX2, lY2 = 1000 .* shape.p₂
 
-      X1 = (lY1 - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
-      Y1 = gdH - ((lX1 - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
+        X1 = (lY1 - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
+        Y1 = gdH - ((lX1 - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
 
-      
-      X2 = (lY2 - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
-      Y2 = gdH - ((lX2 - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
+        
+        X2 = (lY2 - ldW_min) / ldW * gdW + f.margin["left"] + f.offset["left"]
+        Y2 = gdH - ((lX2 - ldH_min) / ldH * gdH) + f.margin["top"] + f.offset["top"]
 
-      x1 = (X1 + X2) / 2 
-      y1 = (Y1 + Y2) / 2
+        x1 = (X1 + X2) / 2 
+        y1 = (Y1 + Y2) / 2
 
-      dx = (X2 - X1) / √((X2 - X1)^2 + (Y2 - Y1)^2)
-      dy = (Y2 - Y1) / √((X2 - X1)^2 + (Y2 - Y1)^2)
+        dx = (X2 - X1) / √((X2 - X1)^2 + (Y2 - Y1)^2)
+        dy = (Y2 - Y1) / √((X2 - X1)^2 + (Y2 - Y1)^2)
 
-      # length scaled down 10× for more convenient usage (avoid floats)
-      x2 = x1 + (f.normals["length"] / 10) * +dy
-      y2 = y1 + (f.normals["length"] / 10) * -dx
+        # length scaled down 10× for more convenient usage (avoid floats)
+        x2 = x1 + (f.normals["length"] / 10) * +dy
+        y2 = y1 + (f.normals["length"] / 10) * -dx
 
-      NativeSVG.line(x1="$(x1)cm", y1="$(y1)cm", x2="$(x2)cm", y2="$(y2)cm", stroke=f.normals["color"], stroke_width="$(f.normals["thickness"])px", marker_end="url(#arrowhead)")
+        NativeSVG.line(x1="$(x1)cm", y1="$(y1)cm", x2="$(x2)cm", y2="$(y2)cm", stroke=f.normals["color"], stroke_width="$(f.normals["thickness"])px", marker_end="url(#arrowhead)")
+      end
     end
   end
 end
