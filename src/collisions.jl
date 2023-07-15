@@ -1,35 +1,22 @@
 module Collisions
 import ..Species: Particles, Fluid
-import ..CrossSections: AbstractCrossSections
+import ..CrossSections: CrossSection
 
-abstract type Collision end
 
-struct IsotropicScatteringCollision <: Collision
+struct Collision{PROCESS}
   source :: Particles
   target :: Fluid
-  σ :: AbstractCrossSections
+  σ :: CrossSection
 end
-IsotropicScatteringCollision(s, t; σ) = IsotropicScatteringCollision(s, t, σ)
 
-struct IonizationCollision <: Collision
-  source :: Particles
-  target :: Fluid
-  σ :: AbstractCrossSections
-  ω :: Float64
-end
-IonizationCollision(s, t; σ, ω) = IonizationCollision(s, t, σ, ω)
+const ElasticCollision = Collision{:Elastic}
+const IsotropicScatteringCollision = Collision{:IsotropicScattering}
+const ExcitationCollision = Collision{:Excitation}
+const BackwardScatteringCollision = Collision{:BackwardScattering}
+const IonizationCollision = Collision{:Ionization}
 
-struct ExcitationCollision <: Collision
-  source :: Particles
-  target :: Fluid
-  σ :: AbstractCrossSections
+function Collision{PROCESS}(source, target; σ_dataset::Symbol, ε=nothing) where {PROCESS}
+  σ = CrossSection(σ_dataset, PROCESS, source, target, ε)
+  return Collision{PROCESS}(source, target, σ)
 end
-ExcitationCollision(s, t; σ) = ExcitationCollision(s, t, σ)
-
-struct BackwardScatteringCollision <: Collision
-  source :: Particles
-  target :: Fluid
-  σ :: AbstractCrossSections
-end
-BackwardScatteringCollision(s, t; σ) = BackwardScatteringCollision(s, t, σ)
 end

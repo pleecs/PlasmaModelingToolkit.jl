@@ -4,4 +4,5 @@ authors = ["Bartosz Chaber <bartosz.chaber@ee.pw.edu.pl>", "Wiktor Łodyga <wikt
 version = "0.1.25"
 
 [deps]
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 NativeSVG = "e0ae6c8d-2d3a-402f-a45e-2aac098fa7eb"

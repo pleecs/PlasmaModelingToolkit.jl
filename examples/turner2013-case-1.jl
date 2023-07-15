@@ -8,11 +8,10 @@ import PlasmaModelingToolkit.Models: FDMModel, PICModel, MCCModel
 import PlasmaModelingToolkit.Species: electrons, ions, gas
 import PlasmaModelingToolkit.Sources: SpeciesLoader
 import PlasmaModelingToolkit.TemporalFunctions: SineFunction, ConstantFunction
-import PlasmaModelingToolkit.Collisions: IsotropicScatteringCollision, IonizationCollision, ExcitationCollision, BackwardScatteringCollision
+import PlasmaModelingToolkit.Collisions: IsotropicScatteringCollision, IonizationCollision, ExcitationCollision, BackwardScatteringCollision, ElasticCollision
 import PlasmaModelingToolkit.Distributions: UniformDistribution, MaxwellBoltzmannDistribution
 import PlasmaModelingToolkit.Atoms: Helium
 import PlasmaModelingToolkit.Units: MHz, cm
-import PlasmaModelingToolkit.CrossSections: Biagi
 import PlasmaModelingToolkit.Constants: ω_He
 
 const X    = 6.7cm                    # electrode separation
@@ -57,12 +56,13 @@ problem[whole] = SpeciesLoader(e, n_0,   UniformDistribution(), MaxwellBoltzmann
 problem[whole] = SpeciesLoader(iHe, n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_i, iHe.mass}())
 problem[whole] = SpeciesLoader(He, n_He, UniformDistribution(), MaxwellBoltzmannDistribution{T_He, He.mass}())
 
-problem += IsotropicScatteringCollision(e, He, σ=Biagi(:elastic))
-problem += IonizationCollision(e, He, σ=Biagi(:ionization), ω=ω_He)
-problem += ExcitationCollision(e, He, σ=Biagi(:excitation))
+problem += ElasticCollision(e, He, σ_dataset=:Biagi)
+problem += IonizationCollision(e, He, σ_dataset=:Biagi)
+problem += ExcitationCollision(e, He, σ_dataset=:Biagi, ε=19.82)
+problem += ExcitationCollision(e, He, σ_dataset=:Biagi, ε=20.61)
 
-problem += IsotropicScatteringCollision(iHe, He, σ=Biagi(:excitation))
-problem += BackwardScatteringCollision(iHe, He, σ=Biagi(:excitation))
+problem += IsotropicScatteringCollision(iHe, He, σ_dataset=:Phelps)
+problem += BackwardScatteringCollision(iHe, He, σ_dataset=:Phelps)
 
 es  = FDMModel(bvp, NX + 1)
 pic = PICModel(problem, NX + 1, maxcount = (e => 200_000, iHe => 200_000), weights = (e => WG, iHe => WG))
