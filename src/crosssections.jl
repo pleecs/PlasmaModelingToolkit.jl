@@ -2,13 +2,8 @@ module CrossSections
 import ..Species: Particles, Fluid
 import JLD2: load
 
-struct Dataset
-  name :: String
-  path :: String
-end
-
-Biagi() = Dataset("Biagi-7.1", "data/Biagi-7.1.jld2")
-Phelps() = Dataset("Phelps", "data/Phelps.jld2")
+Biagi() = load("$(Main.DATASET_PATH)/Biagi-7.1.jld2", "Biagi-7.1")
+Phelps() = load("$(Main.DATASET_PATH)/Phelps.jld2", "Phelps")
 
 struct CrossSection
   data :: Matrix{Float64}
@@ -26,8 +21,8 @@ function resample(data::Matrix{Float64}, n=1000, Δε=nothing, min=nothing, max=
 end
 
 
-function CrossSection(dataset::Dataset, type::Symbol, source::Particles{SOURCE}, target::Fluid{TARGET}; ε_loss=nothing, scattering=nothing) where {SOURCE, TARGET}
-  processes = load(dataset.path, dataset.name)[SOURCE][TARGET][type]
+function CrossSection(dataset, type::Symbol, source::Particles{SOURCE}, target::Fluid{TARGET}; ε_loss=nothing, scattering=nothing) where {SOURCE, TARGET}
+  processes = dataset[SOURCE][TARGET][type]
   
   if !isnothing(ε_loss)
     filter!(process->process["ε_loss"] == ε_loss, processes)
@@ -52,7 +47,7 @@ function CrossSection(dataset::Dataset, type::Symbol, source::Particles{SOURCE},
   process = first(processes)
   data = process["data"]
   attributes = Dict{String, Any}()
-  
+
   if haskey(process, "ε_loss")
     attributes["ε_loss"] = process["ε_loss"]
   end

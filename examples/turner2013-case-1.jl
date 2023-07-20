@@ -14,6 +14,8 @@ import PlasmaModelingToolkit.Atoms: Helium
 import PlasmaModelingToolkit.Units: MHz, cm
 import PlasmaModelingToolkit.CrossSections: Biagi, Phelps
 
+DATASET_PATH = "./data"
+
 const X    = 6.7cm                    # electrode separation
 const R    = √(1/π)                   # electrode radius
 const n_He = 9.64e20                  # neutral density
