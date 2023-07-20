@@ -8,11 +8,11 @@ import PlasmaModelingToolkit.Models: FDMModel, PICModel, MCCModel
 import PlasmaModelingToolkit.Species: electrons, ions, gas
 import PlasmaModelingToolkit.Sources: SpeciesLoader
 import PlasmaModelingToolkit.TemporalFunctions: SineFunction, ConstantFunction
-import PlasmaModelingToolkit.Collisions: IsotropicScatteringCollision, IonizationCollision, ExcitationCollision, BackwardScatteringCollision, ElasticCollision
+import PlasmaModelingToolkit.Collisions: ElasticCollision, IonizationCollision, ExcitationCollision, IsotropicScattering, BackwardScattering
 import PlasmaModelingToolkit.Distributions: UniformDistribution, MaxwellBoltzmannDistribution
 import PlasmaModelingToolkit.Atoms: Helium
 import PlasmaModelingToolkit.Units: MHz, cm
-import PlasmaModelingToolkit.Constants: ω_He
+import PlasmaModelingToolkit.CrossSections: Biagi, Phelps
 
 const X    = 6.7cm                    # electrode separation
 const R    = √(1/π)                   # electrode radius
@@ -56,13 +56,13 @@ problem[whole] = SpeciesLoader(e, n_0,   UniformDistribution(), MaxwellBoltzmann
 problem[whole] = SpeciesLoader(iHe, n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_i, iHe.mass}())
 problem[whole] = SpeciesLoader(He, n_He, UniformDistribution(), MaxwellBoltzmannDistribution{T_He, He.mass}())
 
-problem += ElasticCollision(e, He, σ_dataset=:Biagi)
-problem += IonizationCollision(e, He, σ_dataset=:Biagi)
-problem += ExcitationCollision(e, He, σ_dataset=:Biagi, ε=19.82)
-problem += ExcitationCollision(e, He, σ_dataset=:Biagi, ε=20.61)
+problem += ElasticCollision(e, He, Biagi(); scattering=IsotropicScattering())
+problem += IonizationCollision(e, He, Biagi(); scattering=IsotropicScattering(), ε_loss=24.587, ions=iHe)
+problem += ExcitationCollision(e, He, Biagi(); scattering=IsotropicScattering(), ε_loss=19.82)
+problem += ExcitationCollision(e, He, Biagi(); scattering=IsotropicScattering(), ε_loss=20.061)
 
-problem += IsotropicScatteringCollision(iHe, He, σ_dataset=:Phelps)
-problem += BackwardScatteringCollision(iHe, He, σ_dataset=:Phelps)
+problem += ElasticCollision(iHe, He, Phelps(); scattering=IsotropicScattering())
+problem += ElasticCollision(iHe, He, Phelps(); scattering=BackwardScattering())
 
 es  = FDMModel(bvp, NX + 1)
 pic = PICModel(problem, NX + 1, maxcount = (e => 200_000, iHe => 200_000), weights = (e => WG, iHe => WG))
