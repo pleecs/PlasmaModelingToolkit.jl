@@ -2,8 +2,17 @@ module CrossSections
 import ..Species: Particles, Fluid
 import JLD2: load
 
-struct CrossSection{DT}
-  data :: DT
+struct Dataset
+  name :: String
+  path :: String
+end
+
+Biagi() = Dataset("Biagi-7.1", "data/Biagi-7.1.jld2")
+Phelps() = Dataset("Phelps", "data/Phelps.jld2")
+
+struct CrossSection
+  data :: Matrix{Float64}
+  attributes :: Dict{String, Any}
 end
 
 function resample(data::Matrix{Float64}, n=1000, Δε=nothing, min=nothing, max=nothing)
@@ -16,14 +25,48 @@ function resample(data::Matrix{Float64}, n=1000, Δε=nothing, min=nothing, max=
   return hcat(ε, σ)
 end
 
-process_name(particles::Symbol, gas::Symbol, process::Symbol, ε::Nothing) = join(string.([particles, gas, process]),"_")
-process_name(particles::Symbol, gas::Symbol, process::Symbol, ε::Float64) = join(string.([particles, gas, process]),"_") * "_" * replace(string(ε), "." => "_") * "eV"
-dataset_name(dataset::Symbol) = string(dataset) * ".jld2"
 
-function CrossSection(dataset::Symbol, process::Symbol, particles::Particles{PARTICLES}, gas::Fluid{FLUID}, ε) where {PARTICLES, FLUID}
-  σ = load("data/" * dataset_name(dataset), process_name(PARTICLES, FLUID, process, ε))
-  return CrossSection(σ)
+function CrossSection(dataset::Dataset, type::Symbol, source::Particles{SOURCE}, target::Fluid{TARGET}; ε_loss=nothing, scattering=nothing) where {SOURCE, TARGET}
+  processes = load(dataset.path, dataset.name)[SOURCE][TARGET][type]
+  
+  if !isnothing(ε_loss)
+    filter!(process->process["ε_loss"] == ε_loss, processes)
+  end
+
+  @assert length(processes) > 0 "In $(dataset.name) dataset there is no data for $(string(type)) collision with specified energy level"
+
+  if !isnothing(scattering)
+    specified = filter(process->haskey(process,"scattering"), processes)
+    filter!(process->process["scattering"] == scattering.sym, specified)
+
+    if length(specified) == 0
+      filter!(process->!haskey(process,"scattering"), processes)
+    else
+      processes = specified
+    end
+  end
+
+  @assert length(processes) > 0 "In $(dataset.name) dataset there is no data for $(string(type)) collision with specified scattering type (nor universal one)"
+  @assert length(processes) == 1 "In $(dataset.name) dataset there more than one entry for $(string(type)) collision with specified attributes, please provide more information"
+
+  process = first(processes)
+  data = process["data"]
+  attributes = Dict{String, Any}()
+  
+  if haskey(process, "ε_loss")
+    attributes["ε_loss"] = process["ε_loss"]
+  end
+
+  if haskey(process, "approximation")
+    attributes["approximation"] = process["approximation"]
+  end
+
+  if haskey(process, "scattering")
+    attributes["scattering"] = process["scattering"]
+  else
+    attributes["scattering"] = scattering
+  end
+
+  return CrossSection(data, attributes)
 end
-
-CrossSection(dataset_name::String, process_name::String) = CrossSection(load(dataset_name, process_name))
 end
