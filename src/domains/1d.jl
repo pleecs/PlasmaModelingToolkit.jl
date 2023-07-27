@@ -3,6 +3,7 @@ import ..Materials: Material
 import Base: setindex!
 
 const Domain1D = Domain{1, :X}
+const OneDimensionalDomain = Domain{1, :X}
 
 function Domain1D(xmin::Float64, xmax::Float64, material::Material)
   region = Segment1D(xmin, xmax)
