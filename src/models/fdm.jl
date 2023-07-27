@@ -38,6 +38,22 @@ function FDMModel(problem::BoundaryValueProblem{D,CS}, args...) where {D,CS}
   return fdm
 end
 
+function setindex!(model::FDMModel{1}, bc::FDMCondition, segment::Segment1D)
+  nodes = model.node_material
+  grid = model.grid
+  bcs = model.conditions
+  get!(bcs, bc, length(bcs) + 1)
+
+  i1 = snap_node(grid, segment.p₁)
+  i2 = snap_node(grid, segment.p₂)
+
+  for i=min(i1,i2):max(i1,i2)
+    model.node_boundary[i] = bcs[bc]
+  end
+
+  return nothing
+end
+
 function setindex!(model::FDMModel{2}, bc::FDMCondition, segment::Segment2D)
   nodes = model.node_material
   grid = model.grid
