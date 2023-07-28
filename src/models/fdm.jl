@@ -93,10 +93,10 @@ function setindex!(model::FDMModel{1}, bc::FDMCondition, point::Point1D)
   nodes = model.node_material
   grid = model.grid
   bcs = model.conditions
-  get!(bcs, dbc, length(bcs) + 1)
+  get!(bcs, bc, length(bcs) + 1)
 
   i = snap_node(grid, point)
-  model.node_boundary[i] = bcs[dbc]
+  model.node_boundary[i] = bcs[bc]
 
   return nothing
 end
