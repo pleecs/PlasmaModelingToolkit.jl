@@ -8,7 +8,7 @@ struct DirichletBoundaryCondition <: BoundaryCondition
   α :: TemporalFunction
 end
 
-DirichletBoundaryCondition(α::Float64) = DirichletBoundaryCondition(ConstantFunction{α}())
+DirichletBoundaryCondition(α::Real) = DirichletBoundaryCondition(ConstantFunction{float(α)}())
 
 struct PerfectElectricConductor  <: BoundaryCondition end
 struct PerfectMagneticConductor  <: BoundaryCondition end
