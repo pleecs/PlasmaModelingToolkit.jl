@@ -1,4 +1,5 @@
 import ..BoundaryConditions: NeumannBoundaryCondition, DirichletBoundaryCondition, PeriodicBoundaryCondition
+import ..BoundaryConditions: PerfectElectricConductor, PerfectMagneticConductor
 import ..Grids: Grid
 import ..Geometry: Segment2D, Point1D
 import ..Materials: Material, Conductor
@@ -69,6 +70,12 @@ function setindex!(model::FDMModel{2}, bc::FDMCondition, segment::Segment2D)
   
   return nothing
 end
+
+# translate PEC/PMC into DBC/NBC
+setindex!(model::FDMModel{2}, ::PerfectElectricConductor, segment::Segment2D) =
+  setindex!(model, DirichletBoundaryCondition(0.0))
+setindex!(model::FDMModel{2}, ::PerfectMagneticConductor, segment::Segment2D) =
+  setindex!(model, NeumannBoundaryCondition())
 
 # model[shape => material] = DirichletBoundaryCondition(potential)
 function setindex!(model::FDMModel{2}, dbc::DirichletBoundaryCondition, pair::Pair{S, M}) where {S<:Shape2D, M<:Material}
