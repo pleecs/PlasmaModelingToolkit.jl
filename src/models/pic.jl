@@ -21,6 +21,23 @@ function PICModel(problem::ParticleProblem{D,CS}, args...; maxcount, weights) wh
 
   grid = discretize(problem.domain, args...)
   particles = Set{Particles}()
+  
+  for (species, _) in maxcount
+    if species in particles
+      @warn "Repeated $(species) in maxcount definition. The last value applies."
+    elseif species isa Particles
+      push!(particles, species)
+    end
+  end
+
+  for (species, _) in weights
+    if species in particles
+      continue
+    elseif species isa Particles
+      @error "Unknown species $(species) (no maxcount defined for it)"
+    end
+  end
+  
   weights = Dict(weights...)
   maxcount = Dict(maxcount...)
   boundaries = problem.boundaries
@@ -28,14 +45,18 @@ function PICModel(problem::ParticleProblem{D,CS}, args...; maxcount, weights) wh
   loaders = problem.loaders
 
   for (_, source) in sources
-    if source.species isa Particles
-      push!(particles, source.species)
+    if source.species in particles
+      continue
+    elseif source.species isa Particles
+      @error "Unknown species $(source.species) (no maxcount defined for it)"
     end
   end
 
   for (_, loader) in loaders
-    if loader.species isa Particles
-      push!(particles, loader.species)
+    if loader.species in particles
+      continue
+    elseif loader.species isa Particles
+      @error "Unknown species $(loader.species) (no maxcount defined for it)"
     end
   end
 
