@@ -2,8 +2,8 @@ module CrossSections
 import ..Species: Particles, Fluid
 import JLD2: load
 
-Biagi() = load("$(Main.DATASET_PATH)/Biagi-7.1.jld2", "Biagi-7.1")
-Phelps() = load("$(Main.DATASET_PATH)/Phelps.jld2", "Phelps")
+Biagi() = load("$(Main.DATASET_PATH)/Biagi-7.1.jld2")#, "Biagi-7.1")
+Phelps() = load("$(Main.DATASET_PATH)/Phelps.jld2")#, "Phelps")
 
 struct CrossSection
   data :: Matrix{Float64}
@@ -22,13 +22,15 @@ end
 
 
 function CrossSection(dataset, type::Symbol, source::Particles{SOURCE}, target::Fluid{TARGET}; ε_loss=nothing, scattering=nothing) where {SOURCE, TARGET}
-  processes = dataset[SOURCE][TARGET][type]
+  dataset_name = first(keys(dataset))
+
+  processes = dataset[dataset_name][SOURCE][TARGET][type]
   
   if !isnothing(ε_loss)
     filter!(process->process["ε_loss"] == ε_loss, processes)
   end
 
-  @assert length(processes) > 0 "In $(dataset.name) dataset there is no data for $(string(type)) collision with specified energy level"
+  @assert length(processes) > 0 "In $(dataset_name) dataset there is no data for $(string(type)) collision with specified energy level"
 
   if !isnothing(scattering)
     specified = filter(process->haskey(process,"scattering"), processes)
@@ -41,8 +43,8 @@ function CrossSection(dataset, type::Symbol, source::Particles{SOURCE}, target::
     end
   end
 
-  @assert length(processes) > 0 "In $(dataset.name) dataset there is no data for $(string(type)) collision with specified scattering type (nor universal one)"
-  @assert length(processes) == 1 "In $(dataset.name) dataset there more than one entry for $(string(type)) collision with specified attributes, please provide more information"
+  @assert length(processes) > 0 "In $(dataset_name) dataset there is no data for $(string(type)) collision with specified scattering type (nor universal one)"
+  @assert length(processes) == 1 "In $(dataset_name) dataset there more than one entry for $(string(type)) collision with specified attributes, please provide more information"
 
   process = first(processes)
   data = process["data"]
