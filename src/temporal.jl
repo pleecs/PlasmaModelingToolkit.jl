@@ -12,6 +12,9 @@ LogisticFunction{t₀, L, k} = GeneralizedLogisticFunction{0.0, L, k, 1.0, 1.0, 
 # f(t) = A * sin(2\pi * FREQ * t)
 struct SineFunction{A, FREQ} <: TemporalFunction end
 
+# f(t) = A * cos(2\pi * FREQ * t)
+struct CosineFunction{A, FREQ} <: TemporalFunction end
+
 # f(t) = \sum_{i=0}^{N-1} A * exp(-\frac{(t-\mu+i * T)^2}{2\sigma^2})
 struct GaussianPulseTrain{A, MU, SIGMA, N, T} <: TemporalFunction end
 
