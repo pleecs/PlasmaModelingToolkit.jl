@@ -34,7 +34,7 @@ function CrossSection(dataset, type::Symbol, source::Particles{SOURCE}, target::
     filter!(process->process["ε_loss"] == ε_loss, processes)
   end
 
-  @assert length(processes) > 0 "In $(dataset_name) dataset there is no data for $(string(type)) collision with specified energy level"
+  @assert length(processes) > 0 "In $(dataset_name) dataset there is no data for $(string(type)) collision between $(string(source)) and $(string(target)) with specified energy level ($ε_loss)"
 
   if !isnothing(scattering)
     specified = filter(process->haskey(process,"scattering"), processes)
