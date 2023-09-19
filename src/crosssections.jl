@@ -2,7 +2,11 @@ module CrossSections
 import ..Species: Particles, Fluid
 import JLD2: load
 
-Biagi() = load("$(Main.DATASET_PATH)/Biagi-7.1.jld2")#, "Biagi-7.1")
+abstract type AbstractCrossSections end
+struct Biagi{SYM} <: AbstractCrossSections end
+Biagi(sym::Symbol) = Biagi{sym}()
+
+Biagi(;version) = load("$(Main.DATASET_PATH)/Biagi-$(string(version)).jld2")#, "Biagi-7.1")
 Phelps() = load("$(Main.DATASET_PATH)/Phelps.jld2")#, "Phelps")
 
 struct CrossSection
