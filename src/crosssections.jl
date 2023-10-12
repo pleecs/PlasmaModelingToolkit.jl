@@ -25,17 +25,23 @@ function resample(data::Matrix{Float64}, n=1000, Δε=nothing, min=nothing, max=
 end
 
 
-function CrossSection(dataset, type::Symbol, source::Particles{SOURCE}, target::Fluid{TARGET}; ε_loss=nothing, scattering=nothing) where {SOURCE, TARGET}
+function CrossSection(dataset, type::Symbol, source::Particles{SOURCE}, target::Fluid{TARGET}; ε_loss=nothing, scattering=nothing, excited_state=nothing) where {SOURCE, TARGET}
   dataset_name = first(keys(dataset))
 
   processes = dataset[dataset_name][SOURCE][TARGET][type]
   
   if !isnothing(ε_loss)
     filter!(process->process["ε_loss"] == ε_loss, processes)
+    @assert length(processes) > 0 "In $(dataset_name) dataset there is no data for $(string(type)) collision between $(string(source)) and $(string(target)) with specified energy level ($ε_loss)"
   end
 
-  @assert length(processes) > 0 "In $(dataset_name) dataset there is no data for $(string(type)) collision between $(string(source)) and $(string(target)) with specified energy level ($ε_loss)"
 
+  if !isnothing(excited_state)
+    filter!(process->process["excited_state"] == excited_state, processes)
+    @assert length(processes) > 0 "In $(dataset_name) dataset there is no data for $(string(type)) collision between $(string(source)) and $(string(target)) with specified excited state ($excited_state)"
+  end
+
+  
   if !isnothing(scattering)
     specified = filter(process->haskey(process, "scattering"), processes)
     filter!(process->process["scattering"] == scattering, specified)
@@ -45,9 +51,9 @@ function CrossSection(dataset, type::Symbol, source::Particles{SOURCE}, target::
     else
       processes = specified
     end
+    @assert length(processes) > 0 "In $(dataset_name) dataset there is no data for $(string(type)) collision between $(string(source)) and $(string(target)) with specified scattering type ($scattering) (nor universal one)"
   end
 
-  @assert length(processes) > 0 "In $(dataset_name) dataset there is no data for $(string(type)) collision with specified scattering type (nor universal one)"
   @assert length(processes) == 1 "In $(dataset_name) dataset there more than one entry for $(string(type)) collision with specified attributes, please provide more information"
 
   process = first(processes)
@@ -56,6 +62,10 @@ function CrossSection(dataset, type::Symbol, source::Particles{SOURCE}, target::
 
   if haskey(process, "ε_loss")
     attributes["ε_loss"] = process["ε_loss"]
+  end
+
+  if haskey(process, "excited_state")
+    attributes["excited_state"] = process["excited_state"]
   end
 
   if haskey(process, "approximation")

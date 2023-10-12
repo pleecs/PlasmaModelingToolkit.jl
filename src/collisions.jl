@@ -60,12 +60,13 @@ struct ExcitationCollision <: Collision
   ε_loss :: Float64
   σ :: Matrix{Float64}  
   scattering :: Scattering
+  excited_state :: Symbol
 end
 
-function ExcitationCollision(source, target, dataset; ε_loss, scattering=nothing)
+function ExcitationCollision(source, target, dataset; ε_loss, scattering=nothing, excited_state=nothing)
   @assert scattering != :Opal "Opal scattering can be defined only for ionization collision"
 
-  cs = CrossSection(dataset, :Excitation, source, target; ε_loss, scattering)
+  cs = CrossSection(dataset, :Excitation, source, target; ε_loss, scattering, excited_state)
   
   if isnothing(scattering)
     @assert "scattering" in keys(cs.attributes) "There is no scattering specification in dataset, you have to provide one"
@@ -74,7 +75,13 @@ function ExcitationCollision(source, target, dataset; ε_loss, scattering=nothin
     scattering = Scattering(scattering, target)
   end
 
-  return ExcitationCollision(source, target, ε_loss, cs.data, scattering)
+  if isnothing(excited_state)
+    excited_state = Symbol("_")
+  else
+    excited_state = Symbol(excited_state)
+  end
+
+  return ExcitationCollision(source, target, ε_loss, cs.data, scattering, excited_state)
 end
 
 struct IonizationCollision <: Collision
