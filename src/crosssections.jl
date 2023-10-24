@@ -1,13 +1,85 @@
 module CrossSections
 import ..Species: Particles, Fluid
 import JLD2: load
+import DelimitedFiles: readdlm
+import PlasmaModelingToolkit
+
 
 abstract type AbstractCrossSections end
 struct Biagi{SYM} <: AbstractCrossSections end
 Biagi(sym::Symbol) = Biagi{sym}()
 
-Biagi(;version) = load("$(Main.DATASET_PATH)/Biagi-$(string(version)).jld2")#, "Biagi-7.1")
-Phelps() = load("$(Main.DATASET_PATH)/Phelps.jld2")#, "Phelps")
+Biagi(;version) = load("$(pkgdir(PlasmaModelingToolkit))/data/Biagi-$(string(version)).jld2")
+Phelps() = load("$(pkgdir(PlasmaModelingToolkit))/data/Phelps.jld2")
+
+function lxcatread(path::String, name::String)
+  data = Dict()
+  f = open(path, "r")
+  
+  while true
+    # read raw
+    _ = readuntil(f, "SPECIES: ")
+    species = readuntil(f, "\n")
+    _ = readuntil(f, "PROCESS: ")
+    process = readuntil(f, "\n")
+    _ = readuntil(f, "PARAM.: ")
+    params = readuntil(f, "\n")
+    _ = readuntil(f, "-----------------------------")
+    σ = readuntil(f, "-----------------------------")
+
+    if eof(f)
+      break
+    end
+
+    # postprocess
+    row = Dict{String, Any}()
+
+    m = match(r"(?P<participants>[a-zA-Z\+ ]+) -> (?P<products>[a-zA-Z0-9\(\)\.\+\* ]+)?, (?P<process>[a-zA-Z]+)", process)
+    @assert !isnothing(m) "Error while parsing LXCat file: Could not parse process description ($(process)) in $(name) dataset"
+    process = Symbol(m[:process])
+    if process == :Backscat
+      process = :Elastic
+      row["scattering"] = :Backward
+    elseif process == :Isotropic
+      process = :Elastic
+      row["scattering"] = :Isotropic
+    end    
+    products = m[:products]
+
+    m = match(r"(?P<source>[a-zA-Z]+)(?P<ision>(\^\+)?) / (?P<target>[a-zA-Z]+)", species)
+    @assert !isnothing(m) "Error while parsing LXCat file: Could not parse species description ($(species)) for $(string(process)) collision in $(name) dataset"
+    if isempty(m[:ision])
+      source = Symbol(m[:source])
+    else
+      source = Symbol("i" * m[:source])
+    end
+    target = Symbol(m[:target]) 
+    
+    if process == :Excitation
+      m = match(r"(?P<source>[a-zA-Z]+) \+ (?P<target>[a-zA-Z]+)(\()?(?P<state>([a-zA-Z0-9]+|\*))(\))?", products)
+      @assert !isnothing(m) "Error while parsing LXCat file: Could not parse process products description ($(products)) for $(string(process)) collision in $(name) dataset"
+      row["excited_state"] = m[:state]
+    end
+
+    if process == :Excitation || process == :Ionization
+      m = match(r"E = (?P<energy>[0-9\.]+)", params)
+      @assert !isnothing(m) "Error while parsing LXCat file: Could not parse params description ($(params)) for $(string(process)) collision in $(name) dataset"
+      row["ε_loss"] = parse(Float64, m[:energy])
+    end
+
+    σ = readdlm(IOBuffer(σ))
+    row["data"] = σ
+
+    # fillup
+    if !haskey(data,                 source)  data[source] = Dict() end
+    if !haskey(data[source],         target)  data[source][target] = Dict() end
+    if !haskey(data[source][target], process) data[source][target][process] = Vector() end
+
+    push!(data[source][target][process], row)
+    @debug "Parsed $(string(source)) -> $(string(target)) process: $(string(process))"
+  end
+  return Dict{String, typeof(data)}(name => data)
+end
 
 struct CrossSection
   data :: Matrix{Float64}
