@@ -13,17 +13,9 @@ struct MCCModel{D,V,CS}
 end
 
 function MCCModel(problem::ParticleCollisionProblem{D,CS}) where {D,CS}
-  particles = Set{Particles}()
-  fluids = Set{Fluid}()
+  particles = Set(problem.particles.particles)
+  fluids = Set(problem.fluids)
   collisions = problem.collisions
-  loaders = problem.loaders
-  for collision in collisions
-    if collision.source isa Particles
-      push!(particles, collision.source)
-    end
-    if collision.target isa Fluid
-      push!(fluids, collision.target)
-    end
-  end
+  loaders = vcat(problem.loaders, problem.particles.loaders)
   return MCCModel{D,3,CS}(particles, fluids, collisions, loaders)
 end
