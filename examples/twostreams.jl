@@ -6,7 +6,7 @@ import PlasmaModelingToolkit.ParticleBoundaries: PeriodicBoundary, ReflectingBou
 import PlasmaModelingToolkit.Problems: ParticleProblem, BoundaryValueProblem
 import PlasmaModelingToolkit.Models: FDMModel, PICModel
 import PlasmaModelingToolkit.Species: electrons, ions
-import PlasmaModelingToolkit.Sources: SpeciesLoader
+import PlasmaModelingToolkit.Sources: ParticleLoader
 import PlasmaModelingToolkit.Distributions: UniformDistribution, MaxwellBoltzmannDistribution
 import PlasmaModelingToolkit.Atoms: Helium
 import PlasmaModelingToolkit.Units: kHz
@@ -43,17 +43,17 @@ bvp[side] = NeumannBoundaryCondition()
 bvp[upper] = PeriodicBoundaryCondition()
 bvp[lower] = PeriodicBoundaryCondition()
 
-problem = ParticleProblem(domain)
+e   = electrons()
+iHe = ions(Helium)
+
+problem = ParticleProblem(domain, e, iHe)
 problem[side] = ReflectingBoundary()
 problem[lower] = PeriodicBoundary()
 problem[upper] = PeriodicBoundary()
 
-e   = electrons()
-iHe = ions(Helium)
-
-problem[whole] = SpeciesLoader(e, 0.5n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_e, e.mass}(), drift = [:z => +ν_drift])
-problem[whole] = SpeciesLoader(e, 0.5n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_e, e.mass}(), drift = [:z => -ν_drift])
-problem[whole] = SpeciesLoader(iHe, n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_i, iHe.mass}())
+problem[whole] = ParticleLoader(e, 0.5n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_e, e.mass}(), drift = [:z => +ν_drift])
+problem[whole] = ParticleLoader(e, 0.5n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_e, e.mass}(), drift = [:z => -ν_drift])
+problem[whole] = ParticleLoader(iHe, n_0, UniformDistribution(), MaxwellBoltzmannDistribution{T_i, iHe.mass}())
 
 es  = FDMModel(bvp, NZ + 1, NR + 1)
 pic = PICModel(problem, NZ + 1, NR + 1, weights = (e => WG, iHe => WG), maxcount = (e => 20_000, iHe => 20_000))

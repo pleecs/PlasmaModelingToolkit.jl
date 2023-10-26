@@ -1,46 +1,44 @@
 import ..Geometry: Rectangle, Segment2D, Shape, Point1D, Segment1D
 import ..ParticleBoundaries: ParticleBoundary
-import ..Sources: SpeciesSource, SpeciesLoader
+import ..Sources: FluidLoader
 import ..Collisions: Collision
-import ..Species: Particles, Fluid
 import Base: setindex!, +
 
 struct ParticleCollisionProblem{D, CS}
   particles :: ParticleProblem{D, CS}
+  fluids :: Vector{Fluid}
   collisions :: Vector{Collision}
-  loaders :: Vector{Pair{Shape{D}, SpeciesLoader}}
-  ParticleCollisionProblem(domain::Domain{D,CS}) where {D,CS} = new{D,CS}(ParticleProblem(domain), [], [])
+  loaders :: Vector{Pair{Shape{D}, FluidLoader}}  
+end
+
+function ParticleCollisionProblem(domain::Domain{D,CS}, species...) where {D,CS}
+  particles = filter(x->(x isa Particles), species)
+  fluids = filter(x->(x isa Fluid), species)
+
+  return ParticleCollisionProblem{D, CS}(
+    ParticleProblem(domain, particles...),
+    collect(fluids),
+    [],
+    [])
 end
 
 function +(problem::ParticleCollisionProblem, collision::Collision)
+  @assert collision.source in problem.particles.particles "You have to add $(collision.source) to a problem before using it as a collision source"
+  @assert collision.target in problem.fluids "You have to add $(collision.target) to a problem before using it as a collision target" 
   push!(problem.collisions, collision)
   return problem
 end
 
-function setindex!(problem::ParticleCollisionProblem{2}, loader::SpeciesLoader, region::Rectangle)
-  if loader.species isa Fluid
-    push!(problem.loaders, region => loader)
-  end
-
-  if loader.species isa Particles
-    problem.particles[region] = loader
-  end
+function setindex!(problem::ParticleCollisionProblem{2}, loader::FluidLoader, region::Rectangle)
+  @assert loader.species in problem.fluids "You have to add $(loader.species) to a problem first before adding a loader for it"  
+  push!(problem.loaders, region => loader)
 end
 
-function setindex!(problem::ParticleCollisionProblem{2}, boundary::ParticleBoundary, segment::Segment2D)
-  problem.particles[segment] = boundary
+function setindex!(problem::ParticleCollisionProblem{1}, loader::FluidLoader, region::Segment1D)
+  @assert loader.species in problem.fluids "You have to add $(loader.species) to a problem first before adding a loader for it"
+  push!(problem.loaders, region => loader)
 end
 
-function setindex!(problem::ParticleCollisionProblem{1}, loader::SpeciesLoader, region::Segment1D)
-  if loader.species isa Fluid
-    push!(problem.loaders, region => loader)
-  end
-
-  if loader.species isa Particles
-    problem.particles[region] = loader
-  end
-end
-
-function setindex!(problem::ParticleCollisionProblem{1}, boundary::ParticleBoundary, point::Point1D)
-  problem.particles[point] = boundary
+function setindex!(problem::ParticleCollisionProblem, value, key)
+  problem.particles[key] = value
 end
