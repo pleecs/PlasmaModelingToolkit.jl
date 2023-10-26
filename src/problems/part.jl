@@ -62,12 +62,12 @@ function setindex!(problem::ParticleProblem{1}, boundary::ParticleBoundary, poin
   push!(problem.boundaries, point => boundary)
 end
 
-function setindex!(problem::ParticleProblem{1}, source::ParticleSource, segment::Segment1D)
-  @assert source.species in problem.particles "You have to add $(source.species) to a problem first before adding a source for it"
-  push!(problem.sources, segment => source)
-end
-
-function setindex!(problem::ParticleProblem{1}, loader::ParticleLoader, segment::Segment1D)
+function setindex!(problem::ParticleProblem{1}, loader::ParticleLoader, segment::Shape{1})
   @assert loader.species in problem.particles "You have to add $(loader.species) to a problem first before adding a loader for it"
   push!(problem.loaders, segment => loader)
+end
+
+function setindex!(problem::ParticleProblem{1}, source::ParticleSource, segment::Shape{1})
+  @assert source.species in problem.particles "You have to add $(source.species) to a problem first before adding a source for it"
+  push!(problem.sources, segment => source)
 end
