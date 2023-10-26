@@ -6,7 +6,7 @@ import Base: setindex!, +
 
 struct ParticleCollisionProblem{D, CS}
   particles :: ParticleProblem{D, CS}
-  fluids :: Vector{Fluid}
+  fluids :: Set{Fluid}
   collisions :: Vector{Collision}
   loaders :: Vector{Pair{Shape{D}, FluidLoader}}  
 end
@@ -17,7 +17,7 @@ function ParticleCollisionProblem(domain::Domain{D,CS}, species...) where {D,CS}
 
   return ParticleCollisionProblem{D, CS}(
     ParticleProblem(domain, particles...),
-    collect(fluids),
+    Set(collect(fluids)),
     [],
     [])
 end

@@ -36,9 +36,9 @@ struct ParticleSource <: SpeciesSource
   drift :: Vector{Pair{Symbol, Float64}}
 end
 
-struct ParticleLoader{T} <: SpeciesLoader
+struct ParticleLoader <: SpeciesLoader
   species :: Particles
-  value :: T
+  count :: Int64
   x :: PositionDistribution
   v :: VelocityDistribution
   drift :: Vector{Pair{Symbol, Float64}}
@@ -53,6 +53,6 @@ end
 ParticleSource(species::Particles, rate::TemporalFunction, x::PositionDistribution; drift=Vector{Pair{Symbol, Float64}}([])) = ParticleSource(species, rate, x, MaxwellBoltzmannDistribution{0.0, species.mass}(), drift)
 ParticleSource(species::Particles, rate::TemporalFunction, x::PositionDistribution, v::VelocityDistribution; drift=Vector{Pair{Symbol, Float64}}([])) = ParticleSource(species, rate, x, v, drift)
 
-ParticleLoader(species::Particles, value::Real, x::PositionDistribution; drift=Vector{Pair{Symbol, Float64}}([])) = ParticleLoader(species, value, x, MaxwellBoltzmannDistribution{0.0, 0.0}(), drift)
-ParticleLoader(species::Particles, value::Real, x::PositionDistribution, v::VelocityDistribution; drift=Vector{Pair{Symbol, Float64}}([])) = ParticleLoader(species, value, x, v, drift)
+ParticleLoader(species::Particles, count::Int64, x::PositionDistribution; drift=Vector{Pair{Symbol, Float64}}([])) = ParticleLoader(species, count, x, MaxwellBoltzmannDistribution{0.0, species.mass}(), drift)
+ParticleLoader(species::Particles, count::Int64, x::PositionDistribution, v::VelocityDistribution; drift=Vector{Pair{Symbol, Float64}}([])) = ParticleLoader(species, count, x, v, drift)
 end

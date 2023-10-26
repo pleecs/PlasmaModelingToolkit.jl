@@ -6,14 +6,14 @@ import ..Species: Particles, Fluid
 
 struct ParticleProblem{D, CS}
   domain :: Domain{D,CS}
-  particles :: Vector{Particles}
+  particles :: Set{Particles}
   boundaries :: Vector{Pair{Shape{D}, ParticleBoundary}}
   sources :: Vector{Pair{Shape{D}, ParticleSource}}
   loaders :: Vector{Pair{Shape{D}, ParticleLoader}} 
 end
 
 function ParticleProblem(domain::Domain{D,CS}, species...) where {D,CS} 
-  particles = Vector{Particles}()
+  particles = Set{Particles}()
   for element in species
     @assert element isa Particles "You can only add Particles to a ParticleProblem"
       push!(particles, element)
