@@ -33,7 +33,7 @@ function PICModel(problem::ParticleProblem{D,CS}, args...; maxcount, weights) wh
   sources = problem.sources
   loaders = problem.loaders
 
-  return PICModel{D,3,CS}(grid, Set(particles), weights, maxcount, boundaries, sources, loaders)
+  return PICModel{D,3,CS}(grid, particles, weights, maxcount, boundaries, sources, loaders)
 end
 
 function PICModel(problem::ParticleCollisionProblem{D,CS}, args...; maxcount, weights) where{D,CS}

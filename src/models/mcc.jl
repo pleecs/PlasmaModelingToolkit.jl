@@ -13,8 +13,8 @@ struct MCCModel{D,V,CS}
 end
 
 function MCCModel(problem::ParticleCollisionProblem{D,CS}) where {D,CS}
-  particles = Set(problem.particles.particles)
-  fluids = Set(problem.fluids)
+  particles = problem.particles.particles
+  fluids = problem.fluids
   collisions = problem.collisions
   loaders = vcat(problem.loaders, problem.particles.loaders)
   return MCCModel{D,3,CS}(particles, fluids, collisions, loaders)
