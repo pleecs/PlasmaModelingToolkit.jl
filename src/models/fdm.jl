@@ -23,6 +23,7 @@ function FDMModel(problem::BoundaryValueProblem{D,CS}, args...) where {D,CS}
   conditions = Dict{FDMCondition, UInt8}()
   node_boundary = zeros(UInt8, args...)
   node_material = zeros(UInt8, args...)
+
   
   materials[IdealConductor()] = 0x00
   for (shape, material) in problem.domain.materials
@@ -78,7 +79,7 @@ setindex!(model::FDMModel{2}, ::PerfectMagneticConductor, segment::Segment2D) =
   setindex!(model, NeumannBoundaryCondition(), segment)
 
 # model[shape => material] = DirichletBoundaryCondition(potential)
-function setindex!(model::FDMModel{2}, dbc::DirichletBoundaryCondition, pair::Pair{S, M}) where {S<:Shape2D, M<:Material}
+function setindex!(model::FDMModel{2,:ZR}, dbc::DirichletBoundaryCondition, pair::Pair{S, M}) where {S<:Shape2D, M<:Material}
   grid = model.grid
   bcs = model.conditions
   get!(bcs, dbc, length(bcs) + 1)
