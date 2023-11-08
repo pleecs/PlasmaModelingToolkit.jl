@@ -1,7 +1,8 @@
 module Circuit
 import ..TemporalFunctions: TemporalFunction, ConstantFunction
+import ..BoundaryConditions: BoundaryCondition
 
-struct LumpedElement{T}
+struct LumpedElement{T} <: BoundaryCondition
 	value  :: TemporalFunction
 end
 LumpedElement(symbol, value::Float64) = LumpedElement{symbol}(ConstantFunction{value}())
