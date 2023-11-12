@@ -15,10 +15,9 @@ struct PerfectMagneticConductor  <: BoundaryCondition end
 struct AbsorbingBoundaryCondition <: BoundaryCondition end
 struct SurfaceImpedance  <: BoundaryCondition
   η :: TemporalFunction
-  ε :: Float64
 end
 
-SurfaceImpedance(η::Float64, ε::Float64) = SurfaceImpedance(ConstantFunction{η}(), ε) 
+SurfaceImpedance(η::Float64) = SurfaceImpedance(ConstantFunction{η}()) 
 
 end
 
