@@ -5,12 +5,9 @@ import ..BoundaryConditions: PerfectElectricConductor
 abstract type InterfaceCondition end
 struct DielectricInterface{EPS1, EPS2, SIG} <: InterfaceCondition end
 
-interface(mat1::Dielectric{EPS1, MU, SIG},
-          mat2::Dielectric{EPS2, MU, SIG}) where {EPS1, EPS2, MU, SIG} =
-          DielectricInterface{EPS1, EPS2, SIG}()
-interface(mat1::Dielectric{EPS, MU, SIG1},
-          mat2::Dielectric{EPS, MU, SIG2}) where {EPS, MU, SIG1, SIG2} =
-          DielectricInterface{EPS, EPS, min(SIG1, SIG2)}()
+interface(mat1::Dielectric{EPS1, MU, SIG1},
+          mat2::Dielectric{EPS2, MU, SIG2}) where {EPS1, EPS2, MU, SIG1, SIG2} =
+          DielectricInterface{EPS1, EPS2, min(SIG1, SIG2)}()
 
 function detect_interface_z!(boundaries, edge_boundary, node_material, dielectrics)
   NZ, NR = size(node_material)
