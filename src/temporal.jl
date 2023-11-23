@@ -31,4 +31,7 @@ struct DoubleExponentialPulse{A, ALPHA, BETA} <: TemporalFunction end
 #           LOW,  t < A,
 #           HIGH, t > B }
 struct RampFunction{A, B, LOW, HIGH} <: TemporalFunction end
+
+struct SmoothedRampFunction{A, B, LOW, HIGH, SMOOTHNESS} <: TemporalFunction end
+
 end
