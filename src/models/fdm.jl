@@ -73,9 +73,9 @@ end
 
 # translate PEC/PMC into DBC/NBC
 setindex!(model::FDMModel{2}, ::PerfectElectricConductor, segment::Segment2D) =
-  setindex!(model, DirichletBoundaryCondition(0.0))
+  setindex!(model, DirichletBoundaryCondition(0.0), segment)
 setindex!(model::FDMModel{2}, ::PerfectMagneticConductor, segment::Segment2D) =
-  setindex!(model, NeumannBoundaryCondition())
+  setindex!(model, NeumannBoundaryCondition(), segment)
 
 # model[shape => material] = DirichletBoundaryCondition(potential)
 function setindex!(model::FDMModel{2}, dbc::DirichletBoundaryCondition, pair::Pair{S, M}) where {S<:Shape2D, M<:Material}
