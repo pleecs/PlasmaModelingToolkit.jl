@@ -4,7 +4,7 @@ import ..InterfaceConditions: InterfaceCondition
 import ..Grids: Grid, discretize, discretize!, snap_boundary
 import ..Domains: AxisymmetricDomain, Domain1D
 import ..Geometry: Shape2D, Segment2D, Rectangle, Segment1D, Point1D, Shape
-import ..Materials: Material, Conductor, Dielectric, PerfectlyMatchedLayer
+import ..Materials: Material, IdealConductor, Dielectric, PerfectlyMatchedLayer
 import ..Problems: BoundaryValueProblem
 import ..InterfaceConditions: detect_interface_z!, detect_interface_r!
 import Base: setindex!
@@ -29,7 +29,7 @@ function FDTDModel(problem::BoundaryValueProblem{2, :ZR}, NZ, NR)
 	node_material = zeros(UInt8, NZ, NR)
 	edge_boundary = z_edge_boundary, r_edge_boundary
 	
-	materials[Conductor()] = 0x00
+	materials[IdealConductor()] = 0x00
 	for (shape, material) in problem.domain.materials
 		get!(materials, material, length(materials) + 1)
 		discretize!(node_material, grid, shape, materials[material])

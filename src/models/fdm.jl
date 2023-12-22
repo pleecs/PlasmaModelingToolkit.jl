@@ -2,7 +2,7 @@ import ..BoundaryConditions: NeumannBoundaryCondition, DirichletBoundaryConditio
 import ..BoundaryConditions: PerfectElectricConductor, PerfectMagneticConductor
 import ..Grids: Grid
 import ..Geometry: Segment2D, Point1D
-import ..Materials: Material, Conductor
+import ..Materials: Material, IdealConductor
 import ..Problems: BoundaryValueProblem
 import ..Grids: discretize, discretize!, snap_node
 import Base: setindex!
@@ -24,7 +24,7 @@ function FDMModel(problem::BoundaryValueProblem{D,CS}, args...) where {D,CS}
   node_boundary = zeros(UInt8, args...)
   node_material = zeros(UInt8, args...)
   
-  materials[Conductor()] = 0x00
+  materials[IdealConductor()] = 0x00
   for (shape, material) in problem.domain.materials
     get!(materials, material, length(materials))
     discretize!(node_material, grid, shape, materials[material])
