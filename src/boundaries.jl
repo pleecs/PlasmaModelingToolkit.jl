@@ -3,7 +3,12 @@ import ..TemporalFunctions: TemporalFunction, ConstantFunction
 
 abstract type BoundaryCondition end
 struct NeumannBoundaryCondition  <: BoundaryCondition end
-struct PeriodicBoundaryCondition <: BoundaryCondition end
+
+struct PeriodicBoundaryCondition{AXIS} <: BoundaryCondition 
+  PeriodicBoundaryCondition(AXIS::Symbol) = PeriodicBoundaryCondition{AXIS}()
+end
+
+
 struct DirichletBoundaryCondition <: BoundaryCondition
   α :: TemporalFunction
 end
