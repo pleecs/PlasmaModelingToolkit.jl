@@ -39,4 +39,5 @@ end
 
 include("domains/zr.jl")
 include("domains/1d.jl")
+include("domains/2d.jl")
 end
