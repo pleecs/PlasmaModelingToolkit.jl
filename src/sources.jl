@@ -11,18 +11,15 @@ struct TEM <: WaveguideMode end
 
 struct CoaxialPort <: BoundaryCondition
   signal :: TemporalFunction
-  η :: Float64
 end
 
 struct WaveguidePort <: BoundaryCondition
   signal :: TemporalFunction
   mode :: WaveguideMode
-  η :: Float64
 end
 
 struct UniformPort <: BoundaryCondition
   signal :: TemporalFunction
-  η :: Float64
 end
 
 struct CurrentSource <: BoundaryCondition
