@@ -1,5 +1,5 @@
 module Domains
-import ..Geometry: Shape
+import ..Geometry: Shape, Segment
 import ..Materials: Material
 import PlasmaModelingToolkit: ++
 import Base: getproperty
@@ -36,6 +36,35 @@ end
 
   return code
 end
+
+≲(a::Number, b::Number) = (a < b || a ≈ b) 
+
+function isboundary(domain::Domain{D}, segment::Segment{D}) where D
+  p₁, p₂ = segment.p₁, segment.p₂
+
+  on_boundary = false
+
+  for dim₁ in 1:D
+    min_val = domain.mins[dim₁]
+    max_val = domain.maxs[dim₁]
+
+    if(p₁[dim₁] == min_val && p₂[dim₁] == min_val) || (p₁[dim₁] == max_val && p₂[dim₁] == max_val)
+      on_boundary = true
+      for dim₂ in 1:D
+        if dim₂ == dim₁
+          continue
+        end
+
+        if !(domain.mins[dim₂] ≲ p₁[dim₂] ≲ domain.maxs[dim₂] && domain.mins[dim₂] ≲ p₂[dim₂] ≲ domain.maxs[dim₂])
+          on_boundary = false
+          break
+        end
+      end
+    end
+  end
+  return on_boundary
+end
+
 
 include("domains/zr.jl")
 include("domains/1d.jl")

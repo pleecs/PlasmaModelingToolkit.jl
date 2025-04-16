@@ -15,6 +15,19 @@ const Segment2D = Segment{2}
 Segment1D(x₁::Real, x₂::Real) = Segment(tuple(float(x₁)), tuple(float(x₂)))
 Segment2D(x₁::Real, y₁::Real, x₂::Real, y₂::Real) = Segment(tuple(float(x₁),float(y₁)), tuple(float(x₂),float(y₂)))
 
+function ∥(segment::Segment2D, axis::Symbol)
+  if axis == :X
+    return segment.p₁[2] ≈ segment.p₂[2]
+  elseif axis == :Y
+    return segment.p₁[1] ≈ segment.p₂[1]
+  elseif axis == :Z
+    @error "Not implemented"
+  elseif axis == :R
+    @error "Not implemented"
+  end
+end
+
+
 struct Point{D} <: Shape{D}
   coords :: NTuple{D, Float64}
 end

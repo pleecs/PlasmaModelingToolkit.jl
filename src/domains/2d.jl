@@ -1,4 +1,4 @@
-import ..Geometry: Shape2D, Segment2D
+import ..Geometry: Shape2D, Segment2D, ∥
 import ..Materials: Material
 import Base: setindex!
 
