@@ -24,18 +24,18 @@ end
 module ParticleBoundaries
 import ..Species: Particles
 abstract type ParticleBoundary end
-struct ReflectingBoundary <: ParticleBoundary
+struct ReflectingBoundary{AXIS} <: ParticleBoundary
   particles :: Vector{Particles}
-  ReflectingBoundary(particles...) = new([particles...]) 
 end
+ReflectingBoundary{AXIS}(particles...) where {AXIS} = ReflectingBoundary{AXIS}([particles...])
 
-struct PeriodicBoundary <: ParticleBoundary
+struct PeriodicBoundary{AXIS} <: ParticleBoundary
   particles :: Vector{Particles}
-  PeriodicBoundary(particles...) = new([particles...]) 
 end
+PeriodicBoundary{AXIS}(particles...) where {AXIS} = PeriodicBoundary{AXIS}([particles...])
 
-struct AbsorbingBoundary <: ParticleBoundary
+struct AbsorbingBoundary{AXIS} <: ParticleBoundary
   particles :: Vector{Particles}
-  AbsorbingBoundary(particles...) = new([particles...]) 
 end
+AbsorbingBoundary{AXIS}(particles...) where {AXIS} = AbsorbingBoundary{AXIS}([particles...])
 end
