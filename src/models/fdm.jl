@@ -121,7 +121,7 @@ function setindex!(model::FDMModel{1}, bc::FDMCondition, point::Point1D)
   get!(bcs, bc, length(bcs) + 1)
 
   i = snap_node(grid, point)
-  model.edge_boundary[i] = bcs[bc]
+  model.edge_boundary[1][i] = bcs[bc]
 
   return nothing
 end
