@@ -105,4 +105,18 @@ function IonizationCollision(source, target, dataset; ε_loss, ions, scattering=
 
   return IonizationCollision(source, target, ions, ε_loss, cs.data, scattering)
 end
+
+struct ChargeTransferCollision <: Collision
+  source :: Particles
+  target :: Fluid
+  atoms :: Particles
+  σ :: Matrix{Float64}
+  scattering :: Scattering
+end
+
+function ChargeTransferCollision(source, target, dataset; atoms=nothing, scattering=:Backward)
+  cs = CrossSection(dataset, :Elastic, source, target; scattering)
+  scattering = Scattering(scattering, target)
+  return ChargeTransferCollision(source, target, atoms, cs.data, scattering)
+end
 end
