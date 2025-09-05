@@ -38,4 +38,10 @@ struct AbsorbingBoundary{AXIS} <: ParticleBoundary
   particles :: Vector{Particles}
 end
 AbsorbingBoundary{AXIS}(particles...) where {AXIS} = AbsorbingBoundary{AXIS}([particles...])
+
+struct EmittingBoundary{AXIS} <: ParticleBoundary
+  particles :: Vector{Particles}
+  product :: Particles
+end
+EmittingBoundary{AXIS}(particles...; product=nothing) where {AXIS} = EmittingBoundary{AXIS}([particles...], product)
 end
