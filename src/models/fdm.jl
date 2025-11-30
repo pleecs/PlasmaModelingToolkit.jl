@@ -1,10 +1,10 @@
 import ..BoundaryConditions: NeumannBoundaryCondition, DirichletBoundaryCondition, PeriodicBoundaryCondition
 import ..BoundaryConditions: PerfectElectricConductor, PerfectMagneticConductor
 import ..Grids: Grid
-import ..Geometry: Segment2D, Point1D, ∥
+import ..Geometry: Segment2D, Point1D, Shape2D, ∥
 import ..Materials: Material, IdealConductor
 import ..Problems: BoundaryValueProblem
-import ..Grids: discretize, discretize!, snap_node
+import ..Grids: discretize, discretize!, snap_boundary, snap_node
 import Base: setindex!
 
 const FDMCondition = Union{NeumannBoundaryCondition, DirichletBoundaryCondition, PeriodicBoundaryCondition}
@@ -14,6 +14,7 @@ struct FDMModel{D, CS}
   materials :: Dict{Material, UInt8}
   conditions :: Dict{FDMCondition, UInt8}
   edge_boundary :: NTuple{D, Array{UInt8, D}}
+  node_boundary :: Array{UInt8, D}
   node_material :: Array{UInt8, D}
 end
 
@@ -22,6 +23,7 @@ function FDMModel(problem::BoundaryValueProblem{D,CS}, args...) where {D,CS}
   materials = Dict{Material, UInt8}()
   conditions = Dict{FDMCondition, UInt8}()
   node_material = zeros(UInt8, args...)
+  node_boundary = zeros(UInt8, args...)
   if D == 1
     edge_boundary = (zeros(args...),)
   else
@@ -34,7 +36,7 @@ function FDMModel(problem::BoundaryValueProblem{D,CS}, args...) where {D,CS}
     discretize!(node_material, grid, shape, materials[material])
   end
 
-  fdm = FDMModel{D,CS}(grid, materials, conditions, edge_boundary, node_material)
+  fdm = FDMModel{D,CS}(grid, materials, conditions, edge_boundary, node_boundary, node_material)
 
   for (region, constraint) in problem.constraints
     fdm[region] = constraint
@@ -43,10 +45,18 @@ function FDMModel(problem::BoundaryValueProblem{D,CS}, args...) where {D,CS}
   return fdm
 end
 
-function setindex!(model::FDMModel{2,:XY}, bc::FDMCondition, segment::Segment2D)
+function setindex!(model::FDMModel{2}, bc::FDMCondition, segment::Segment2D)
   grid = model.grid
   bcs = model.conditions
-  get!(bcs, bc, length(bcs) + 1)
+  nb = model.node_boundary
+  bc_id = get!(bcs, bc, length(bcs) + 1)
+
+  i₁, j₁ = snap_node(grid, segment.p₁)
+  i₂, j₂ = snap_node(grid, segment.p₂)
+
+  for j=min(j₁,j₂):max(j₁,j₂), i=min(i₁,i₂):max(i₁,i₂)
+    nb[i,j] = bc_id
+  end
   
   if segment ∥ :X
     @views edges = model.edge_boundary[1]
@@ -56,7 +66,7 @@ function setindex!(model::FDMModel{2,:XY}, bc::FDMCondition, segment::Segment2D)
     @assert j₁ == j₂ && i₁ != i₂
 
     for i=min(i₁, i₂):max(i₁, i₂)
-      edges[i,j₁] = bcs[bc]
+      edges[i,j₁] = bc_id
     end
   elseif segment ∥ :Y
     @views edges = model.edge_boundary[2]
@@ -66,27 +76,10 @@ function setindex!(model::FDMModel{2,:XY}, bc::FDMCondition, segment::Segment2D)
     @assert i₁ == i₂ && j₁ != j₂
 
     for j=min(j₁, j₂):max(j₁, j₂)
-      edges[i₁,j] = bcs[bc]
+      edges[i₁,j] = bc_id
     end
   end
 end
-
-# TODO: needs rework after switching from node_boundary to edge_boundary
-# function setindex!(model::FDMModel{2}, bc::FDMCondition, segment::Segment2D)
-#   nodes = model.node_material
-#   grid = model.grid
-#   bcs = model.conditions
-#   get!(bcs, bc, length(bcs) + 1)
-
-#   i1, j1 = snap_node(grid, segment.p₁)
-#   i2, j2 = snap_node(grid, segment.p₂)
-  
-#   for j=min(j1,j2):max(j1,j2), i=min(i1,i2):max(i1,i2)
-#     model.node_boundary[i,j] = bcs[bc]
-#   end
-  
-#   return nothing
-# end
 
 # translate PEC/PMC into DBC/NBC
 setindex!(model::FDMModel{2}, ::PerfectElectricConductor, segment::Segment2D) =
@@ -94,34 +87,35 @@ setindex!(model::FDMModel{2}, ::PerfectElectricConductor, segment::Segment2D) =
 setindex!(model::FDMModel{2}, ::PerfectMagneticConductor, segment::Segment2D) =
   setindex!(model, NeumannBoundaryCondition(), segment)
 
-# TODO: needs rework after switching from node_boundary to edge_boundary
-# # model[shape => material] = DirichletBoundaryCondition(potential)
-# function setindex!(model::FDMModel{2,:ZR}, dbc::DirichletBoundaryCondition, pair::Pair{S, M}) where {S<:Shape2D, M<:Material}
-#   grid = model.grid
-#   bcs = model.conditions
-#   get!(bcs, dbc, length(bcs) + 1)
-
-#   shape, material = pair
-#   mid = model.materials[material]
-
-#   nz, nr = size(grid.z)
-#   for j=1:nr, i=1:nz
-#     if (grid.z[i,j], grid.r[i,j]) ∈ shape && (model.node_material[i,j] == mid)
-#       model.node_boundary[i,j] = bcs[dbc]
-#     end
-#   end
-
-#   return nothing
-#  end
-
-function setindex!(model::FDMModel{1}, bc::FDMCondition, point::Point1D)
-  nodes = model.node_material
+# model[shape => material] = DirichletBoundaryCondition(potential)
+function setindex!(model::FDMModel{2,:ZR}, dbc::DirichletBoundaryCondition, pair::Pair{S, M}) where {S<:Shape2D, M<:Material}
   grid = model.grid
   bcs = model.conditions
-  get!(bcs, bc, length(bcs) + 1)
+  nb = model.node_boundary
+  bc_id = get!(bcs, dbc, length(bcs) + 1)
+
+  shape, material = pair
+  mid = model.materials[material]
+
+  nz, nr = size(grid.z)
+  for j=1:nr, i=1:nz
+    if (grid.z[i,j], grid.r[i,j]) ∈ shape && (model.node_material[i,j] == mid)
+      nb[i,j] = bc_id
+    end
+  end
+
+  return nothing
+end
+
+function setindex!(model::FDMModel{1}, bc::FDMCondition, point::Point1D)
+  grid = model.grid
+  bcs = model.conditions
+  nb = model.node_boundary
+  bc_id = get!(bcs, bc, length(bcs) + 1)
 
   i = snap_node(grid, point)
-  model.edge_boundary[1][i] = bcs[bc]
+  model.edge_boundary[1][i] = bc_id
+  nb[i] = bc_id
 
   return nothing
 end
