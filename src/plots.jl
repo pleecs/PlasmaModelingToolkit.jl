@@ -9,7 +9,7 @@ import ..Domains: AxisymmetricDomain
 import ..Geometry: Rectangle, Circle, Polygon, Segment2D, CompositeShape, Shape2D
 import ..Materials: Material, Medium, Conductor, Dielectric, PerfectlyMatchedLayer, Metal, Vacuum, PTFE, Air
 import ..InterfaceConditions: DielectricInterface
-import ..BoundaryConditions: PerfectMagneticConductor, PerfectElectricConductor, SurfaceImpedance, BoundaryCondition
+import ..BoundaryConditions: PerfectMagneticConductor, PerfectElectricConductor, SurfaceImpedance, DirichletBoundaryCondition, BoundaryCondition
 import ..ParticleBoundaries: ParticleBoundary
 import ..Sources: CoaxialPort, WaveguidePort, UniformPort
 import ..Constants: ε_0, μ_0
@@ -20,6 +20,7 @@ default_colormap = Dict(
   "PerfectMagneticConductor" => "#247BA0",
   "PerfectElectricConductor" => "#F25F5C",
   "SurfaceImpedance" => "#FFE066",
+  "DirichletBoundaryCondition" => "#F25F5C",
   "CoaxialPort" => "#70C1B3",
   "WaveguidePort" => "#70C1B3",
   "UniformPort" => "#70C1B3",
@@ -58,6 +59,7 @@ function Figure(model;
   normals = Dict("show" => true, "length" => 6, "thickness" => 1, "color" => default_colormap["normals"])
   )
 
+  colormap = merge(copy(default_colormap), colormap)
   return Figure(
     model,
     float(width),
@@ -90,6 +92,7 @@ color(::Conductor, colormap) = colormap["Conductor"]
 color(::PerfectMagneticConductor, colormap) = colormap["PerfectMagneticConductor"]
 color(::PerfectElectricConductor, colormap) = colormap["PerfectElectricConductor"]
 color(::SurfaceImpedance, colormap) = colormap["SurfaceImpedance"]
+color(::DirichletBoundaryCondition, colormap) = colormap["DirichletBoundaryCondition"]
 color(::CoaxialPort, colormap) = colormap["CoaxialPort"]
 color(::WaveguidePort, colormap) = colormap["WaveguidePort"]
 color(::UniformPort, colormap) = colormap["UniformPort"]
