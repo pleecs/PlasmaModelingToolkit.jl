@@ -1,9 +1,16 @@
 module Distributions
-abstract type PositionDistribution end
-abstract type VelocityDistribution end
+abstract type AbstractPositionDistribution end
+abstract type AbstractVelocityDistribution end
 
-struct UniformDistribution <: PositionDistribution end
-struct GaussianSeedDistribution <: PositionDistribution end
-struct MaxwellBoltzmannDistribution{T, M} <: VelocityDistribution end
+struct UniformDistribution <: AbstractPositionDistribution end
+struct GaussianSeedDistribution <: AbstractPositionDistribution end
+struct MaxwellBoltzmannDistribution{T, M} <: AbstractVelocityDistribution end
+
+struct FunctionDistribution
+  f :: Function
+end
+
+const PositionDistribution = Union{AbstractPositionDistribution, FunctionDistribution}
+const VelocityDistribution = Union{AbstractVelocityDistribution, FunctionDistribution}
 
 end
