@@ -17,4 +17,8 @@ end
 
 FunctionDistribution(f; sampling=RejectionSampling()) = FunctionDistribution(f, sampling)
 
+struct PrecomputedPositions <: PositionDistribution
+  x :: Vector{Float64}
+end
+
 end

@@ -5,6 +5,7 @@ import ..Grids: discretize
 import ..Species: Particles
 import ..ParticleBoundaries: ParticleBoundary
 import ..Sources: ParticleSource, ParticleLoader
+import ..Distributions: PrecomputedPositions
 
 struct PICModel{D,V,CS}
       grid :: Grid{D,CS}
@@ -32,6 +33,14 @@ function PICModel(problem::ParticleProblem{D,CS}, args...; maxcount, weights) wh
   boundaries = problem.boundaries
   sources = problem.sources
   loaders = problem.loaders
+  
+  for (_, loader) in loaders
+    if loader.x isa PrecomputedPositions
+      xs = loader.x.x
+      @assert length(xs) <= maxcount[loader.species] "PrecomputedPositions length exceeds maxcount for species $(loader.species)"
+    end
+  end
+
 
   return PICModel{D,3,CS}(grid, particles, weights, maxcount, boundaries, sources, loaders)
 end

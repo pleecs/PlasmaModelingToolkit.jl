@@ -2,7 +2,7 @@ module Sources
 import ..BoundaryConditions: BoundaryCondition
 import ..Materials: Medium
 import ..TemporalFunctions: TemporalFunction
-import ..Distributions: PositionDistribution, VelocityDistribution, MaxwellBoltzmannDistribution
+import ..Distributions: PositionDistribution, VelocityDistribution, MaxwellBoltzmannDistribution, PrecomputedPositions
 import ..Species: Particles, Fluid
 
 abstract type WaveguideMode end
@@ -56,4 +56,10 @@ ParticleSource(species::Particles, rate::TemporalFunction, x::PositionDistributi
 
 ParticleLoader(species::Particles, count::Int64, x::PositionDistribution; drift=Vector{Pair{Symbol, Float64}}([])) = ParticleLoader(species, count, x, MaxwellBoltzmannDistribution{0.0, species.mass}(), drift)
 ParticleLoader(species::Particles, count::Int64, x::PositionDistribution, v::VelocityDistribution; drift=Vector{Pair{Symbol, Float64}}([])) = ParticleLoader(species, count, x, v, drift)
+
+function ParticleLoader(species::Particles, count::Int64, x::PrecomputedPositions, v::VelocityDistribution; drift=Vector{Pair{Symbol, Float64}}([]))
+  @assert length(x.x) == count "PrecomputedPositions length must match loader.count"
+  return ParticleLoader(species, count, x, v, drift)
+end
+
 end

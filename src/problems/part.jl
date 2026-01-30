@@ -3,6 +3,7 @@ import ..Geometry: Shape, Segment2D, Rectangle, Point1D, Segment1D
 import ..ParticleBoundaries: ParticleBoundary
 import ..Sources: ParticleSource, ParticleLoader
 import ..Species: Particles, Fluid
+import ..Distributions: PrecomputedPositions
 
 struct ParticleProblem{D, CS}
   domain :: Domain{D,CS}
@@ -64,6 +65,11 @@ end
 
 function setindex!(problem::ParticleProblem{1}, loader::ParticleLoader, segment::Shape{1})
   @assert loader.species in problem.particles "You have to add $(loader.species) to a problem first before adding a loader for it"
+  if loader.x isa PrecomputedPositions
+    xmin = first(min(segment.p₁,segment.p₂))
+    xmax = first(max(segment.p₁,segment.p₂))
+    @assert all(x -> (x >= xmin && x <= xmax), loader.x.x) "PrecomputedPositions values cannot exceed Segment area (xmin=$xmin, xmax=$xmax)"
+  end
   push!(problem.loaders, segment => loader)
 end
 
