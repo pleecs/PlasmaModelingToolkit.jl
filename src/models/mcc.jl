@@ -12,10 +12,13 @@ struct MCCModel{D,V,CS}
      loaders :: Vector{Pair{Shape{D}, SpeciesLoader}}
 end
 
-function MCCModel(problem::ParticleCollisionProblem{D,CS}) where {D,CS}
+MCCModel(problem::ParticleCollisionProblem{D,CS}) where {D,CS} =
+  MCCModel{D,3}(problem)
+
+function MCCModel{D,V}(problem::ParticleCollisionProblem{D,CS}) where {D,V,CS}
   particles = problem.particles.particles
   fluids = problem.fluids
   collisions = problem.collisions
   loaders = vcat(problem.loaders, problem.particles.loaders)
-  return MCCModel{D,3,CS}(particles, fluids, collisions, loaders)
+  return MCCModel{D,V,CS}(particles, fluids, collisions, loaders)
 end

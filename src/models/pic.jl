@@ -17,7 +17,10 @@ boundaries :: Vector{Pair{Shape{D}, ParticleBoundary}}
    loaders :: Vector{Pair{Shape{D}, ParticleLoader}} 
 end
 
-function PICModel(problem::ParticleProblem{D,CS}, args...; maxcount, weights) where {D,CS}
+PICModel(problem::ParticleProblem{D,CS}, args...; maxcount, weights) where {D,CS} =
+  PICModel{D,3}(problem, args...; maxcount=maxcount, weights=weights)
+
+function PICModel{D,V}(problem::ParticleProblem{D,CS}, args...; maxcount, weights) where {D,V,CS}
   @assert length(args) == D
 
   @assert all(x->(x in problem.particles), first.(maxcount)) "Unknown particles in \"maxcount\" definition"
@@ -42,10 +45,15 @@ function PICModel(problem::ParticleProblem{D,CS}, args...; maxcount, weights) wh
   end
 
 
-  return PICModel{D,3,CS}(grid, particles, weights, maxcount, boundaries, sources, loaders)
+  return PICModel{D,V,CS}(grid, particles, weights, maxcount, boundaries, sources, loaders)
 end
 
 function PICModel(problem::ParticleCollisionProblem{D,CS}, args...; maxcount, weights) where{D,CS}
   @assert length(args) == D
   return PICModel(problem.particles, args..., maxcount=maxcount, weights=weights)
+end
+
+function PICModel{D,V}(problem::ParticleCollisionProblem{D,CS}, args...; maxcount, weights) where {D,V,CS}
+  @assert length(args) == D
+  return PICModel{D,V}(problem.particles, args..., maxcount=maxcount, weights=weights)
 end
